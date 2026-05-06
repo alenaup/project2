@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 /*  */
+use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,15 +28,24 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
+            /* bagian semua role punya */
             'nama_lengkap' => fake()->name(),
+            'password' => Hash::make('password'),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => Hash::make('password'),
             'nomor_tlp' => fake()->phoneNumber(),
-            'status' => 'active',
-            'username' => fake()->unique()->userName(),
+            'status' => $this->faker->randomElement([Status::Active->value, Status::Inactive->value]),
+            'created_by' => 0,
+
+            /* tidak semua role punya */
+            'alamat' => fake()->address(),
+            'NIP' => fake()->numerify('NIP-########'),
+            'nama_departemen' => fake()->randomElement(['IT', 'HR', 'Finance', 'Marketing']),
+            'tanggal_masuk' => fake()->date(),
+            'tanggal_keluar' => null,
             'role' => UserRole::Karyawan->value, // default
             'remember_token' => Str::random(10),
+            'vendor_id' => rand(1, 4),
         ];
     }
 
@@ -53,6 +63,12 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => [
             'role' => UserRole::SuperAdmin->value,
+            'alamat' => null,
+            'NIP' => (000),
+            'nama_departemen' => null,
+            'tanggal_masuk' => null,
+            'tanggal_keluar' => null,
+            'vendor_id' => null,
         ]);
     }
 
@@ -60,6 +76,12 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => [
             'role' => UserRole::AdminVendor->value,
+            'alamat' => null,
+            'NIP' => (000),
+            'nama_departemen' => null,
+            'tanggal_masuk' => null,
+            'tanggal_keluar' => null,
+            'vendor_id' => null,
         ]);
     }
 
@@ -67,6 +89,12 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => [
             'role' => UserRole::Hr->value,
+            'alamat' => null,
+            'NIP' => (000),
+            'nama_departemen' => null,
+            'tanggal_masuk' => null,
+            'tanggal_keluar' => null,
+            'vendor_id' => null,
         ]);
     }
 
@@ -74,13 +102,12 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => [
             'role' => UserRole::KepalaDepartemen->value,
-        ]);
-    }
-
-    public function inactive()
-    {
-        return $this->state(fn () => [
-            'status' => 'inactive',
+            'alamat' => null,
+            'NIP' => (000),
+            'nama_departemen' => null,
+            'tanggal_masuk' => null,
+            'tanggal_keluar' => null,
+            'vendor_id' => null,
         ]);
     }
 }

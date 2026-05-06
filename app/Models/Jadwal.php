@@ -16,21 +16,20 @@ class Jadwal extends Model
         'status',
         'tanggal',
         'dibuat_oleh',
-        'id_shift',
     ];
-
-    public function shiift()
-    {
-        return $this->belongsTo(Shiift::class, 'id_shift', 'id_shift');
-    }
-
-    public function karyawanJadwals()
-    {
-        return $this->hasMany(KaryawanJadwal::class, 'id_jadwal', 'id_jadwal');
-    }
 
     public function kehadirans()
     {
-        return $this->hasMany(Kehadiran::class, 'id_jadwal', 'id_jadwal');
+        return $this->hasMany(Kehadiran::class, 'jadwal_id');
+    }
+
+    public function shift()
+    {
+        return $this->belongsTo(Shift::class, 'shift_id', 'id_shift');
+    }
+
+    public function user()
+    {
+        return $this->belongsToMany(User::class, 'karyawan_jadwal', 'jadwal_id', 'user_id');
     }
 }

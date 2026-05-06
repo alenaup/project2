@@ -13,7 +13,7 @@
                 <div x-data="{ open: false }" class="relative">
                     <button @click="open = true"
                         class="px-4 py-2 bg-emerald-500 text-white rounded-xl shadow hover:bg-emerald-600 transition flex items-center gap-2">
-                        + Tambah User
+                        + Tambah Karyawan
                     </button>
                     <div x-show="open" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                         <!-- CARD -->
@@ -21,7 +21,7 @@
 
                             <!-- HEADER -->
                             <div class="flex justify-between items-center mb-5">
-                                <h2 class="text-xl font-bold text-gray-800">Tambah User</h2>
+                                <h2 class="text-xl font-bold text-gray-800">Tambah Karyawan</h2>
 
                                 <button @click="open = false" class="text-gray-400 hover:text-gray-600 text-xl">
                                     ✕
@@ -80,7 +80,7 @@
 
                                     <button type="submit"
                                         class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 shadow">
-                                        Simpan
+                                        Ajukan
                                     </button>
 
                                 </div>

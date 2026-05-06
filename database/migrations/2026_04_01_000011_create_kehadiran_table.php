@@ -9,10 +9,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kehadiran', function (Blueprint $table) {
-            $table->integer('id_kehadiran')->autoIncrement();
+            $table->bigInteger('id_kehadiran')->autoIncrement();
             $table->timestamp('waktu_masuk')->nullable();
             $table->timestamp('waktu_keluar')->nullable();
-            $table->timestamp('waktu_telat')->nullable();
+            $table->time('waktu_telat')->nullable();
             $table->date('tanggal');
             $table->string('lokasi_masuk', 255);
             $table->string('lokasi_keluar', 255)->nullable();
@@ -23,18 +23,18 @@ return new class extends Migration
             $table->text('keterangan')->nullable();
             $table->timestamps();
 
-            $table->integer('jadwal_id');
+            $table->bigInteger('jadwal_id');
             $table->foreign('jadwal_id', 'jadwal_mencatatt_kehadiran')
                 ->references('id_jadwal')->on('jadwal')
                 ->onDelete('cascade')->onUpdate('cascade');
 
-            $table->integer('tipe_kehadiran_id');
+            $table->bigInteger('tipe_kehadiran_id');
             $table->foreign('tipe_kehadiran_id', 'tipe_dari_kehadiran')
                 ->references('id_tipe_kehadiran')->on('tipe_kehadiran')
                 ->onDelete('cascade')->onUpdate('cascade');
 
-            $table->integer('rekapan_kehadiran_id');
-            $table->foreign('rekapan_kehadiran_id', 'rekapan_dari_kehadiran')
+            $table->bigInteger('rekapan_kehadiran_id');
+            $table->foreign('rekapan_kehadiran_id', 'rekapan_mencatat_kehadiran')
                 ->references('id_rekapan')->on('rekap_kehadiran')
                 ->onDelete('cascade')->onUpdate('cascade');
         });

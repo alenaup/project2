@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Jadwal;
 use App\Models\Shift;
-use App\Models\KepalaDepartement;
+use App\Enums\Status;
 
 class JadwalSeeder extends Seeder
 {
@@ -14,27 +14,25 @@ class JadwalSeeder extends Seeder
      */
     public function run(): void
     {
-        $kepalaDepartement = KepalaDepartement::pluck('id_departement')->toArray();
-
         $ShiftPagi = Shift::query()->where('tipe_shift', 'Pagi')->first();
         $ShiftSore = Shift::query()->where('tipe_shift', 'Sore')->first();
         $ShiftMalam = Shift::query()->where('tipe_shift', 'Malam')->first();
         Jadwal::create([
-            'status' => 'Aktif',
+            'status' => Status::Active->value,
             'tanggal' => '2026-04-21',
-            'dibuat_oleh' => $kepalaDepartement[0],
+            'dibuat_oleh' => 1,
             'shift_id' => $ShiftPagi->id_shift,
         ]);
         Jadwal::create([
-            'status' => 'Aktif',
+            'status' => Status::Active->value,
             'tanggal' => '2026-04-21',
-            'dibuat_oleh' => $kepalaDepartement[1],
+            'dibuat_oleh' => 1,
             'shift_id' => $ShiftSore->id_shift,
         ]);
         Jadwal::create([
-            'status' => 'Aktif',
+            'status' => Status::Active->value,
             'tanggal' => '2026-04-21',
-            'dibuat_oleh' => $kepalaDepartement[2],
+            'dibuat_oleh' => 2,
             'shift_id' => $ShiftMalam->id_shift,
         ]);
     }

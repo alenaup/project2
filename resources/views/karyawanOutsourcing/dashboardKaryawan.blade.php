@@ -1,5 +1,12 @@
 @extends('layouts.karyawanOutsourcing')
 
+    {{-- kode CDN untuk leaflet map ini hanya unntuk user karyawan outsorcing --}}
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    {{-- kode CDN untuk leaflet map ini hanya unntuk user karyawan outsorcing --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 @section('content')
     <!-- CONTENT -->
     <div class="flex-1 p-4 md:p-6 max-w-7xl mx-auto">
@@ -23,9 +30,7 @@
                 </div>
 
                 {{-- bagian info shift --}}>
-                <span class="text-xs bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-medium">
-                    1 Shift
-                </span>
+
             </div>
 
             <!-- CARD -->
@@ -44,10 +49,7 @@
                         <p class="text-sm text-gray-500 mt-1">08:00 - 17:00</p>
                     </div>
 
-                    <!-- time badge -->
-                    <div class="text-xs bg-green-100 text-green-600 px-3 py-1 rounded-full font-medium">
-                        Aktif
-                    </div>
+
                 </div>
             </div>
 
@@ -81,10 +83,7 @@
                         Belum absen masuk hari ini
                     </p>
 
-                    <!-- badge -->
-                    <span class="text-[11px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-medium">
-                        Pending
-                    </span>
+
                 </div>
 
                 <!-- bottom accent -->
@@ -118,10 +117,7 @@
                         Belum absen keluar hari ini
                     </p>
 
-                    <!-- badge -->
-                    <span class="text-[11px] bg-gray-100 text-gray-500 px-3 py-1 rounded-full font-medium">
-                        Pending
-                    </span>
+
                 </div>
 
                 <!-- bottom accent -->
@@ -160,7 +156,7 @@
                 {{-- button dengan aksi absen keluar untuk melakukan absensi keluar kerja --}}
                 {{-- mengirim data ke folder public js karyawan_js dashboard dengan fungtion absenKeluar --}}
                 <button id="btnKeluar" onclick="absenKeluar()"
-                    class="group flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-medium hover:bg-gray-200 transition">
+                    class="group flex items-center justify-center gap-2 bg-gray-100 text-gray-700 py-2.5 rounded-xl font-medium hover:shadow-md hover:-translate-y-0.5  transition">
                     <i class="fas fa-sign-out-alt text-sm group-hover:scale-110 transition"></i>
                     Absen Keluar
                 </button>

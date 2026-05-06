@@ -3,19 +3,20 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use App\Enums\Status;
 
 return new class extends Migration
 {
     public function up(): void
     {
         Schema::create('jadwal', function (Blueprint $table) {
-            $table->integer('id_jadwal')->autoIncrement();
-            $table->enum('status', ['active', 'inactive'])->default('active');
+            $table->bigInteger('id_jadwal')->autoIncrement();
+            $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
             $table->date('tanggal');
-            $table->integer('dibuat_oleh');
+            $table->bigInteger('dibuat_oleh');
             $table->timestamps();
 
-            $table->integer('shift_id');
+            $table->bigInteger('shift_id');
             $table->foreign('shift_id', 'jadwa_diatur_shift')
                 ->references('id_shift')->on('shift')
                 ->onDelete('cascade')->onUpdate('cascade');

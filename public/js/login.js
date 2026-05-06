@@ -3,12 +3,12 @@ document.addEventListener('login-success', function (event) {
     const overlay = document.getElementById('animationOverlay');
     overlay.style.display = 'flex';
 
-    // Tambahkan partikel bintang
-    const stars = document.createElement('div');
-    stars.classList.add('stars');
-    overlay.appendChild(stars);
+    // Tambahkan loading bar progres
+    const loader = document.createElement('div');
+    loader.classList.add('anim-loader');
+    overlay.appendChild(loader);
 
-    // Tunggu sampai animasi selesai (sekitar 3 detik) sebelum memindahkan halaman
+    // Tunggu sampai animasi selesai (sekitar 3.5 detik) sebelum memindahkan halaman
     setTimeout(function () {
         window.location.href = event.detail.url;
     }, 3500);

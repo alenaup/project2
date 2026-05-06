@@ -31,19 +31,14 @@
                             <!-- Sliding pill -->
                             <div id="tabPill"
                                 class="absolute top-1 left-1 h-[calc(100%-8px)] rounded-lg bg-white shadow-md"
-                                style="width:calc(50% - 4px); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);"></div>
+                                style="width:calc(95% - 4px); transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);"></div>
 
                             <button type="button" id="tabMulai" onclick="switchTab('mulai')"
                                 class="relative z-10 flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-colors duration-200 text-[#3C8B5E]">
                                 <i class="fa-solid fa-calendar-day text-xs"></i>
                                 Tanggal Mulai
                             </button>
-                            <button type="button" id="tabSelesai" onclick="switchTab('selesai')"
-                                class="relative z-10 flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2 rounded-lg text-sm font-semibold transition-colors duration-200"
-                                style="color: rgba(255,255,255,0.7)">
-                                <i class="fa-solid fa-calendar-check text-xs"></i>
-                                Tanggal Selesai
-                            </button>
+
                         </div>
                     </div>
 
@@ -94,7 +89,7 @@
 
                                     <div class="flex flex-col items-center gap-2">
 
-                                    
+
                                         <i class="fa-solid fa-cloud-arrow-up text-2xl text-emerald-500"></i>
                                         <p class="text-sm font-medium text-gray-600">Klik atau upload file</p>
                                         <p class="text-xs text-gray-400">JPG, PNG, PDF (Max 5MB)</p>
@@ -106,52 +101,6 @@
                                         onchange="handleFileSelect(this)">
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- SLIDE 2 — Tanggal Selesai -->
-                    <div id="slideCardSelesai"
-                        style="position:absolute; top:0; left:0; right:0;
-            transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease;
-           transform: translateX(100%); opacity: 0; pointer-events:none;">
-
-                        <div class="p-6 space-y-4">
-
-                            <!-- Tanggal selesai -->
-                            <div>
-                                <label class="text-sm font-semibold text-gray-700 block mb-2">
-                                    Tanggal Selesai<span class="text-red-500">*</span>
-                                </label>
-                                <input id="tglSelesai" type="date"
-                                    class="w-full border border-gray-200 rounded-lg p-3"
-                                    onchange="updateRingkasan()">
-                            </div>
-
-                            <!-- Upload Ulang -->
-                            <div>
-                                <label class="text-sm font-semibold text-gray-700 block mb-2">
-                                    Upload Ulang Surat Sakit <span class="text-red-500">*</span>
-                                </label>
-
-                                <div id="dropZoneUlang"
-                                    class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer"
-                                    onclick="document.getElementById('fileSuratUlang').click()">
-
-                                    Klik untuk unggah ulang file
-
-                                    <div class="flex flex-col items-center gap-2">
-                                        <i class="fa-solid fa-cloud-arrow-up text-2xl text-emerald-500"></i>
-                                        <p class="text-sm font-medium text-gray-600">Klik atau upload file</p>
-                                        <p class="text-xs text-gray-400">JPG, PNG, PDF (Max 5MB)</p>
-                                    </div>
-
-                                    <input id="fileSuratUlang" type="file"
-                                        accept=".jpg,.jpeg,.png,.pdf"
-                                        class="hidden"
-                                        onchange="handleFileSelect(this)">
-                                </div>
-                            </div>
-
                         </div>
                     </div>
 

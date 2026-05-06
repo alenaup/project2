@@ -4,25 +4,40 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+/* mengambil nillai enum untuk status dn role yang sudah ditentukan  */
+use App\Enums\Status;
+use App\Enums\UserRole;
+
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-
+    /* menalankan migrasi untuk tabel users */
     /* Tabel Users, password_reset_tokens, sessions */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->bigIncrements('id_user');
+            /* untuk semua user */
+            $table->bigInteger('id_user')->autoIncrement();
             $table->string('nama_lengkap', 255);
+            $table->string('password');
+            $table->string('nomor_tlp', 20)->nullable();
+                    /* eksekusi menggunakan enums */
+            $table->enum('role', [UserRole::SuperAdmin->value, UserRole::AdminVendor->value, UserRole::Hr->value, UserRole::Karyawan->value, UserRole::KepalaDepartemen->value])->default(UserRole::Karyawan->value);
+            $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->string('nomor_tlp')->nullable();
-            $table->enum('status', ['active', 'inactive'])->default('active');
-            $table->string('username');
-            $table->enum('role', ['super_admin', 'admin_vendor', 'hr', 'karyawan', 'kepala_departemen'])->default('karyawan');
+            $table->bigInteger('created_by')->default(0);
+
+            /* hanaya untuk karyawan */
+            $table->string('alamat', 255)->nullable();
+            $table->string('NIP', 100)->default('0');
+            $table->date('tanggal_keluar')->nullable();
+            $table->date('tanggal_masuk')->nullable();
+            $table->string('nama_departemen', 255)->nullable();
+
+            $table->bigInteger('vendor_id')->nullable();
+            $table->foreign('vendor_id')
+            ->references('id_vendor')->on('vendor')
+            ->onDelete('cascade')->onUpdate('cascade');
 
             $table->rememberToken();
             $table->timestamps();

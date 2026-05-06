@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Vendor;
 
+
 class VendorSeeder extends Seeder
 {
     /**
@@ -21,20 +22,6 @@ class VendorSeeder extends Seeder
             'alamat' => 'Jl. Industri No. 10, Jakarta Selatan',
         ]);
 
-        Vendor::create([
-            'nama_vendor' => 'CV. Bersih Nusantara',
-            'status' => 'active',
-            'nomor_tlp' => '082345678901',
-            'email' => 'bersihnusantara@vendor.com',
-            'alamat' => 'Jl. Raya Bandung No. 25, Bandung',
-        ]);
-
-        Vendor::create([
-            'nama_vendor' => 'PT. Maju Bersama',
-            'status' => 'inactive',
-            'nomor_tlp' => '083456789012',
-            'email' => 'majubersama@vendor.com',
-            'alamat' => 'Jl. Sudirman No. 100, Surabaya',
-        ]);
+        Vendor::factory()->count(3)->create();
     }
 }

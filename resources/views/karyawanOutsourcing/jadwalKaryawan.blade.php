@@ -4,7 +4,7 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 bg-white/70 rounded-xl shadow">
         <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h1 class="text-xl font-bold text-gray-800 md:text-2xl">Jadwal Kerjaku 🗓️</h1>
+                <h1 class="text-xl font-bold text-gray-800 md:text-2xl">Jadwal Kerjaku </h1>
                 <p class="text-gray-500 text-sm">Lihat detail waktu shift kerjamu untuk bulan ini.</p>
             </div>
             <button

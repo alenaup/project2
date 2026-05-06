@@ -2,100 +2,137 @@
         #animationOverlay {
             position: fixed;
             inset: 0;
-            background-color: #bbdfc6;
-            /* Warna hijau super muda */
+            background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%); /* Dark slate to dark emerald */
             z-index: 9999;
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: row;
+            overflow: hidden;
         }
 
-        /* 1. Logo Naik ke atas dan mengecil */
-        @keyframes logoUpAndShrink {
+        /* Dynamic Glowing Orbs Background */
+        #animationOverlay::before, #animationOverlay::after {
+            content: "";
+            position: absolute;
+            width: 50vw;
+            height: 50vw;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            animation: floatingOrbs 6s infinite alternate ease-in-out;
+        }
+        #animationOverlay::before {
+            background: rgba(16, 185, 129, 0.25); /* Emerald 500 */
+            top: -20%; left: -10%;
+        }
+        #animationOverlay::after {
+            background: rgba(4, 120, 87, 0.2); /* Emerald 700 */
+            bottom: -20%; right: -10%;
+            animation-delay: 2s;
+        }
+
+        @keyframes floatingOrbs {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(60px, 60px) scale(1.1); }
+        }
+
+        /* 1. Logo smooth reveal and glide */
+        @keyframes logoRevealGlide {
             0% {
-                transform: translateY(100px) scale(1.6);
+                transform: scale(0.8) translateY(30px);
                 opacity: 0;
             }
-
-            30% {
-                transform: translateY(0px) scale(1.6);
+            25% {
+                transform: scale(1.1) translateY(0);
                 opacity: 1;
             }
-
+            45% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
             100% {
-                transform: translateY(-50px) scale(0.6);
+                transform: scale(0.85) translateX(-130px); /* Smooth glide to left */
                 opacity: 1;
             }
         }
 
-        /* 2. Menggelinding ke kiri */
-        @keyframes rollLeft {
-            0% {
-                transform: translateX(0) rotate(0deg);
-            }
-
-            100% {
-                transform: translateX(-200px) rotate(-360deg);
-            }
-        }
-
-        /* 3. Teks Eco Green Muncul dari belakang logo ke kiri */
-        @keyframes revealText {
-            0% {
-                transform: translateX(200px);
+        /* 2. Teks Eco Green Muncul dengan efek clip-path reveal */
+        @keyframes textRevealModern {
+            0%, 45% {
+                transform: translateX(-40px);
                 opacity: 0;
+                clip-path: inset(0 100% 0 0); /* Masked completely */
             }
-
             100% {
-                transform: translateX(30px);
+                transform: translateX(0px);
                 opacity: 1;
+                clip-path: inset(0 0 0 0); /* Fully revealed */
             }
         }
 
         .anim-logo-wrapper {
             position: absolute;
-            animation: logoUpAndShrink 1.2s ease-in-out forwards;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: logoRevealGlide 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
 
         .anim-logo {
-            width: 150px;
-            animation: rollLeft 1s ease-in-out 1.2s forwards;
+            width: 140px;
+            filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5));
+            /* Remove the old rollLeft animation completely */
         }
 
         .anim-text {
             font-size: 4rem;
-            font-weight: 700;
-            color: #169928;
-            /* Emerald 600 */
+            font-weight: 800;
+            color: #ffffff;
             opacity: 0;
             position: absolute;
-            animation: revealText 0.8s ease-out 1.8s forwards;
+            z-index: 10;
+            margin-left: 150px; /* Position to the right of the glided logo */
+            animation: textRevealModern 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             white-space: nowrap;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-family: 'Inter', sans-serif; /* Fallback modern font */
+            letter-spacing: -0.03em;
         }
 
-        /* Animasi Partikel Bintang */
-        @keyframes starAnimation {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0);
-            }
-
-            50% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0);
-            }
-        }
-
-        .stars {
+        /* Loading Bar untuk memberikan kesan progres / sistem sedang loading */
+        .anim-loader {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            animation: starAnimation 2s linear infinite;
+            z-index: 10;
+            bottom: 25%;
+            width: 250px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeInLoader 0.5s ease 1s forwards;
+        }
+        
+        .anim-loader::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0;
+            width: 0%;
+            background: #10b981; /* Emerald 500 */
+            box-shadow: 0 0 15px #10b981;
+            border-radius: 4px;
+            animation: loadingProgress 2.2s cubic-bezier(0.4, 0, 0.2, 1) 1.2s forwards;
+        }
+
+        @keyframes fadeInLoader {
+            to { opacity: 1; }
+        }
+        
+        @keyframes loadingProgress {
+            0% { width: 0%; }
+            40% { width: 60%; }
+            80% { width: 85%; }
+            100% { width: 100%; }
         }

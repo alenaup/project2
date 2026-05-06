@@ -2,6 +2,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Enums\Status;
 use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,9 +28,14 @@ use Illuminate\Support\Carbon;
  * @property int $id_user
  * @property string $nama_lengkap
  * @property string $email
- * @property string $username
  * @property string|null $nomor_tlp
  * @property UserRole $role
+ * @property string $password
+ * @property string|null $alamat
+ * @property string|null $NIP
+ * @property string|null $nama_departemen
+ * @property string|null $tanggal_keluar
+ * @property string|null $tanggal_masuk
  * @property string $status
  * @property Carbon|null $email_verified_at
  *
@@ -66,14 +72,19 @@ class User extends Authenticatable
         'email',
         'password',
         'nomor_tlp',
-        'username',
+        'alamat',
+        'NIP',
+        'nama_departemen',
+        'tanggal_keluar',
+        'tanggal_masuk',
         'role',
         'status',
+        'created_by',
     ];
 
     /* mengisi nilai default untuk atribut */
     protected $attributes = [
-        'status' => 'active',
+        'status' => Status::Active->value,
         'role' => UserRole::Karyawan->value,
     ];
 
@@ -133,13 +144,6 @@ class User extends Authenticatable
 
     /* ================================================================ */
 
-    /* relasi */
-    /* relasi 1 karyawan dengan 1 user */
-    public function karyawan()
-    {
-        return $this->hasOne(Karyawan::class, 'user_id', 'id_user');
-    }
-
     /* mengambil data berdasarkan role */
     public function roleData(): ?Model
     {
@@ -147,5 +151,28 @@ class User extends Authenticatable
             UserRole::Karyawan => $this->karyawan,
             default => null,
         };
+    }
+
+
+    /* =============================================================== */
+    /* relasi one to many dengan model vendor */
+    /* relasi hanya untuk user dengan role admin_vendor */
+    /* bagian ini hanya memberikan sebuah jalur jadi tidak memerlukan pengecekan role */
+    public function vendor()
+    {
+        return $this->belongsTo(Vendor::class, 'vendor_id', 'id_vendor');
+    }
+
+    /* relasi ke tabel relasi dengan nama tabel KaryawanJadwal */
+    public function jadwal()
+    {
+        return $this->belongsToMany(Jadwal::class, 'karyawan_jadwal', 'user_id', 'jadwal_id');
+    }
+
+    /* relasi ke tabel lembur dengan kardinalittas satu ke banyak */
+
+    public function lembur()
+    {
+        return $this->hasMany(Lembur::class, 'user_id');
     }
 }

@@ -34,11 +34,11 @@
                             <i class="fa-solid fa-stopwatch text-xs"></i>
                             Pengajuan Lembur
                         </button>
-                        <button onclick="switchTab(1)" id="tabBtn1"
+                        {{-- <button onclick="switchTab(1)" id="tabBtn1"
                             class="px-5 py-2 text-sm font-semibold transition-all duration-300 flex items-center gap-2 text-white hover:bg-white/10">
                             <i class="fa-solid fa-flag-checkered text-xs"></i>
                             Selesai Lembur
-                        </button>
+                        </button> --}}
                     </div>
                 </div>
             </div>
@@ -127,77 +127,6 @@
                     <!-- /panel 0 -->
 
                     <!-- PANEL 1: Selesai Lembur -->
-                    <div class="slide-panel px-6 py-6">
-                        <div class="flex items-center gap-2 mb-5">
-                            <div class="section-bar bg-purple-500"></div>
-                            <h3 class="font-semibold text-gray-700 text-sm">Data Diri — Selesai Lembur</h3>
-                        </div>
-
-                        <div class="grid md:grid-cols-2 gap-x-6 gap-y-4">
-                            <div>
-                                <label class="inp-label">NIM <span class="req">*</span></label>
-                                <input id="nim1" type="text" value="1406200062026" readonly class="inp">
-                            </div>
-                            <div>
-                                <label class="inp-label">Nama Lengkap <span class="req">*</span></label>
-                                <input id="nama1" type="text" value="Rangga Racing" readonly class="inp">
-                            </div>
-                            <div>
-                                <label class="inp-label">No. HP <span class="req">*</span></label>
-                                <input id="noHp1" type="tel" value="085363356775" readonly class="inp">
-                            </div>
-                            <div>
-                                <label class="inp-label">Email <span class="req">*</span></label>
-                                <input id="email1" type="email" value="rangga@gmail.com" readonly class="inp">
-                            </div>
-                            <div>
-                                <label class="inp-label">Tanggal Lembur <span class="req">*</span></label>
-                                <input id="tanggal1" type="date" class="inp">
-                            </div>
-                            <div>
-                                <label class="inp-label">
-                                    Asal Departemen
-                                    <span class="ml-1 text-xs px-2 py-0.5 rounded-full"></span>
-                                </label>
-                                <input type="text" value="Kebersihan" readonly class="inp">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="inp-label">Alamat <span class="req">*</span></label>
-                                <input id="alamat1" type="text" value="Nongsa No 12" readonly class="inp">
-                            </div>
-
-                            <div class="md:col-span-2">
-                                <div class="flex items-center gap-2 mb-3 mt-2">
-                                    <div class="section-bar bg-purple-400"></div>
-                                    <h3 class="font-semibold text-gray-700 text-sm">Keterangan</h3>
-                                </div>
-                                <label class="inp-label">Apa yang telah dikerjakan hari ini? <span
-                                        class="req">*</span></label>
-                                <textarea id="ket1" rows="7" oninput="hitungKata(1)"
-                                    placeholder="Tuliskan hasil pekerjaan yang telah diselesaikan saat lembur..."
-                                    class="inp resize-none leading-relaxed" style="min-height:160px;"></textarea>
-                                <div class="mt-2 flex items-center justify-end gap-3">
-                                    <div class="flex-1 bg-gray-100 rounded-full overflow-hidden" style="height:4px">
-                                        <div id="bar1" class="h-full rounded-full transition-all"
-                                            style="width:0%;background:#7c3aed"></div>
-                                    </div>
-                                    <span class="text-xs text-gray-400 whitespace-nowrap">
-                                        <span id="wc1" class="font-semibold text-gray-600">0</span> / 300 kata
-                                    </span>
-                                </div>
-                                <p id="warn1" class="text-xs text-red-500 mt-1 hidden">
-                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>Melebihi batas 300 kata!
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end gap-3 mt-6 pt-5 border-t border-gray-100">
-                            <button onclick="submit(1)"
-                                class="px-6 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition active:scale-95 flex items-center gap-2 shadow-sm">
-                                <i class="fa-solid fa-circle-check"></i>Lapor Selesai
-                            </button>
-                        </div>
-                    </div>
 
                 </div>
             </div>

@@ -160,9 +160,9 @@ function renderRiwayat() {
         }[item.status]
 
         const badgeLabel = {
-            menunggu: "⏳ Menunggu",
-            disetujui: "✅ Disetujui",
-            ditolak: "❌ Ditolak"
+            menunggu: " Menunggu",
+            disetujui: " Disetujui",
+            ditolak: " Ditolak"
         }[item.status]
 
         const fileIcon = item.tipeFile === "pdf" ?

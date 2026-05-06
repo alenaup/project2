@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('shift', function (Blueprint $table) {
-            $table->integer('id_shift')->autoIncrement();
+            $table->bigInteger('id_shift')->autoIncrement();
             $table->time('jam_masuk');
             $table->time('jam_keluar');
             $table->string('tipe_shift', 50);

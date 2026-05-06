@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      *
-     * ⚠️ URUTAN PENTING! Parent table harus di-seed sebelum child table
+     * URUTAN PENTING! Parent table harus di-seed sebelum child table
      * karena ada relasi foreign key antar tabel.
      *
      * Urutan dependensi:
@@ -24,33 +24,23 @@ class DatabaseSeeder extends Seeder
      * 6. AdminVendor        → butuh: Vendor
      * 7. Karyawan           → butuh: AdminVendor + KepalaDepartement
      */
-    
     public function run(): void
     {
         // --- Tabel tanpa dependensi (parent tables) ---
         $this->call([
-            UserSeeder::class,
-            SuperAdminSeeder::class,
             VendorSeeder::class,
-            KepalaDepartementSeeder::class,
-            ShiftSeeder::class,
-            TipeKehadiranSeeder::class,
-            HrSeeder::class,
-            JadwalSeeder::class,
+            UserSeeder::class,
             RekapKehadiranSeeder::class,
-        ]);
-
-        // --- Tabel dengan 1 dependensi ---
-        $this->call([
-            AdminVendorSeeder::class,
+            ShiftSeeder::class,
+            JadwalSeeder::class,
+            KaryawanJadwalSeeder::class,
+            TipeKehadiranSeeder::class,
         ]);
 
         // --- Tabel dengan 2+ dependensi ---
         $this->call([
-            KaryawanSeeder::class,
-            KaryawanJadwalSeeder::class,
-            LemburSeeder::class,
             KehadiranSeeder::class,
+            LemburSeeder::class,
         ]);
     }
 }

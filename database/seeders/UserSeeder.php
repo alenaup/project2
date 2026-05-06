@@ -18,7 +18,6 @@ class UserSeeder extends Seeder
         /* KEPALA DEPARTEMEN START */
         DB::table('users')->insert([
             'nama_lengkap' => 'Muhammad Rangga',
-            'username' => 'Rangga',
             'email' => 'Rangga@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
@@ -27,18 +26,7 @@ class UserSeeder extends Seeder
         ]);
 
         DB::table('users')->insert([
-            'nama_lengkap' => 'Muhammad Rangga cihuy',
-            'username' => 'Rangga cihuy',
-            'email' => 'Ranggacihuy@gmail.com',
-            'nomor_tlp' => '081275796452',
-            'status' => 'active',
-            'role' => UserRole::KepalaDepartemen->value,
-            'password' => Hash::make('userRanggacihuy'),
-        ]);
-
-        DB::table('users')->insert([
             'nama_lengkap' => 'Muhammad Thoriq Ali Aljundi',
-            'username' => 'Thoriq',
             'email' => 'thoriq@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
@@ -56,7 +44,6 @@ class UserSeeder extends Seeder
 
         DB::table('users')->insert([
             'nama_lengkap' => 'Jason Devito',
-            'username' => 'Jason',
             'email' => 'jason@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
@@ -73,7 +60,6 @@ class UserSeeder extends Seeder
 
         DB::table('users')->insert([
             'nama_lengkap' => 'Atma Fauzilla',
-            'username' => 'Atma',
             'email' => 'atma@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
@@ -91,22 +77,11 @@ class UserSeeder extends Seeder
 
         DB::table('users')->insert([
             'nama_lengkap' => 'Zahrah Faradila',
-            'username' => 'Zahrah',
             'email' => 'zahrah@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::AdminVendor->value,
             'password' => Hash::make('userZahrah'),
-        ]);
-
-        DB::table('users')->insert([
-            'nama_lengkap' => 'Zahrah Faradila2',
-            'username' => 'Zahrah2',
-            'email' => '2zahrah@gmail.com',
-            'nomor_tlp' => '081275796452',
-            'status' => 'active',
-            'role' => UserRole::AdminVendor->value,
-            'password' => Hash::make('userZahrah2'),
         ]);
 
         /* Membuat 5 data dummy admin vendor */
@@ -118,56 +93,56 @@ class UserSeeder extends Seeder
         /* KARYAWAN START */
         DB::table('users')->insert([
             'nama_lengkap' => 'Atma Karyawan',
-            'username' => 'KaryawanAtma',
             'email' => '2atma@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userAtma'),
+            'vendor_id' => 1
         ]);
 
         DB::table('users')->insert([
             'nama_lengkap' => 'Rangga Karyawan',
-            'username' => 'KaryawanRangga',
             'email' => '2rangga@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userRangga'),
+            'vendor_id' => 2
         ]);
 
         DB::table('users')->insert([
             'nama_lengkap' => 'JasonKaryawan',
-            'username' => 'Jason',
             'email' => '2jason@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userJason'),
+            'vendor_id' => 3
         ]);
 
         DB::table('users')->insert([
             'nama_lengkap' => 'ZahraKaryawan',
-            'username' => 'Zahra',
             'email' => '3zahra@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userZahra'),
+            'vendor_id' => 4
         ]);
 
         DB::table('users')->insert([
             'nama_lengkap' => 'ThoriqKaryawan',
-            'username' => 'Thoriq',
             'email' => '2Thoriq@gmail.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userThoriq'),
+            'vendor_id' => 4
         ]);
 
         /* membuat data dummy 10 karyawan */
-        User::factory()->count(10)->create();
+        User::factory()->count(40)->create();
         /* KARYAWAN END */
 
     }

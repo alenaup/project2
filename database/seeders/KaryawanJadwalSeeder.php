@@ -2,23 +2,24 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
-use App\Models\KaryawanJadwal;
-use App\Models\Karyawan;
 use App\Models\Jadwal;
+use App\Models\User;
+use Illuminate\Database\Seeder;
 
 class KaryawanJadwalSeeder extends Seeder
 {
-    public function run(): void
-    {
-        $karyawan = Karyawan::first();
-        $jadwal = Jadwal::first();
 
-        if ($karyawan && $jadwal) {
-            KaryawanJadwal::create([
-                'karyawan_id' => $karyawan->id_karyawan,
-                'jadwal_id' => $jadwal->id_jadwal,
-            ]);
+    public function run()
+    {
+        $users = User::all();
+        $jadwals = Jadwal::all();
+
+        foreach ($users as $user) {
+            // random ambil 1-3 jadwal
+            $randomJadwal = $jadwals->random(rand(1, 3))->pluck('id_jadwal')->toArray();
+
+            // attach ke pivot
+            $user->jadwal()->attach($randomJadwal);
         }
     }
 }
