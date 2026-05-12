@@ -11,6 +11,10 @@ export default defineConfig({
         }),
     ],
     server: {
+        host: '0.0.0.0',
+        hmr: {
+            host: 'localhost', // Ini kunci agar CSS muncul di lokal Anda
+        },
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },
