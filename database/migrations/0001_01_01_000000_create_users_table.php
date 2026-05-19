@@ -39,6 +39,11 @@ return new class extends Migration
             ->references('id_vendor')->on('vendor')
             ->onDelete('cascade')->onUpdate('cascade');
 
+            $table->bigInteger('departemen_id')->nullable();
+            $table->foreign('departemen_id')
+            ->references('id_departemen')->on('departemen')
+            ->onDelete('cascade')->onUpdate('cascade');
+
             $table->rememberToken();
             $table->timestamps();
         });
