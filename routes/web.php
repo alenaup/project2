@@ -5,14 +5,15 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 
-/* Route untuk logic */
-Route::get('/', [AuthController::class, 'login'])->name('login');
+/* Route untuk login berfungsi menyalurkan reuest dan melakukan validasi awal */
+/* mengembalikan data ke controller Auth dan mengeksekusi  method atau fungsi login*/
+Route::get('/', [AuthController::class, 'login'])->/* ini adalah nama rute */name('login');
 
 
 /* Route Kepala departement */
 Route::get('/kepala-departement/dashboard', function () {
     return view('kepala-departement.dashboard');
-});
+})->name('kepala_departemen.dashboard');
 
 Route::get('/kepala-departement/karyawan', function () {
     return view('kepala-departement.karyawan');
@@ -38,7 +39,7 @@ Route::get('/kepala-departement/pengajuan', function () {
 
 /* Admin OutSourcing */
 
-Route::get('/admin-outsourcing/dashboard',  [AdminOutsourcingController::class, 'dashboard']);
+Route::get('/admin-outsourcing/dashboard',  [AdminOutsourcingController::class, 'dashboard'])->name('admin.dashboard');
 
 Route::get('/admin-outsourcing/pengajuan-karyawan', function () {
     return view('adminOutsourcing.pengajuanKaryawan');
@@ -56,7 +57,7 @@ Route::get('/admin-outsourcing/kelola-karyawan', function () {
 
 Route::get('/hr/dashboard', function () {
     return view('hr.dashboard');
-});
+})->name('hr.dashboard');
 
 Route::get('/hr/rekapan-detail', function () {
     return view('hr.rekapanDetail');
@@ -78,7 +79,7 @@ Route::get('/hr/data-karyawan', function () {
 
 Route::get('/super-admin/dashboard', function () {
     return view('superAdmin.dashboardAdmin');
-});
+})->name('super.dashboard');
 
 Route::get('/super-admin/pengaturan', function () {
     return view('superAdmin.pengaturanAdmin');
@@ -92,7 +93,7 @@ Route::get('/super-admin/pengaturan', function () {
 
 Route::get('/karyawan-outsourcing/dashboard', function () {
     return view('karyawanOutsourcing.dashboardKaryawan');
-});
+})->name('dashboard');
 
 Route::get('/karyawan-outsourcing/pengajuanKaryawan', function () {
     return view('karyawanOutsourcing.pengajuanKaryawan');

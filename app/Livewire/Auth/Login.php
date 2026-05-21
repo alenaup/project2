@@ -19,17 +19,10 @@ class Login extends Component
     public function login(AuthService $authService)
     {
         // 1. Validasi
-        $this->validate([
-            'email' => 'required|email:rfc,dns',
-            'password' => 'required'
-        ], [
-            'email.required' => 'Email wajib diisi',
-            'email.email' => 'Format email tidak valid',
-            'password.required' => 'Password wajib diisi'
-        ]);
+        $this->validate($this->rules(), $this->messages());
 
         // 2. Panggil service
-        $result = $authService->login($this->email, $this->password);
+        $result = $authService->login(trim($this->email), $this->password);
 
         // 3. Kalau gagal
         if (!$result['success']) {
@@ -43,10 +36,28 @@ class Login extends Component
 
     public function updated($propertyName)
     {
-        $this->validateOnly($propertyName, [
-            'email' => 'required|email:rfc,dns',
+        if (! array_key_exists($propertyName, $this->rules())) {
+            return;
+        }
+
+        $this->validateOnly($propertyName, $this->rules(), $this->messages());
+    }
+
+    protected function rules(): array
+    {
+        return [
+            'email' => 'required|email:rfc',
             'password' => 'required'
-        ]);
+        ];
+    }
+
+    protected function messages(): array
+    {
+        return [
+            'email.required' => 'Email wajib diisi',
+            'email.email' => 'Format email tidak valid',
+            'password.required' => 'Password wajib diisi'
+        ];
     }
 
     public function render()

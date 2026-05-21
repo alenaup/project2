@@ -7,17 +7,20 @@
     @endif
 
     <!-- TABS -->
-    <div class="bg-white px-4 md:px-10 border-gray-200 border-b border-t flex gap-6 text-sm overflow-x-auto">
-        <button wire:click="switchTab('admin_vendor')"
-            class="py-3 {{ $activeTab === 'admin_vendor' ? 'border-b-2 border-green-600 text-green-700 font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+    <div class="bg-white px-4 md:px-10 py-3 border-gray-200 border-b border-t flex gap-2 text-sm overflow-x-auto">
+        <button type="button" wire:click="switchTab('admin_vendor')" wire:key="tab-admin-vendor"
+            aria-pressed="{{ $activeTab === 'admin_vendor' ? 'true' : 'false' }}"
+            class="px-4 py-2 rounded-lg border transition-all duration-200 whitespace-nowrap {{ $activeTab === 'admin_vendor' ? 'bg-green-600 border-green-600 text-white font-semibold shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:text-green-700 hover:border-green-300 hover:bg-green-50' }}">
             Admin Outsourcing
         </button>
-        <button wire:click="switchTab('hr')"
-            class="py-3 {{ $activeTab === 'hr' ? 'border-b-2 border-green-600 text-green-700 font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+        <button type="button" wire:click="switchTab('hr')" wire:key="tab-hr"
+            aria-pressed="{{ $activeTab === 'hr' ? 'true' : 'false' }}"
+            class="px-4 py-2 rounded-lg border transition-all duration-200 whitespace-nowrap {{ $activeTab === 'hr' ? 'bg-green-600 border-green-600 text-white font-semibold shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:text-green-700 hover:border-green-300 hover:bg-green-50' }}">
             HR Perusahaan
         </button>
-        <button wire:click="switchTab('kepala_departemen')"
-            class="py-3 {{ $activeTab === 'kepala_departemen' ? 'border-b-2 border-green-600 text-green-700 font-semibold' : 'text-gray-500 hover:text-gray-700' }}">
+        <button type="button" wire:click="switchTab('kepala_departemen')" wire:key="tab-kepala-departemen"
+            aria-pressed="{{ $activeTab === 'kepala_departemen' ? 'true' : 'false' }}"
+            class="px-4 py-2 rounded-lg border transition-all duration-200 whitespace-nowrap {{ $activeTab === 'kepala_departemen' ? 'bg-green-600 border-green-600 text-white font-semibold shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:text-green-700 hover:border-green-300 hover:bg-green-50' }}">
             Kepala Departemen
         </button>
     </div>

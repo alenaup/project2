@@ -26,8 +26,8 @@
                     <img src="/images/logo.png" alt="Logo" class="w-full h-full object-contain">
                 </div>
                 <div>
-                    <h1 class="text-sm font-extrabold">Ecogreen e-Outsourcing
-                        <p class="text-[11px] text-green-200">Sistem Manajemen Karyawan Outsourcing</p>
+                    <h1 class="text-sm font-extrabold">Ecogreen e-Outsourcing</h1>
+                    <p class="text-[11px] text-green-200">Sistem Manajemen Karyawan Outsourcing</p>
                 </div>
             </div>
             <div class="relative">
@@ -69,6 +69,8 @@
 
             {{-- melakukan request kepada bagian service folder app/livewire/superAdmin/user-management --}}
             @livewire('super-admin.user-management')
+        </div>
+
         <script>
             function toggleDropdown() {
                 const dropdown = document.getElementById('dropdownProfile');
