@@ -1,4 +1,5 @@
 <?php
+use App\Enums\Status;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,16 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('departemen', function (Blueprint $table) {
-            $table->bigInteger('id_departemen')->autoIncrement();
+            $table->unsignedBigInteger('id_departemen')->autoIncrement();
             $table->string('nama_departemen', 255);
+            $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
             $table->timestamps();
 
-            $table->bigInteger('lokasi_id');
-            $table->foreign('lokasi_id', 'departemen_dibuat_di_lokasi')
+            $table->unsignedBigInteger('lokasi_id')->nullable();
+            $table->foreign('lokasi_id', 'lokasi_absensi_departemen')
                 ->references('id_lokasi')->on('lokasi')
                 ->onDelete('cascade')->onUpdate('cascade');
         });
     }
+
 
     public function down(): void
     {

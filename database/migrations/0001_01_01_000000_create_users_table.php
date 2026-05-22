@@ -14,34 +14,38 @@ return new class extends Migration
     /* Tabel Users, password_reset_tokens, sessions */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('user', function (Blueprint $table) {
             /* untuk semua user */
-            $table->bigInteger('id_user')->autoIncrement();
+            $table->unsignedBigInteger('id_user')->autoIncrement();
             $table->string('nama_lengkap', 255);
             $table->string('password');
             $table->string('nomor_tlp', 20)->nullable();
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+
                     /* eksekusi menggunakan enums */
             $table->enum('role', [UserRole::SuperAdmin->value, UserRole::AdminVendor->value, UserRole::Hr->value, UserRole::Karyawan->value, UserRole::KepalaDepartemen->value])->default(UserRole::Karyawan->value);
             $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->bigInteger('created_by')->default(0);
 
             /* hanaya untuk karyawan */
             $table->string('alamat', 255)->nullable();
-            $table->string('NIP', 100)->default('0');
+            $table->string('nip', 100)->default('0');
             $table->date('tanggal_keluar')->nullable();
             $table->date('tanggal_masuk')->nullable();
-            $table->string('nama_departemen', 255)->nullable();
 
-            $table->bigInteger('vendor_id')->nullable();
-            $table->foreign('vendor_id')
-            ->references('id_vendor')->on('vendor')
+            $table->unsignedBigInteger('outsourcing_id')->nullable();
+            $table->foreign('outsourcing_id', 'outsourcing_memiliki_karyawan')
+            ->references('id_outsourcing')->on('outsourcing')
             ->onDelete('cascade')->onUpdate('cascade');
 
-            $table->bigInteger('departemen_id')->nullable();
-            $table->foreign('departemen_id')
+            $table->unsignedBigInteger('departemen_id')->nullable();
+            $table->foreign('departemen_id', 'karyawan berasal dari departemen')
             ->references('id_departemen')->on('departemen')
+            ->onDelete('cascade')->onUpdate('cascade');
+            
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id', 'user dibuat oleh user')
+            ->references('id_user')->on('user')
             ->onDelete('cascade')->onUpdate('cascade');
 
             $table->rememberToken();

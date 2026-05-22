@@ -10,15 +10,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('jadwal', function (Blueprint $table) {
-            $table->bigInteger('id_jadwal')->autoIncrement();
+            $table->unsignedBigInteger('id_jadwal')->autoIncrement();
             $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
             $table->date('tanggal');
-            $table->bigInteger('dibuat_oleh');
             $table->timestamps();
 
-            $table->bigInteger('shift_id');
+            $table->unsignedBigInteger('shift_id');
             $table->foreign('shift_id', 'jadwa_diatur_shift')
                 ->references('id_shift')->on('shift')
+                ->onDelete('cascade')->onUpdate('cascade');
+
+            $table->unsignedBigInteger('dibuat_oleh');
+            $table->foreign('dibuat_oleh', 'jadwal dibuat oleh kepala departemen')
+                ->references('id_user')->on('user')
                 ->onDelete('cascade')->onUpdate('cascade');
         });
     }

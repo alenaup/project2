@@ -11,16 +11,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('lokasi', function (Blueprint $table) {
-            $table->bigInteger('id_lokasi')->autoIncrement();
+            $table->unsignedBigInteger('id_lokasi')->autoIncrement();
             $table->decimal('longtitude', 10, 8);
             $table->decimal('latitude', 10, 8);
-            $table->string('alamat', 255);
             $table->string('nama_lokasi', 255);
             $table->integer('radius');
             $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
             $table->timestamps();
-
-            
         });
     }
 
