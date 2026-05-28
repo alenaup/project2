@@ -16,19 +16,25 @@ class DatabaseSeeder extends Seeder
      * karena ada relasi foreign key antar tabel.
      *
      * Urutan dependensi:
-     * 1. SuperAdmin        → tanpa dependensi
-     * 2. Vendor             → tanpa dependensi
-     * 3. KepalaDepartement  → tanpa dependensi
-     * 4. Shift              → tanpa dependensi
-     * 5. TipeKehadiran      → tanpa dependensi
-     * 6. AdminVendor        → butuh: Vendor
-     * 7. Karyawan           → butuh: AdminVendor + KepalaDepartement
+     * 1. Lokasi (Independen)
+     * 2. Outsourcing/Vendor (Independen)
+     * 3. Departemen (Butuh: Lokasi)
+     * 4. User (Butuh: Outsourcing, Departemen)
+     * 5. RekapKehadiran (Butuh: User/Admin, User/HR)
+     * 6. Shift (Independen)
+     * 7. Jadwal (Butuh: Shift, User/KepalaDepartemen)
+     * 8. KaryawanJadwal Pivot (Butuh: User, Jadwal)
+     * 9. TipeKehadiran (Independen)
+     * 10. Kehadiran (Butuh: Jadwal, TipeKehadiran, RekapKehadiran)
+     * 11. Lembur (Butuh: User/Karyawan, User/KepalaDepartemen)
      */
     public function run(): void
     {
-        // --- Tabel tanpa dependensi (parent tables) ---
+        // --- Tabel Independen & Master ---
         $this->call([
-            VendorSeeder::class,
+            LokasiSeeder::class,
+            OutsourcingSeeder::class,
+            DepartemenSeeder::class,
             UserSeeder::class,
             RekapKehadiranSeeder::class,
             ShiftSeeder::class,
@@ -37,7 +43,7 @@ class DatabaseSeeder extends Seeder
             TipeKehadiranSeeder::class,
         ]);
 
-        // --- Tabel dengan 2+ dependensi ---
+        // --- Tabel Transaksional/Detail ---
         $this->call([
             KehadiranSeeder::class,
             LemburSeeder::class,

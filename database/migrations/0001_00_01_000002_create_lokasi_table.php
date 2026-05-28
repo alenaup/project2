@@ -7,12 +7,12 @@ use App\Enums\Status;
 
 return new class extends Migration
 {
-    /* Tabel vendor atau perusahaan outsourcing */
+     /* Tabel lokasi untuk menyimpan data lokasi dengan koordinat GPS */
     public function up(): void
     {
         Schema::create('lokasi', function (Blueprint $table) {
             $table->unsignedBigInteger('id_lokasi')->autoIncrement();
-            $table->decimal('longtitude', 10, 8);
+            $table->decimal('longitude', 11, 8);
             $table->decimal('latitude', 10, 8);
             $table->string('nama_lokasi', 255);
             $table->integer('radius');
@@ -20,7 +20,6 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
 
     public function down(): void
     {

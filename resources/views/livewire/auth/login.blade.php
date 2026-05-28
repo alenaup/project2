@@ -32,7 +32,7 @@
 
         <!-- RIGHT -->
         <div
-            class="w-full p-4 mx-[8%] my-[20%] md:w-5/12 md:my-0 md:mx-0 flex items-center justify-center bg-white/10 backdrop-blur-md">
+            class="w-full p-4 mx-[8%] my-[20%] md:w-5/12 md:my-0 md:mx-0 flex rounded-2xl md:rounded-0 items-center justify-center bg-white/10 backdrop-blur-md">
             <div class="w-full max-w-md md:p-10 p-4">
                 <img src="/images/logo.png"
                     class="block md:hidden w-16 mx-auto mb-6 transition duration-300 transform animate-[spin_16s_linear_infinite]"

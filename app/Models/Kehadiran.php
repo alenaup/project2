@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,15 +16,13 @@ class Kehadiran extends Model
     protected $fillable = [
         'waktu_masuk',
         'waktu_keluar',
-        'waktu_telat',
+        'toleransi_telat',
         'tanggal',
         'lokasi_masuk',
         'lokasi_keluar',
-        'bukti',
-        'keterangan',
-        'rekapan_kehadiran_id',
         'jadwal_id',
         'tipe_kehadiran_id',
+        'rekapan_kehadiran_id',
     ];
 
     public function jadwal()
@@ -34,5 +33,10 @@ class Kehadiran extends Model
     public function tipeKehadiran()
     {
         return $this->belongsTo(TipeKehadiran::class, 'tipe_kehadiran_id', 'id_tipe_kehadiran');
+    }
+
+    public function rekapanKehadiran()
+    {
+        return $this->belongsTo(RekapKehadiran::class, 'rekapan_kehadiran_id', 'id_rekapan');
     }
 }

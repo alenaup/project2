@@ -13,7 +13,7 @@
             @livewire(\App\Livewire\AdminOutsourcing\DashboardStats::class)
         </div>
 
-        <!-- ─── TABEL REKAP ────────────────────── -->
+        <!-- ───  TABEL REKAP ────────────────────── -->
         <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
             <div class="flex items-start justify-between mb-4 flex-wrap gap-3 border-b border-slate-400 pb-4">
                 <div>

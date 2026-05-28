@@ -15,26 +15,39 @@ class RekapKehadiran extends Model
     protected $primaryKey = 'id_rekapan';
 
     protected $fillable = [
-        'total_lembur',
-        'total_jam_kerja',
-        'total_terlambat',
-        'tanggal_validasi',
+        'pengaju',
+        'pevalidasi',
         'status_validasi',
         'status',
-        'pemvalidasi_id',
-        'tanggal',
+        'tanggal_validasi',
+        'total_jam_kerja',
+        'total_terlambat',
+        'total_hadir',
+        'total_sakit',
+        'total_izin',
+        'total_lembur',
+        'total_cuti',
+        'total_mankir',
     ];
 
     protected $casts = [
         'tanggal_validasi' => 'date',
-        'tanggal' => 'date',
         'status' => Status::class,
-
     ];
 
+    public function pengajuUser()
+    {
+        return $this->belongsTo(User::class, 'pengaju', 'id_user');
+    }
+
+    public function pevalidasiUser()
+    {
+        return $this->belongsTo(User::class, 'pevalidasi', 'id_user');
+    }
 
     public function kehadiran()
     {
-        return $this->hasMany(Kehadiran::class, 'rekapan_kehadiran_id');
+        return $this->hasMany(Kehadiran::class, 'rekapan_kehadiran_id', 'id_rekapan');
     }
+
 }

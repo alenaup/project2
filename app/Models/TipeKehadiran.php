@@ -14,10 +14,13 @@ class TipeKehadiran extends Model
 
     protected $fillable = [
         'status_kehadiran',
+        'keterangan',
+        'bukti'
+
     ];
 
-    public function kehadirans()
+    public function kehadiran()
     {
-        return $this->hasMany(Kehadiran::class, 'id_tipe_kehadiran', 'id_tipe_kehadiran');
+        return $this->hasMany(Kehadiran::class, 'tipe_kehadiran_id', 'id_tipe_kehadiran');
     }
 }

@@ -15,6 +15,7 @@ class Jadwal extends Model
     protected $fillable = [
         'status',
         'tanggal',
+        'shift_id',
         'dibuat_oleh',
     ];
 

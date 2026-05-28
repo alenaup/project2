@@ -13,7 +13,7 @@
         <div class="flex-1 p-4 md:p-6 overflow-x-hidden">
             <!-- HEADER -->
             <x-header>Kepala Departemen</x-header>
-            <x-alert></x-alert>
+            
             <!-- CONTENT -->
 
 

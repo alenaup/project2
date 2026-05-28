@@ -30,7 +30,7 @@
 
         <div class="flex-1 p-6 ml-0">
             <x-header>Kepala Departemen {{-- <-- Ganti aja ini kalo mau --}}</x-header>
-            <x-alert></x-alert>
+           
 
             {{-- NONTIFIKASI, CETAK SEBAGAI EXCEL, MODAL MENAMBAHKAN JADWAL --}}
             <div class='flex justify-between border-b pb-4'>
@@ -231,7 +231,7 @@
                         <div class="mt-4 text-2xl font-bold text-gray-800">128</div>
                         <div class="mt-4 ml-2 flex flex-col justify-end items-end">
                             <span class="text-sm text-gray-600">terakhir update hari ini</span>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -249,7 +249,7 @@
                         <div class="mt-4 text-2xl font-bold text-gray-800">97</div>
                         <div class="mt-4 ml-2 flex flex-col justify-end items-end">
                             <span class="text-sm text-gray-600">terakhir update 1 hari </span>
-                            
+
                         </div>
                     </div>
                 </div>

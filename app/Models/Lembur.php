@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,13 +18,19 @@ class Lembur extends Model
         'selesai_lembur',
         'tanggal_dibuat',
         'status',
-        'karyawan_id',
-        'pemvalidasi',
+        'status_validasi',
         'keterangan',
+        'karyawan_id',
+        'pemvalidasi_id',
     ];
 
     public function karyawan()
     {
-        return $this->belongsTo(Karyawan::class, 'karyawan_id', 'id_karyawan');
+        return $this->belongsTo(User::class, 'karyawan_id', 'id_user');
+    }
+
+    public function pemvalidasi()
+    {
+        return $this->belongsTo(User::class, 'pemvalidasi_id', 'id_user');
     }
 }

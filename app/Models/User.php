@@ -4,6 +4,11 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\Status;
 use App\Enums\UserRole;
+use App\Models\Departemen;
+use App\Models\Kehadiran;
+use App\Models\Lembur;
+use App\Models\Outsourcing;
+use App\Models\RekapKehadiran;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -55,7 +60,7 @@ class User extends Authenticatable
      */
 
     /* nama table yang digunakan */
-    protected $table = 'users';
+    protected $table = 'user';
 
     /* primary key */
     protected $primaryKey = 'id_user';
@@ -73,13 +78,13 @@ class User extends Authenticatable
         'password',
         'nomor_tlp',
         'alamat',
-        'NIP',
+        'nip',
         'nama_departemen',
         'tanggal_keluar',
         'tanggal_masuk',
         'role',
         'status',
-        'created_by',
+        'dibuat_oleh',
     ];
 
     /* mengisi nilai default untuk atribut */
@@ -155,24 +160,33 @@ class User extends Authenticatable
 
 
     /* =============================================================== */
-    /* relasi one to many dengan model vendor */
-    /* relasi hanya untuk user dengan role admin_vendor */
-    /* bagian ini hanya memberikan sebuah jalur jadi tidak memerlukan pengecekan role */
-    public function vendor()
+    public function departemen() 
     {
-        return $this->belongsTo(Vendor::class, 'vendor_id', 'id_vendor');
+        return $this->belongsTo(Departemen::class,'departemen_id', 'id_departemen');
     }
-
-    /* relasi ke tabel relasi dengan nama tabel KaryawanJadwal */
-    public function jadwal()
-    {
-        return $this->belongsToMany(Jadwal::class, 'karyawan_jadwal', 'user_id', 'jadwal_id');
-    }
-
-    /* relasi ke tabel lembur dengan kardinalittas satu ke banyak */
 
     public function lembur()
     {
-        return $this->hasMany(Lembur::class, 'user_id');
+        return $this->hasMany(Lembur::class, 'user_id', 'id_user');
+    }
+
+    public function outsourcing() 
+    {
+        return $this->belongsTo(Outsourcing::class, 'outsourcing_id', 'id_outsourcing');
+    }
+
+    public function rekap() 
+    {
+        return $this->hasMany(RekapKehadiran::class, 'user_id', 'id_user');
+    }
+
+    public function kehadiran()
+    {
+        return $this->hasMany(Kehadiran::class, 'user_id', 'id_user');
+    }
+
+    public function jadwal()
+    {
+        return $this->belongsToMany(Jadwal::class, 'karyawan_jadwal', 'user_id', 'jadwal_id');
     }
 }
