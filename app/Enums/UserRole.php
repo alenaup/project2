@@ -9,3 +9,4 @@ enum UserRole: string
     case AdminVendor      = 'admin_outsourcing';
     case KepalaDepartemen = 'kepala_departemen';
 }
+

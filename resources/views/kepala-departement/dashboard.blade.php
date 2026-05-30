@@ -27,10 +27,10 @@
             ['title' => 'Laporan', 'icon' => 'fa-solid fa-file-lines', 'ref' => '/kepala-departement/laporan'],
             ['title' => 'Shift', 'icon' => 'fa-solid fa-user-clock', 'ref' => '/kepala-departement/shift'],
         ]">kepala-departement</x-sidebar>
+        <div x-show="open" @click="open = false" class="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden z-40"></div>
 
         <div class="flex-1 p-6 ml-0">
             <x-header>Kepala Departemen {{-- <-- Ganti aja ini kalo mau --}}</x-header>
-           
 
             {{-- NONTIFIKASI, CETAK SEBAGAI EXCEL, MODAL MENAMBAHKAN JADWAL --}}
             <div class='flex justify-between border-b pb-4'>

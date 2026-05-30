@@ -32,16 +32,7 @@
         <!-- Filters & Search -->
         <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row justify-between items-center gap-2">
             <!-- Tabs -->
-            <div class="flex space-x-1 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
-                <template x-for="tab in tabs" :key="tab.id">
-                    <button
-                        @click="activeTab = tab.id"
-                        :class="activeTab === tab.id ? 'bg-[#009254] text-white shadow-md shadow-green-100' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50'"
-                        class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 whitespace-nowrap"
-                        x-text="tab.name"
-                    ></button>
-                </template>
-            </div>
+            
 
             <!-- Search -->
             <div class="relative w-full md:w-72">

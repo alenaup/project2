@@ -2,7 +2,9 @@
 @extends('layouts.admin-outsourcing')
 
 {{-- mengambil style dari halaman adminOutsourcing dashboard --}}
-<link rel="stylesheet" href="{{ asset('css/admin-outsourcing/dashboard.css') }}">
+@push('styles')
+    <link rel="stylesheet" href="{{ asset('css/admin-outsourcing/dashboard.css') }}">
+@endPush
 
 {{-- mengisi konten halaman adminOutsourcing --}}
 @section('content')
@@ -14,7 +16,7 @@
         </div>
 
         <!-- ───  TABEL REKAP ────────────────────── -->
-        <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
+        <div class="animate-item bg-white border border-slate-200 rounded-xl shadow-sm p-5">
             <div class="flex items-start justify-between mb-4 flex-wrap gap-3 border-b border-slate-400 pb-4">
                 <div>
                     <div class="flex items-center gap-2">
@@ -110,7 +112,11 @@
             </div>
         </div>
     </div><!-- /content -->
-
-    {{-- mengambil script untuk halaman adminOutsourcing dashboard dari folder public js --}}
-    <script src="{{ asset('js/admin-outsourcing/dashboard.js') }}"></script>
 @endsection
+
+{{-- mengambil script untuk halaman adminOutsourcing dashboard dari folder public js --}}
+@push('scripts')
+    <script src="{{ asset('js/admin-outsourcing/dashboard.js') }}"></script>
+    {{-- kode CDN untuk chart.js --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+@endpush

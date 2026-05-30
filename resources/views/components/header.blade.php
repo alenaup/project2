@@ -16,7 +16,7 @@
     <div x-data="{ openProfile: false }" class="relative">
         <div @click="openProfile = !openProfile"
             class="flex items-center gap-1 bg-white px-2 py-1 rounded-xl shadow
-                               cursor-pointer hover:shadow-lg transition md:px-4 md:py-2 md:gap-3">
+                    cursor-pointer hover:shadow-lg transition md:px-4 md:py-2 md:gap-3">
 
             <img src="/images/profile.jpg" class="w-10 h-10 rounded-full object-cover">
 
@@ -40,15 +40,9 @@
 
             <hr>
 
-            <a href="#" class="block px-4 py-2 text-sm text-red-500 hover:bg-red-50">
-                🚪 Logout
-            </a>
+            <livewire:auth.logout />
         </div>
 
     </div>
-
-
 </div>
-
-
 @yield('content')

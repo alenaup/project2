@@ -9,7 +9,7 @@
 @theme {
     --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
-        
+
     --color-brand: #16a34a;
     --color-brand-dark: #15803d;
     --color-brand-light: #dcfce7;
@@ -20,4 +20,24 @@
   body {
     @apply font-sans;
   }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-item {
+    opacity: 0;
+}
+
+.animate-item.show {
+    animation: fadeUp 0.7s ease-out forwards;
 }

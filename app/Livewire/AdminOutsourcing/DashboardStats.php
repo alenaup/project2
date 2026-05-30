@@ -3,8 +3,7 @@
 namespace App\Livewire\AdminOutsourcing;
 
 use App\Models\Kehadiran;
-use App\Models\Karyawan;
-use App\Models\TipeKehadiran;
+use App\Models\User;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
 
@@ -88,7 +87,7 @@ class DashboardStats extends Component
      */
     public function getTotalKaryawanProperty(): int
     {
-        return Karyawan::whereNull('tanggal_keluar')->count();
+        return User::whereNull('tanggal_keluar')->count();
     }
 
     // ──────────────────────────────────────────────────────

@@ -7,7 +7,7 @@
 
         {{-- HEADER --}}
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-2">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center justify-between mb-6">    
                 <h2 class="text-xl font-semibold text-gray-800">Data Karyawan</h2>
 
                 <div x-data="{ open: false }" class="relative">
@@ -317,6 +317,8 @@
             </div>
         </div>
     </div>
-
-    <script src="{{ asset('js/admin-outsourcing/kelola-karyawan.js') }}"></script>
 @endsection
+
+@push('scripts')
+    <script src="{{ asset('js/admin-outsourcing/kelola-karyawan.js') }}"></script>
+@endpush

@@ -7,52 +7,55 @@ use App\Services\AuthService;
 
 class Login extends Component
 {
+    // * inisialisasi property unntuk menampung data
     public string $email = '';
     public string $password = '';
-    public $showPassword = false;
 
-    public function togglePassword()
-    {
-        $this->showPassword = !$this->showPassword;
-    }
-
+    /* menginisiasi Service Auth dengan menamakan $authService */
     public function login(AuthService $authService)
     {
-        // 1. Validasi
+        // 1. Validasi dengan memanggil fungsi rules dan massege yang sidah dibuat
         $this->validate($this->rules(), $this->messages());
 
-        // 2. Panggil service
+        // 2. Panggil service dan eksekusi function login
         $result = $authService->login(trim($this->email), $this->password);
 
-        // 3. Kalau gagal
+        // 3. mengambil return dari service, jika gagal → tampilkan error, jika berhasil → kirim event ke frontend
         if (!$result['success']) {
             $this->addError('login', $result['message']);
             return;
         }
 
         // 4. Kalau berhasil → kirim event ke frontend (animasi)
+        // pakai event karena kita tidak ingin melakukan redirect secara langsung, tapi ingin menampilkan animasi terlebih dahulu
         $this->dispatch('login-success', url: $result['redirect']);
     }
 
-    public function updated($propertyName)
+    /* fungsi untuk melakukan validasi ketika data diubah */
+    public function updated(string $propertyName)
     {
+        // 1. cek apakah property yang diubah ada di rules
         if (! array_key_exists($propertyName, $this->rules())) {
             return;
         }
-
+        // 2. jika ada, lakukan validasi hanya pada property yang diubah
         $this->validateOnly($propertyName, $this->rules(), $this->messages());
     }
 
+    /* fungsi untuk meneentukan rules dari validasi */
     protected function rules(): array
     {
+        // 1. rules untuk validasi
         return [
             'email' => 'required|email:rfc',
             'password' => 'required'
         ];
     }
 
+    /* pesan yang dikirimkan berdasarkan rules */
     protected function messages(): array
     {
+        // 1. pesan yang dikirimkan
         return [
             'email.required' => 'Email wajib diisi',
             'email.email' => 'Format email tidak valid',
@@ -60,8 +63,5 @@ class Login extends Component
         ];
     }
 
-    public function render()
-    {
-        return view('livewire.auth.login');
-    }
+
 }
