@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
 use App\Models\Jadwal;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -11,7 +12,7 @@ class KaryawanJadwalSeeder extends Seeder
 
     public function run()
     {
-        $users = User::all();
+        $users = User::query()->where('role', UserRole::Karyawan->value)->get();
         $jadwals = Jadwal::all();
 
         foreach ($users as $user) {

@@ -47,7 +47,7 @@ class RekapKehadiranFactory extends Factory
      */
     private function getUserIdByRole(UserRole $role): int
     {
-        $user = User::where('role', $role->value)->inRandomOrder()->first();
+        $user = User::query()->where('role', $role->value)->inRandomOrder()->first();
 
         if ($user) {
             return $user->id_user;

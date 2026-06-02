@@ -1,11 +1,11 @@
 @extends('layouts.karyawanOutsourcing')
 
+@push('styles')
     {{-- kode CDN untuk leaflet map ini hanya unntuk user karyawan outsorcing --}}
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-
     {{-- kode CDN untuk leaflet map ini hanya unntuk user karyawan outsorcing --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+@endpush    
 
 @section('content')
     <!-- CONTENT -->
@@ -227,3 +227,8 @@
     </div>
     <script src="{{ asset('js/karyawan_js/dashboard.js') }}"></script>
 @endsection
+@push('scripts')
+    {{-- kode CDN untuk chart.js ini hanya unntuk user karyawan outsorcing --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+@endpush

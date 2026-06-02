@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 /* digunakan untuk menagambil  */
-/* use Illuminate\Support\Facades\Auth; */
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -15,7 +15,7 @@ class AuthController extends Controller
     {
         /* ini adalah untuk melakukan fungsi cek session */
         /* jika session masih aktif maka langsung ke halaman dashboard berdasarkan role */
-        /* if (Auth::check()) {
+        if (Auth::check()) {
 
             $role = Auth::user()->role;
 
@@ -27,9 +27,10 @@ class AuthController extends Controller
                 'karyawan' => redirect()->route('dashboard'),
             };
         }
-        */
 
         /* jika tidak memiliki session maka dikembalikan ke view */
         return view('Auth.login');
     }
+
+    
 }

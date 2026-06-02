@@ -12,7 +12,10 @@ return new class extends Migration
         Schema::create('jadwal', function (Blueprint $table) {
             $table->unsignedBigInteger('id_jadwal')->autoIncrement();
             $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
-            $table->date('tanggal');
+            $table->time('toleransi_telat')->nullable();
+            $table->date('tanggal_mulai');
+            $table->date('tanggal_akhir');
+            $table->string('nama_periode', 255);
             $table->timestamps();
 
             $table->unsignedBigInteger('shift_id');

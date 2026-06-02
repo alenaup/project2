@@ -12,7 +12,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_shift')->autoIncrement();
             $table->time('jam_masuk');
             $table->time('jam_keluar');
-            $table->string('tipe_shift', 50);
+            $table->string('nama_shift', 50);
             $table->timestamps();
         });
     }

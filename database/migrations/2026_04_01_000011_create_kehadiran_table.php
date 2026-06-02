@@ -12,7 +12,6 @@ return new class extends Migration
             $table->unsignedBigInteger('id_kehadiran')->autoIncrement();
             $table->timestamp('waktu_masuk')->nullable();
             $table->timestamp('waktu_keluar')->nullable();
-            $table->time('toleransi_telat')->nullable();
             $table->date('tanggal');
             $table->string('lokasi_masuk', 255);
             $table->string('lokasi_keluar', 255)->nullable();
@@ -31,6 +30,11 @@ return new class extends Migration
             $table->unsignedBigInteger('rekapan_kehadiran_id');
             $table->foreign('rekapan_kehadiran_id', 'rekapan_mencatat_kehadiran')
                 ->references('id_rekapan')->on('rekap_kehadiran')
+                ->onDelete('cascade')->onUpdate('cascade');
+
+            $table->unsignedBigInteger('karyawan_id');
+            $table->foreign('karyawan_id', 'karyawan_mencatat_kehadiran')
+                ->references('id_user')->on('user')
                 ->onDelete('cascade')->onUpdate('cascade');
         });
     }
