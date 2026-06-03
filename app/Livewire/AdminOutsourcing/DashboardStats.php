@@ -23,7 +23,7 @@ class DashboardStats extends Component
 {
     /** @var string Bulan dan tahun yang difilter (format: Y-m) */
     public string $bulan;
-
+        
     /**
      * Inisialisasi nilai default bulan ke bulan saat ini.
      */
