@@ -43,8 +43,7 @@
             <x-header>Admin Outsourcing</x-header>
 
             <!-- CONTENT akan diletakkan disini -->
-
-
+            @yield('content')
         </div><!-- /main -->
     </div>
 

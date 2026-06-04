@@ -26,9 +26,9 @@ class KehadiranSeeder extends Seeder
         $tipeKehadiranList = [1, 2, 3, 4, 5, 6];
 
         $dates = [
-            '2026-04-21',
-            '2026-04-22',
-            '2026-04-23'
+            '2026-06-21',
+            '2026-07-22',
+            '2026-06-23'
         ];
 
         foreach ($karyawanDenganKehadiran as $index => $karyawan) {

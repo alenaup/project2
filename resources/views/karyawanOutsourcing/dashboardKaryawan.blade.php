@@ -114,9 +114,10 @@
         </div>
 
     </div>
-    <script src="{{ asset('js/karyawan_js/dashboard.js') }}"></script>
+    
 @endsection
 @push('scripts')
+    <script src="{{ asset('js/karyawan_js/dashboard.js') }}"></script>
     {{-- kode CDN untuk chart.js ini hanya unntuk user karyawan outsorcing --}}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

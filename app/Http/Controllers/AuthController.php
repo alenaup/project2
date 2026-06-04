@@ -21,7 +21,7 @@ class AuthController extends Controller
 
             return match ($role->value) {
                 'super_admin' => redirect()->route('super.dashboard'),
-                'admin_vendor' => redirect()->route('admin.dashboard'),
+                'admin_outsourcing' => redirect()->route('admin.dashboard'),
                 'hr' => redirect()->route('hr.dashboard'),
                 'kepala_departemen' => redirect()->route('kepala_departemen.dashboard'),
                 'karyawan' => redirect()->route('dashboard'),
@@ -29,7 +29,7 @@ class AuthController extends Controller
         }
 
         /* jika tidak memiliki session maka dikembalikan ke view */
-        return view('Auth.login');
+        return view('Auth.login');  
     }
 
     

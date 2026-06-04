@@ -6,6 +6,9 @@ use App\Models\Kehadiran;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
+use App\Enums\UserRole;
+
 
 /**
  * Class DashboardStats
@@ -23,7 +26,7 @@ class DashboardStats extends Component
 {
     /** @var string Bulan dan tahun yang difilter (format: Y-m) */
     public string $bulan;
-        
+
     /**
      * Inisialisasi nilai default bulan ke bulan saat ini.
      */
@@ -32,6 +35,14 @@ class DashboardStats extends Component
         $this->bulan = Carbon::now()->format('Y-m');
     }
 
+    public function getKaryawanOrderByOutsourcing() 
+    {
+        return User::query()
+            ->where('outsourcing_id', Auth::user()->outsourcing_id)
+            ->where('role', UserRole::Karyawan)
+            ->pluck('id_user') 
+            ->toArray(); 
+    }
     // ──────────────────────────────────────────────────────
     // Computed Properties (data dari database)
     // ──────────────────────────────────────────────────────
@@ -42,14 +53,18 @@ class DashboardStats extends Component
      */
     public function getTotalHadirProperty(): int
     {
+        $getKaryawan = $this->getKaryawanOrderByOutsourcing();
         [$tahun, $bulan] = $this->parseBulan();
 
-        return Kehadiran::whereHas('tipeKehadiran', function ($q) {
+        return Kehadiran::whereIn('karyawan_id', $getKaryawan)
+            ->whereHas('tipeKehadiran', function (\Illuminate\Database\Eloquent\Builder $q) {
                 $q->where('status_kehadiran', 'hadir');
             })
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->count();
+
+            
     }
 
     /**
@@ -57,11 +72,13 @@ class DashboardStats extends Component
      */
     public function getTotalAlphaProperty(): int
     {
+        $getKaryawan = $this->getKaryawanOrderByOutsourcing();
         [$tahun, $bulan] = $this->parseBulan();
 
         return Kehadiran::whereHas('tipeKehadiran', function ($q) {
-                $q->where('status_kehadiran', 'alpha');
+                $q->where('status_kehadiran', 'mankir');
             })
+            ->whereIn('karyawan_id', $getKaryawan)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->count();
@@ -72,11 +89,13 @@ class DashboardStats extends Component
      */
     public function getTotalIzinSakitProperty(): int
     {
+        $getKaryawan = $this->getKaryawanOrderByOutsourcing();
         [$tahun, $bulan] = $this->parseBulan();
 
         return Kehadiran::whereHas('tipeKehadiran', function ($q) {
                 $q->whereIn('status_kehadiran', ['izin', 'sakit']);
             })
+            ->whereIn('karyawan_id', $getKaryawan)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->count();
@@ -87,7 +106,10 @@ class DashboardStats extends Component
      */
     public function getTotalKaryawanProperty(): int
     {
-        return User::whereNull('tanggal_keluar')->count();
+        return User::query()->whereNull('tanggal_keluar')
+            ->where('role', UserRole::Karyawan->value)
+            ->where('outsourcing_id', Auth::user()->outsourcing_id)
+            ->count();
     }
 
     // ──────────────────────────────────────────────────────

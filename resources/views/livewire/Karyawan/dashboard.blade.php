@@ -6,8 +6,7 @@
     <!-- Bagian header atau judul dari card-->
     <div class="flex items-center justify-between mb-5 relative z-10">
         <div class="flex items-center gap-3">
-            <div
-                class="w-10 h-10 bg-blue-500/10 text-blue-600 flex items-center justify-center rounded-xl shadow-inner">
+            <div class="w-10 h-10 bg-blue-500/10 text-blue-600 flex items-center justify-center rounded-xl shadow-inner">
                 <i class="fa fa-calendar text-sm"></i>
             </div>
             <div>
@@ -31,7 +30,7 @@
         </div>
 
         <div class="relative z-10 flex items-center justify-between">
-            @if($jadwal && $jadwal->shift)
+            @if ($jadwal && $jadwal->shift)
                 <div>
                     <h3 class="font-semibold text-gray-800 text-base">Shift {{ $jadwal->shift->nama_shift }}</h3>
                     <p class="text-sm text-gray-500 mt-1">
@@ -47,7 +46,7 @@
             @endif
         </div>
     </div>
-    @if($jadwal && $jadwal->shift)
+    @if ($jadwal && $jadwal->shift)
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
 
             <!-- card absensi masuk -->
@@ -81,7 +80,8 @@
                 </div>
 
                 <!-- bottom accent -->
-                <div class="absolute bottom-0 left-0 h-1 w-0 bg-emerald-500 group-hover:w-full transition-all duration-300">
+                <div
+                    class="absolute bottom-0 left-0 h-1 w-0 bg-emerald-500 group-hover:w-full transition-all duration-300">
                 </div>
             </div>
 
@@ -157,3 +157,4 @@
             </div>
         </div>
     @endif
+</div>

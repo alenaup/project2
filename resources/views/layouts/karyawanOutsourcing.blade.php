@@ -41,8 +41,7 @@
             <x-header>Karyawan Outsourcing</x-header>
 
             <!-- CONTENT akan diletakkan disini -->
-
-
+            
         </div><!-- /main -->
     </div>
 

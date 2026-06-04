@@ -39,8 +39,9 @@ Route::get('/kepala-departement/pengajuan', function () {
 
 
 /* Admin OutSourcing */
-
-Route::get('/admin-outsourcing/dashboard',  [AdminOutsourcingController::class, 'dashboard'])->name('admin.dashboard');
+Route::middleware('auth')->group(function () {
+    Route::get('/admin-outsourcing/dashboard',  [AdminOutsourcingController::class, 'dashboard'])->name('admin.dashboard');
+}); 
 
 Route::get('/admin-outsourcing/pengajuan-karyawan', function () {
     return view('adminOutsourcing.pengajuanKaryawan');
@@ -93,8 +94,9 @@ Route::get('/super-admin/pengaturan', function () {
 /* Karyawan Outsourcing */
 
 Route::middleware('auth')->group(function () {
-    Route::get('/karyawan-outsourcing/dashboard', Dashboard::class)
-        ->name('dashboard');
+    Route::get('/karyawan-outsourcing/dashboard', function () {
+        return view('karyawanOutsourcing.dashboardKaryawan');
+    })->name('dashboard');
 });
 
 Route::get('/karyawan-outsourcing/pengajuanKaryawan', function () {
