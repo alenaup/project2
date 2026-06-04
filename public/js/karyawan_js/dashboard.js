@@ -1,344 +1,166 @@
-let sudahMasuk = false
-let sudahKeluar = false
-let tipeAbsensi = null
-let lokasi = null
+var map;
+var userMarker;
+var officeMarker;
+var officeCircle;
 
-// 🔥 MAP CONFIG
-const kantor = {
-    /* lat: 1.0652718115917437,
-    lng: 104.1336049809529 */
+document.addEventListener('DOMContentLoaded', function () {
+    if (typeof L !== 'undefined' && document.getElementById('map')) {
+        // Inisialisasi map dengan pusat di lokasi kantor
+        map = L.map('map').setView([kantor.lat, kantor.lng], 16);
 
-    /* politeknik negeri batam */
+        // Tile layer dari OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-    lat: 1.1508969,
-    lng: 104.0439572
+        // Tambah marker kantor
+        officeMarker = L.marker([kantor.lat, kantor.lng])
+            .addTo(map)
+            .bindPopup(kantor.nama)
+            .openPopup();
 
-}
-
-const radiusKantor = 200
-
-let map
-let markerUser
-let circle
-
-
-
-
-
-function absenMasuk() {
-
-
-    tipeAbsensi = "masuk"
-
-    setActiveButton("masuk")
-
-    document.getElementById("statusMasuk").innerHTML =
-        "Klik simpan untuk absen masuk"
-}
-
-function absenKeluar() {
-
-    tipeAbsensi = "keluar"
-
-    setActiveButton("keluar")
-
-    document.getElementById("statusKeluar").innerHTML =
-        "Klik simpan untuk absen keluar"
-}
-
-
-
-
-
-function simpanAbsensi() {
-
-    if (tipeAbsensi === "masuk" && sudahMasuk) {
-    alert("Sudah absen masuk")
-    return
-}
-
-if (tipeAbsensi === "keluar" && sudahKeluar) {
-    alert("Sudah absen keluar")
-    return
-}
-
-    if (!tipeAbsensi) {
-        alert("Pilih absen masuk atau keluar dulu")
-        return
+        // Tambah circle radius kantor (misal 100m)
+        officeCircle = L.circle([kantor.lat, kantor.lng], {
+            color: '#10b981', // warna emerald
+            fillColor: '#10b981',
+            fillOpacity: 0.15,
+            radius: radiusKantor
+        }).addTo(map);
     }
-
-    if (!navigator.geolocation) {
-        alert("GPS tidak didukung")
-        return
-    }
-
-    navigator.geolocation.getCurrentPosition((pos) => {
-
-        lokasi = {
-            lat: pos.coords.latitude,
-            lng: pos.coords.longitude
-        }
-
-        updateMapUser()
-
-        const jarak = map.distance(
-            [lokasi.lat, lokasi.lng],
-            [kantor.lat, kantor.lng]
-        )
-
-        if (jarak > radiusKantor) {
-
-            alert("Diluar area kantor")
-
-            if (tipeAbsensi === "masuk") {
-                document.getElementById("statusMasuk").innerHTML = "Diluar area"
-            }
-
-            if (tipeAbsensi === "keluar") {
-                document.getElementById("statusKeluar").innerHTML = "Diluar area"
-            }
-
-            return
-        }
-
-        if (tipeAbsensi === "masuk") {
-
-    sudahMasuk = true
-
-    document.getElementById("statusMasuk").innerHTML =
-        "Sudah absen masuk (" + document.getElementById("waktu").value + ")"
-
-    tipeAbsensi = null
-}
-
-        if (tipeAbsensi === "keluar") {
-
-    if (!sudahMasuk) {
-        alert("Absen masuk dulu")
-        return
-    }
-
-    sudahKeluar = true
-
-    document.getElementById("statusKeluar").innerHTML =
-        "Sudah absen keluar (" + document.getElementById("waktu").value + ")"
-
-    tipeAbsensi = null
-
-    setActiveButton(null)
-}
-
-    }, () => {
-        alert("Gagal ambil lokasi")
-    }, {
-        enableHighAccuracy: true
-    })
-}
-
-
-function setActiveButton(tipe = null) {
-
-    const btnMasuk = document.getElementById("btnMasuk")
-    const btnKeluar = document.getElementById("btnKeluar")
-
-    // reset
-    btnMasuk.classList.remove("bg-emerald-600", "text-white")
-    btnKeluar.classList.remove("bg-emerald-600", "text-white")
-
-
-    btnMasuk.classList.add("bg-gray-100", "text-gray-700")
-    btnKeluar.classList.add("bg-gray-100", "text-gray-700")
-
-    if (!tipe) return
-
-    if (tipe === "masuk") {
-        btnMasuk.classList.remove("bg-gray-100", "text-gray-700")
-        btnMasuk.classList.add("bg-emerald-600", "text-white")
-    }
-
-    if (tipe === "keluar") {
-        btnKeluar.classList.remove("bg-gray-100", "text-gray-700")
-        btnKeluar.classList.add("bg-emerald-600", "text-white")
-    }
-
-
-}
+});
 
 function updateMapUser() {
+    if (!map) return;
 
-    if (markerUser) {
-        map.removeLayer(markerUser)
+    // Hapus marker user lama jika ada
+    if (userMarker) {
+        map.removeLayer(userMarker);
     }
 
-    markerUser = L.marker([lokasi.lat, lokasi.lng])
-        .addTo(map)
-        .bindPopup("Lokasi Anda")
-        .openPopup()
-
-    map.setView([lokasi.lat, lokasi.lng], 17)
-}
-
-
-function updateJam() {
-
-    const now = new Date()
-
-    document.getElementById("waktu").value =
-        now.toLocaleTimeString()
-
-}
-
-updateJam()
-setInterval(updateJam, 1000)
-
-
-
-
-
-function initMap() {
-
-    map = L.map('map').setView([1.134658, 104.053451], 17)
-
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19
-    }).addTo(map)
-
-
-    // Marker Kantor
-    L.marker([kantor.lat, kantor.lng])
-        .addTo(map)
-        .bindPopup("Lokasi Kantor")
-        .openPopup()
-
-
-    // Radius Kantor
-    circle = L.circle([kantor.lat, kantor.lng], {
-        color: 'green',
-        fillColor: '#22c55e',
-        fillOpacity: 0.2,
-        radius: radiusKantor
-    }).addTo(map)
-
-}
-
-
-window.addEventListener("load", function () {
-
-    setTimeout(() => {
-
-        initMap()
-        loadGrafik()
-
-    }, 300)
-
-})
-
-function updateTanggal() {
-
-    const now = new Date()
-
-    const tanggal =
-        now.toLocaleDateString('id-ID', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+    // Tambah marker user baru dengan warna biru
+    userMarker = L.marker([lokasi.lat, lokasi.lng], {
+        icon: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
         })
+    }).addTo(map)
+      .bindPopup("Lokasi Anda")
+      .openPopup();
 
-    document.getElementById("tanggalMasuk")
-        .innerHTML = "ABSEN MASUK — " + tanggal
+    // Sesuaikan zoom map agar menampilkan kantor dan user sekaligus
+    const bounds = L.latLngBounds([
+        [kantor.lat, kantor.lng],
+        [lokasi.lat, lokasi.lng]
+    ]);
+    map.fitBounds(bounds, { padding: [50, 50] });
 
-    document.getElementById("tanggalKeluar")
-        .innerHTML = "ABSEN KELUAR — " + tanggal
-
-}
-
-updateTanggal()
-let chartInstance = null
-
-function loadGrafik() {
-
-    const ctx = document.getElementById('grafikAbsensi').getContext('2d')
-
-    if (chartInstance) {
-        chartInstance.destroy()
+    // Update info teks koordinat di UI
+    const infoLokasi = document.getElementById('infoLokasi');
+    if (infoLokasi) {
+        infoLokasi.innerHTML = `Lokasi diambil: ${lokasi.lat.toFixed(6)}, ${lokasi.lng.toFixed(6)}`;
+        infoLokasi.classList.remove('text-gray-400');
+        infoLokasi.classList.add('text-emerald-600', 'font-medium');
     }
-
-    const bulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"]
-
-    const hadir = [20, 18, 22, 19, 21, 20, 23, 22, 21, 19, 20, 22]
-    const alpha = [2, 3, 1, 2, 1, 2, 0, 1, 1, 2, 1, 1]
-    const izin = [1, 2, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1]
-    const lembur = [5, 4, 6, 3, 5, 4, 6, 5, 4, 3, 4, 5]
-
-    chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: bulan,
-            datasets: [{
-                label: 'Hadir',
-                data: hadir,
-                backgroundColor: '#22c55e'
-            },
-            {
-                label: 'Alpha',
-                data: alpha,
-                backgroundColor: '#ef4444'
-            },
-            {
-                label: 'Izin/Sakit',
-                data: izin,
-                backgroundColor: '#facc15'
-            },
-            {
-                label: 'Lembur',
-                data: lembur,
-                backgroundColor: '#a855f7'
-            }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    })
 }
 
 function ambilLokasi() {
-    const info = document.getElementById('infoLokasi');
+
+    if (!navigator.geolocation) {
+        alert("Browser tidak mendukung GPS");
+        return;
+    }
 
     navigator.geolocation.getCurrentPosition(
-        (pos) => {
+
+        function (pos) {
+
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
 
-            info.innerText = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
-        },
-        (err) => {
-            switch(err.code) {
-                case err.PERMISSION_DENIED:
-                    info.innerText = "Izin lokasi ditolak ";
-                    break;
-                case err.POSITION_UNAVAILABLE:
-                    info.innerText = "Lokasi tidak tersedia";
-                    break;
-                case err.TIMEOUT:
-                    info.innerText = "Mengambil lokasi terlalu lama ";
-                    break;
-                default:
-                    info.innerText = "Gagal mengambil lokasi";
+            // Hitung jarak ke kantor (meter)
+            const jarak = map.distance(
+                [lat, lng],
+                [kantor.lat, kantor.lng]
+            );
+
+            // Update marker pada map
+            lokasi = {
+                lat: lat,
+                lng: lng
+            };
+
+            updateMapUser();
+
+            console.log("Jarak ke kantor:", jarak);
+
+            // Cek radius
+            if (jarak > radiusKantor) {
+
+                alert(
+                    `Anda berada di luar area kantor.\nJarak: ${Math.round(jarak)} meter`
+                );
+
+                return;
             }
+
+            // Jika dalam radius
+            alert(
+                `Lokasi valid.\nJarak ke kantor: ${Math.round(jarak)} meter`
+            );
+
+            // Kirim ke Livewire component dashboardAbsensi
+            const componentEl = document.getElementById('map').closest('[wire\\:id]');
+            let component = null;
+            if (componentEl) {
+                component = componentEl.__livewire || (typeof Livewire !== 'undefined' ? Livewire.find(componentEl.getAttribute('wire:id')) : null);
+            }
+
+            if (component) {
+                component.set('latitude', lat);
+                component.set('longitude', lng);
+                component.set('jarak', Math.round(jarak));
+            } else {
+                const fallbackComponent = typeof Livewire !== 'undefined' ? Livewire.first() : null;
+                if (fallbackComponent) {
+                    fallbackComponent.set('latitude', lat);
+                    fallbackComponent.set('longitude', lng);
+                    fallbackComponent.set('jarak', Math.round(jarak));
+                }
+            }
+
+        },
+
+        function (err) {
+
+            switch (err.code) {
+
+                case err.PERMISSION_DENIED:
+                    alert("Izin lokasi ditolak. Silakan izinkan akses lokasi pada browser Anda.");
+                    break;
+
+                case err.POSITION_UNAVAILABLE:
+                    alert("Lokasi tidak tersedia. Pastikan GPS Anda aktif.");
+                    break;
+
+                case err.TIMEOUT:
+                    alert("Pengambilan lokasi terlalu lama (timeout).");
+                    break;
+
+                default:
+                    alert("Gagal mengambil lokasi.");
+                    }
+
+        },
+
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
         }
+
     );
 }
-
-
