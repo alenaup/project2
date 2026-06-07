@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminOutsourcingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KaryawanController;
 use Illuminate\Support\Facades\Route;
+use App\Livewire\Karyawan\dashboard;
 
 
 /* Route untuk login berfungsi menyalurkan reuest dan melakukan validasi awal */
@@ -94,9 +95,10 @@ Route::get('/super-admin/pengaturan', function () {
 
 /* Karyawan Outsourcing */
 
-Route::get('/karyawan-outsourcing/dashboard', function () {
-    return view('karyawanOutsourcing.dashboardKaryawan');
-})->name('dashboard');
+Route::middleware('auth')->group(function () {
+    Route::get('/karyawan-outsourcing/dashboard', Dashboard::class)
+        ->name('dashboard');
+});
 
 Route::get('/karyawan-outsourcing/pengajuanKaryawan', function () {
     return view('karyawanOutsourcing.pengajuanKaryawan');
