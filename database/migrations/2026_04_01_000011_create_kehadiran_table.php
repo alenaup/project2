@@ -13,8 +13,10 @@ return new class extends Migration
             $table->timestamp('waktu_masuk')->nullable();
             $table->timestamp('waktu_keluar')->nullable();
             $table->date('tanggal');
-            $table->string('lokasi_masuk', 255);
-            $table->string('lokasi_keluar', 255)->nullable();
+            $table->string('latitude_masuk', 255)->nullable();
+            $table->string('longitude_masuk', 255)->nullable();
+            $table->string('latitude_keluar', 255)->nullable();
+            $table->string('longitude_keluar', 255)->nullable();
             $table->timestamps();
 
             $table->unsignedBigInteger('jadwal_id');

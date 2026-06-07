@@ -15,8 +15,8 @@ class LokasiSeeder extends Seeder
     {
         Lokasi::create([
             'nama_lokasi' => 'Nongsa Digital Park',
-            'latitude' => 1.185641456138759,
-            'longitude' => 104.10166559444662,
+            'latitude' => 1.1357821037112916,
+            'longitude' => 104.0452537455516,
             'radius' => 100,
             'status' => Status::Active->value,
         ]);

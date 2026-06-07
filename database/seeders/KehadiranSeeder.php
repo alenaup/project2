@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Enums\UserRole;
 use App\Models\Kehadiran;
+use App\Models\Lokasi;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -11,79 +12,216 @@ class KehadiranSeeder extends Seeder
 {
     /**
      * Run the database seeds.
+     *
+     * Menghasilkan data kehadiran dummy untuk setiap karyawan selama
+     * beberapa tanggal. Koordinat GPS (lat/lng masuk & keluar) di-generate
+     * secara acak namun tetap berada di dalam radius lokasi yang terdaftar.
+     *
+     * Tipe kehadiran:
+     *   1 = hadir     → ada waktu + koordinat dalam radius
+     *   2 = sakit     → tidak hadir, tanpa koordinat
+     *   3 = mankir    → tidak hadir, tanpa koordinat
+     *   4 = cuti      → tidak hadir, tanpa koordinat
+     *   5 = izin      → tidak hadir, tanpa koordinat
+     *   6 = terlambat → ada waktu (lewat toleransi) + koordinat dalam radius
      */
-
     public function run(): void
     {
-        // Ambil data semua user role karyawan
-        $karyawans = User::query()->where('role', UserRole::Karyawan->value)->get();
+        // Ambil semua lokasi yang tersedia beserta radius-nya
+        $lokasiList = Lokasi::all();
 
-        // Ambil 5 karyawan pertama untuk dibiarkan kosong kehadirannya
-        $karyawanDenganKehadiran = $karyawans->skip(5);
+        if ($lokasiList->isEmpty()) {
+            $this->command->warn('⚠  Tidak ada data Lokasi. Jalankan LokasiSeeder terlebih dahulu.');
+            return;
+        }
 
-        // Tipe kehadiran yang tersedia (1 s.d. 6):
-        // 1: hadir, 2: sakit, 3: mankir, 4: cuti, 5: izin, 6: terlambat
-        $tipeKehadiranList = [1, 2, 3, 4, 5, 6];
+        // Ambil semua karyawan, lewati 5 pertama (biarkan tanpa kehadiran)
+        $karyawans = User::query()
+            ->where('role', UserRole::Karyawan->value)
+            ->get()
+            ->skip(5);
 
+        if ($karyawans->isEmpty()) {
+            $this->command->warn('⚠  Tidak ada karyawan yang tersedia.');
+            return;
+        }
+
+        // Tanggal-tanggal yang akan di-seed (bisa ditambah sesuai kebutuhan)
         $dates = [
-            '2026-06-21',
-            '2026-07-22',
-            '2026-06-23'
+            '2026-04-10',
+            '2026-04-11',
+            '2026-04-14',
+            '2026-04-15',
+            '2026-04-16',
+            '2026-05-05',
+            '2026-05-06',
+            '2026-05-07',
+            '2026-05-08',
+            '2026-05-09',
+            '2026-06-02',
+            '2026-06-03',
+            '2026-06-04',
         ];
 
-        foreach ($karyawanDenganKehadiran as $index => $karyawan) {
-            // Ambil jadwal_id yang valid dari jadwal yang di-attach ke karyawan ini
+        // Urutan tipe kehadiran yang akan bergilir per karyawan+tanggal
+        $tipeKehadiranList = [1, 1, 1, 6, 2, 1, 1, 1, 5, 1, 1, 3, 4];
+
+        foreach ($karyawans as $karyawanIndex => $karyawan) {
+            // Ambil jadwal yang di-assign ke karyawan ini
             $jadwalIds = $karyawan->jadwal()->pluck('id_jadwal')->toArray();
             if (empty($jadwalIds)) {
-                $jadwalIds = [1, 2, 3];
+                $jadwalIds = [1]; // fallback ke jadwal pertama jika belum ada
             }
+
+            // Pilih lokasi secara round-robin berdasarkan index karyawan
+            $lokasi = $lokasiList[$karyawanIndex % $lokasiList->count()];
 
             foreach ($dates as $dateIndex => $date) {
-                // Pilih tipe kehadiran secara bergilir agar bervariasi untuk setiap karyawan
-                $tipeKehadiranId = $tipeKehadiranList[($index + $dateIndex) % count($tipeKehadiranList)];
-                $jadwalId = $jadwalIds[($index + $dateIndex) % count($jadwalIds)];
+                // Tentukan tipe kehadiran secara bergilir agar variatif
+                $tipeKehadiranId = $tipeKehadiranList[($karyawanIndex + $dateIndex) % count($tipeKehadiranList)];
 
-                // Tentukan waktu masuk/keluar dan lokasi berdasarkan tipe kehadiran
-                $waktuMasuk = null;
-                $waktuKeluar = null;
-                $lokasiMasuk = 'Kantor Pusat';
-                $lokasiKeluar = 'Kantor Pusat';
+                // Pilih jadwal_id secara round-robin
+                $jadwalId = $jadwalIds[($karyawanIndex + $dateIndex) % count($jadwalIds)];
 
-                if ($tipeKehadiranId === 1) { // hadir
-                    $waktuMasuk = $date . ' 07:00:00';
-                    $waktuKeluar = $date . ' 15:00:00';
-                } elseif ($tipeKehadiranId === 6) { // terlambat
-                    $waktuMasuk = $date . ' 07:45:00'; // Terlambat
-                    $waktuKeluar = $date . ' 15:00:00';
-                } elseif ($tipeKehadiranId === 2) { // sakit
-                    $lokasiMasuk = 'Sakit';
-                    $lokasiKeluar = null;
-                } elseif ($tipeKehadiranId === 3) { // mankir
-                    $lokasiMasuk = 'Mankir';
-                    $lokasiKeluar = null;
-                } elseif ($tipeKehadiranId === 4) { // cuti
-                    $lokasiMasuk = 'Cuti';
-                    $lokasiKeluar = null;
-                } elseif ($tipeKehadiranId === 5) { // izin
-                    $lokasiMasuk = 'Izin';
-                    $lokasiKeluar = null;
-                }
+                // Pilih rekapan_kehadiran_id (1–4, sesuai jumlah rekap yang di-seed)
+                $rekapanKehadiranId = ($karyawanIndex % 4) + 1;
 
-                // Menggunakan rekapan_kehadiran_id acak antara 1 sampai 4
-                $rekapanKehadiranId = ($index % 4) + 1;
+                // Buat kehadiran menggunakan factory dengan state sesuai tipe
+                $stateData = $this->resolveState($tipeKehadiranId, $date, $lokasi);
 
-                Kehadiran::create([
-                    'waktu_masuk' => $waktuMasuk,
-                    'waktu_keluar' => $waktuKeluar,
-                    'tanggal' => $date,
-                    'lokasi_masuk' => $lokasiMasuk,
-                    'lokasi_keluar' => $lokasiKeluar,
-                    'rekapan_kehadiran_id' => $rekapanKehadiranId,
-                    'jadwal_id' => $jadwalId,
-                    'tipe_kehadiran_id' => $tipeKehadiranId,
-                    'karyawan_id' => $karyawan->id_user,
-                ]);
+                Kehadiran::factory()
+                    ->state($stateData)
+                    ->create([
+                        'jadwal_id'           => $jadwalId,
+                        'tipe_kehadiran_id'   => $tipeKehadiranId,
+                        'rekapan_kehadiran_id' => $rekapanKehadiranId,
+                        'karyawan_id'         => $karyawan->id_user,
+                    ]);
             }
         }
+
+        $this->command->info('✅ KehadiranSeeder selesai — koordinat GPS dalam radius lokasi.');
+    }
+
+    /**
+     * Kembalikan array state (override attributes factory)
+     * sesuai tipe kehadiran & tanggal yang diberikan.
+     *
+     * @param  int    $tipeKehadiranId  ID tipe kehadiran (1–6)
+     * @param  string $date             Tanggal format Y-m-d
+     * @param  \App\Models\Lokasi $lokasi  Lokasi pusat absensi
+     * @return array<string, mixed>
+     */
+    private function resolveState(int $tipeKehadiranId, string $date, Lokasi $lokasi): array
+    {
+        return match ($tipeKehadiranId) {
+            // ── Hadir: masuk tepat waktu, keluar setelah jam kerja ───────────
+            1 => [
+                'tanggal'          => $date,
+                'waktu_masuk'      => $date . ' 07:00:00',
+                'waktu_keluar'     => $date . ' 15:00:00',
+                'latitude_masuk'   => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['latitude'],
+                'longitude_masuk'  => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['longitude'],
+                'latitude_keluar'  => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['latitude'],
+                'longitude_keluar' => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['longitude'],
+            ],
+
+            // ── Sakit: tidak hadir, tanpa koordinat ───────────────────────────
+            2 => [
+                'tanggal'          => $date,
+                'waktu_masuk'      => null,
+                'waktu_keluar'     => null,
+                'latitude_masuk'   => null,
+                'longitude_masuk'  => null,
+                'latitude_keluar'  => null,
+                'longitude_keluar' => null,
+            ],
+
+            // ── Mankir: absen tanpa keterangan, tanpa koordinat ───────────────
+            3 => [
+                'tanggal'          => $date,
+                'waktu_masuk'      => null,
+                'waktu_keluar'     => null,
+                'latitude_masuk'   => null,
+                'longitude_masuk'  => null,
+                'latitude_keluar'  => null,
+                'longitude_keluar' => null,
+            ],
+
+            // ── Cuti: disetujui, tanpa koordinat ─────────────────────────────
+            4 => [
+                'tanggal'          => $date,
+                'waktu_masuk'      => null,
+                'waktu_keluar'     => null,
+                'latitude_masuk'   => null,
+                'longitude_masuk'  => null,
+                'latitude_keluar'  => null,
+                'longitude_keluar' => null,
+            ],
+
+            // ── Izin: ada keterangan, tanpa koordinat ────────────────────────
+            5 => [
+                'tanggal'          => $date,
+                'waktu_masuk'      => null,
+                'waktu_keluar'     => null,
+                'latitude_masuk'   => null,
+                'longitude_masuk'  => null,
+                'latitude_keluar'  => null,
+                'longitude_keluar' => null,
+            ],
+
+            // ── Terlambat: waktu masuk lewat toleransi, koordinat dalam radius
+            6 => [
+                'tanggal'          => $date,
+                'waktu_masuk'      => $date . ' ' . $this->jamTerlambat(),
+                'waktu_keluar'     => $date . ' 15:00:00',
+                'latitude_masuk'   => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['latitude'],
+                'longitude_masuk'  => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['longitude'],
+                'latitude_keluar'  => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['latitude'],
+                'longitude_keluar' => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['longitude'],
+            ],
+
+            // ── Default: sama seperti hadir ──────────────────────────────────
+            default => [
+                'tanggal'          => $date,
+                'waktu_masuk'      => $date . ' 07:00:00',
+                'waktu_keluar'     => $date . ' 15:00:00',
+                'latitude_masuk'   => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['latitude'],
+                'longitude_masuk'  => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['longitude'],
+                'latitude_keluar'  => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['latitude'],
+                'longitude_keluar' => $this->koordinatDalamRadius($lokasi->latitude, $lokasi->longitude, $lokasi->radius)['longitude'],
+            ],
+        };
+    }
+
+    /**
+     * Hasilkan waktu masuk yang terlambat (16–60 menit setelah jam masuk).
+     */
+    private function jamTerlambat(): string
+    {
+        $menitTelat = rand(16, 60);
+        return date('H:i:s', strtotime("07:00:00 +{$menitTelat} minutes"));
+    }
+
+    /**
+     * Hasilkan koordinat GPS acak di dalam radius (meter) dari titik pusat.
+     * Menggunakan rumus distribusi seragam dalam lingkaran (√U trick).
+     *
+     * @return array{latitude: float, longitude: float}
+     */
+    private function koordinatDalamRadius(float $centerLat, float $centerLng, int $radiusMeters): array
+    {
+        $radiusDalamDerajat = $radiusMeters / 111320;
+
+        $sudut  = lcg_value() * 2 * M_PI;
+        $jarak  = sqrt(lcg_value()) * $radiusDalamDerajat;
+
+        $deltaLat = $jarak * cos($sudut);
+        $deltaLng = $jarak * sin($sudut) / cos(deg2rad($centerLat));
+
+        return [
+            'latitude'  => round($centerLat + $deltaLat, 8),
+            'longitude' => round($centerLng + $deltaLng, 8),
+        ];
     }
 }

@@ -18,11 +18,14 @@ class Kehadiran extends Model
         'waktu_keluar',
         'toleransi_telat',
         'tanggal',
-        'lokasi_masuk',
-        'lokasi_keluar',
+        'latitude_masuk',
+        'longitude_masuk',
+        'latitude_keluar',
+        'longitude_keluar',
         'jadwal_id',
         'tipe_kehadiran_id',
         'rekapan_kehadiran_id',
+        'karyawan_id',
     ];
 
     public function jadwal()

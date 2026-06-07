@@ -48,8 +48,8 @@ function updateMapUser() {
             shadowSize: [41, 41]
         })
     }).addTo(map)
-      .bindPopup("Lokasi Anda")
-      .openPopup();
+        .bindPopup("Lokasi Anda")
+        .openPopup();
 
     // Sesuaikan zoom map agar menampilkan kantor dan user sekaligus
     const bounds = L.latLngBounds([
@@ -113,24 +113,35 @@ function ambilLokasi() {
             );
 
             // Kirim ke Livewire component dashboardAbsensi
+            // Ambil komponen Livewire menggunakan Livewire.find() agar mendapatkan Proxy Object yang benar
             const componentEl = document.getElementById('map').closest('[wire\\:id]');
             let component = null;
-            if (componentEl) {
-                component = componentEl.__livewire || (typeof Livewire !== 'undefined' ? Livewire.find(componentEl.getAttribute('wire:id')) : null);
+            if (componentEl && typeof Livewire !== 'undefined') {
+                component = Livewire.find(componentEl.getAttribute('wire:id'));
             }
 
             if (component) {
-                component.set('latitude', lat);
-                component.set('longitude', lng);
-                component.set('jarak', Math.round(jarak));
+                // Gunakan $set (dengan tanda dollar $) agar perubahan langsung tersinkronisasi ke server Livewire
+                component.$set('latitude', String(lat));
+                component.$set('longitude', String(lng));
+                component.$set('jarak', Math.round(jarak));
+
+                // Isi waktu dengan datetime saat ini (format Y-m-d H:i:s)
+                const now = new Date();
+                const waktu = now.getFullYear() + '-'
+                    + String(now.getMonth() + 1).padStart(2, '0') + '-'
+                    + String(now.getDate()).padStart(2, '0') + ' '
+                    + String(now.getHours()).padStart(2, '0') + ':'
+                    + String(now.getMinutes()).padStart(2, '0') + ':'
+                    + String(now.getSeconds()).padStart(2, '0');
+
+                component.$set('waktu', waktu);
+
+                console.log("Data lokasi & waktu dikirim ke Livewire:", { lat, lng, jarak: Math.round(jarak), waktu });
             } else {
-                const fallbackComponent = typeof Livewire !== 'undefined' ? Livewire.first() : null;
-                if (fallbackComponent) {
-                    fallbackComponent.set('latitude', lat);
-                    fallbackComponent.set('longitude', lng);
-                    fallbackComponent.set('jarak', Math.round(jarak));
-                }
+                console.error("Komponen Livewire tidak ditemukan!");
             }
+
 
         },
 
@@ -152,7 +163,7 @@ function ambilLokasi() {
 
                 default:
                     alert("Gagal mengambil lokasi.");
-                    }
+            }
 
         },
 

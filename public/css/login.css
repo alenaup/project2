@@ -3,7 +3,7 @@
             position: fixed;
             inset: 0;
             background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%); /* Dark slate to dark emerald */
-            z-index: 9999;
+            z-index: 9;
             display: none;
             justify-content: center;
             align-items: center;
@@ -97,7 +97,6 @@
             animation: textRevealModern 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             white-space: nowrap;
             text-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            font-family: 'Inter', sans-serif; /* Fallback modern font */
             letter-spacing: -0.03em;
         }
 
@@ -120,7 +119,7 @@
             position: absolute;
             top: 0; left: 0; bottom: 0;
             width: 0%;
-            background: #10b981; /* Emerald 500 */
+            background: #10b981;
             box-shadow: 0 0 15px #10b981;
             border-radius: 4px;
             animation: loadingProgress 2.2s cubic-bezier(0.4, 0, 0.2, 1) 1.2s forwards;

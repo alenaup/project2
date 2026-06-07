@@ -10,7 +10,6 @@ class Login extends Component
 {
     // * inisialisasi property unntuk menampung data
     public string $email = '';
-
     public string $password = '';
 
     /* menginisiasi Service Auth dengan menamakan $authService */
@@ -19,6 +18,9 @@ class Login extends Component
         // * untuk membatasi percobaan login, dengan menggunakan fitur RateLimiter bawaan laravel
         // * key ini akan menyimpan data percobaan login berdasarkan IP address pengguna
         $key = 'login-attempts:'.request()->ip();
+
+        // 1. Validasi dengan memanggil fungsi rules dan massege yang sidah dibuat
+        $this->validate($this->rules(), $this->messages());
 
         // * jika percobaan login melebihi batas yang ditentukan, maka akan mengirimkan pesan error dan menghentikan proses login
         if (RateLimiter::tooManyAttempts($key, 5)) {
@@ -31,8 +33,6 @@ class Login extends Component
         }
 
         RateLimiter::hit($key, 60);
-        // 1. Validasi dengan memanggil fungsi rules dan massege yang sidah dibuat
-        $this->validate($this->rules(), $this->messages());
 
         // 2. Panggil service dan eksekusi function login
         $result = $authService->login(trim($this->email), $this->password);
@@ -54,12 +54,11 @@ class Login extends Component
     /* fungsi untuk melakukan validasi ketika data diubah */
     public function updated(string $propertyName)
     {
-        // 1. cek apakah property yang diubah ada di rules
-        if (! array_key_exists($propertyName, $this->rules())) {
-            return;
-        }
-        // 2. jika ada, lakukan validasi hanya pada property yang diubah
-        $this->validateOnly($propertyName, $this->rules(), $this->messages());
+        $this->validateOnly(
+            $propertyName,
+            $this->rules(),
+            $this->messages()
+        );
     }
 
     /* fungsi untuk meneentukan rules dari validasi */
