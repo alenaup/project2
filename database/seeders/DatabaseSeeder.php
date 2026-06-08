@@ -36,6 +36,7 @@ class DatabaseSeeder extends Seeder
             OutsourcingSeeder::class,
             DepartemenSeeder::class,
             UserSeeder::class,
+            AjuanKaryawanSeeder::class,
             RekapKehadiranSeeder::class,
             ShiftSeeder::class,
             JadwalSeeder::class,

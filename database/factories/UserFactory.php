@@ -116,6 +116,24 @@ class UserFactory extends Factory
         ]);
     }
 
+    /**
+     * State untuk karyawan yang menunggu persetujuan HR (pending approval).
+     * Status diatur ke inactive agar muncul di halaman ajuan data karyawan.
+     */
+    public function pendingApproval(): static
+    {
+        return $this->state(fn () => [
+            'role' => UserRole::Karyawan->value,
+            'status' => Status::Inactive->value,
+            'alamat' => $this->faker->address(),
+            'nip' => $this->faker->numerify('NIP-########'),
+            'tanggal_masuk' => null,
+            'tanggal_keluar' => null,
+            'outsourcing_id' => $this->outsourcingId(),
+            'departemen_id' => $this->departemenId(),
+        ]);
+    }
+
     private function outsourcingId(): ?int
     {
         return Outsourcing::query()->inRandomOrder()->value('id_outsourcing')

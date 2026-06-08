@@ -9,8 +9,8 @@
     <link rel="icon" type="image/x-icon" href="/images/logo.png">
     @vite('resources/css/app.css')
 
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    @livewireStyles
 </head>
 
 <body x-data="{ open: false }" class="bg-gray-100">
@@ -39,10 +39,8 @@
                 </div>
 
                 <div class="w-full overflow-x-auto pb-4">
-                    <x-hr.tabel-ajuan-data-karyawan></x-hr.tabel-ajuan-data-karyawan>
+                    @livewire(\App\Livewire\HR\AjuanDataKaryawan::class)
                 </div>
-
-                <x-hr.pagination></x-hr.pagination>
             </div>
 
 
@@ -51,6 +49,7 @@
 
     </div>
 
+    @livewireScripts
 </body>
 
 </html>
