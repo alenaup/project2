@@ -14,7 +14,7 @@ class Shift extends Model
     protected $fillable = [
         'jam_masuk',
         'jam_keluar',
-        'tipe_shift',
+        'nama_shift',
     ]; 
 
     public function jadwal()

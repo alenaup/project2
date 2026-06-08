@@ -17,6 +17,10 @@ class Jadwal extends Model
         'tanggal',
         'shift_id',
         'dibuat_oleh',
+        'tanggal_mulai',
+        'tanggal_akhir',
+        'nama_periode',
+        'toleransi_telat',
     ];
 
     public function kehadirans()

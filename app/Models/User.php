@@ -80,6 +80,7 @@ class User extends Authenticatable
         'alamat',
         'nip',
         'nama_departemen',
+        'departemen_id',
         'tanggal_keluar',
         'tanggal_masuk',
         'role',
