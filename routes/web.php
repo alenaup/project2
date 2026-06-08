@@ -75,6 +75,8 @@ Route::get('/hr/data-karyawan', function () {
 
 Route::get('/api/hr/karyawan', [KaryawanController::class, 'index'])->name('api.hr.karyawan');
 
+Route::get('/api/hr/vendors', [KaryawanController::class, 'getVendors'])->name('api.hr.vendors');
+
 /* USER HR SELESAI*/
 
 /* ======================================================================== */

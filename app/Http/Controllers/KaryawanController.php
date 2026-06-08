@@ -3,29 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Outsourcing;
 use App\Enums\UserRole;
 use Illuminate\Http\Request;
 
 class KaryawanController extends Controller
 {
-    /**
-     * Retrieve paginated list of outsourcing employees (role: karyawan).
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function index(Request $request)
     {
-        // 1. Ambil query filter/pencarian jika ada
         $search = $request->query('search');
         $status = $request->query('status');
         $vendorId = $request->query('vendor_id');
 
-        // 2. Query data user dengan role karyawan
         $query = User::with('outsourcing')
             ->where('role', UserRole::Karyawan->value);
 
-        // Filter Pencarian (Nama Lengkap, NIP, atau Email)
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
                 $q->where('nama_lengkap', 'like', "%{$search}%")
@@ -44,10 +36,16 @@ class KaryawanController extends Controller
             $query->where('outsourcing_id', $vendorId);
         }
 
-        // 3. Paginate data
+        // Paginasi
         $karyawan = $query->paginate(10);
 
-        // 4. Return response JSON
+        // Return JSON
         return response()->json($karyawan);
+    }
+
+    public function getVendors(Request $request)
+    {
+        $vendors = Outsourcing::select('id_outsourcing', 'nama_outsourcing')->paginate(5);
+        return response()->json($vendors);
     }
 }
