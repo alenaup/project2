@@ -10,39 +10,42 @@
             <div class="flex items-center justify-between mb-6">    
                 <h2 class="text-xl font-semibold text-gray-800">Data Karyawan</h2>
 
-                <div x-data="{ open: false }" class="relative">
-                    <button @click="open = true"
+                <div class="relative">
+                    <button @click="openModalTambah()"
                         class="px-4 py-2 bg-emerald-500 text-white rounded-xl shadow hover:bg-emerald-600 transition flex items-center gap-2">
                         + Tambah Karyawan
                     </button>
-                    <div x-show="open" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div x-show="isModalTambahOpen" x-transition class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
                         <!-- CARD -->
-                        <div @click.away="open = false" class="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6">
+                        <div @click.away="closeModalTambah()" class="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6">
 
                             <!-- HEADER -->
                             <div class="flex justify-between items-center mb-5">
                                 <h2 class="text-xl font-bold text-gray-800">Tambah Karyawan</h2>
 
-                                <button @click="open = false" class="text-gray-400 hover:text-gray-600 text-xl">
+                                <button @click="closeModalTambah()" class="text-gray-400 hover:text-gray-600 text-xl">
                                     ✕
                                 </button>
                             </div>
 
                             <!-- FORM -->
-                            <form class="space-y-4">
+                            <form @submit.prevent="submitKaryawan" class="space-y-4">
 
                                 <!-- NIP -->
                                 <div>
                                     <label class="text-sm text-gray-600">NIP</label>
-                                    <input type="text"
-                                        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-                                        placeholder="Masukkan NIP">
+                                    <div class="flex items-center">
+                                        <span class="bg-gray-100 border border-r-0 border-gray-200 px-3 py-2 rounded-l-lg text-gray-600">NIP-</span>
+                                        <input type="text" x-model="form.nip" required
+                                            class="w-full border border-gray-200 rounded-r-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                                            placeholder="Masukkan NIP">
+                                    </div>
                                 </div>
 
                                 <!-- Nama -->
                                 <div>
                                     <label class="text-sm text-gray-600">Nama Lengkap</label>
-                                    <input type="text"
+                                    <input type="text" x-model="form.nama_lengkap" required
                                         class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                         placeholder="Nama lengkap">
                                 </div>
@@ -50,7 +53,7 @@
                                 <!-- Email -->
                                 <div>
                                     <label class="text-sm text-gray-600">Email</label>
-                                    <input type="email"
+                                    <input type="email" x-model="form.email" required
                                         class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                         placeholder="email@domain.com">
                                 </div>
@@ -58,7 +61,7 @@
                                 <!-- No Telepon -->
                                 <div>
                                     <label class="text-sm text-gray-600">No Telepon</label>
-                                    <input type="text"
+                                    <input type="text" x-model="form.nomor_tlp" required
                                         class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
                                         placeholder="08xxxxxxxxxx">
                                 </div>
@@ -66,14 +69,26 @@
                                 <!-- Alamat -->
                                 <div>
                                     <label class="text-sm text-gray-600">Alamat</label>
-                                    <textarea class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" rows="3"
+                                    <textarea x-model="form.alamat" required class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" rows="3"
                                         placeholder="Alamat lengkap"></textarea>
+                                </div>
+
+                                <!-- Departemen -->
+                                <div>
+                                    <label class="text-sm text-gray-600">Departemen</label>
+                                    <select x-model="form.departemen_id" required
+                                        class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+                                        <option value="">Pilih Departemen</option>
+                                        <template x-for="dept in departemens" :key="dept.id_departemen">
+                                            <option :value="dept.id_departemen" x-text="dept.nama_departemen"></option>
+                                        </template>
+                                    </select>
                                 </div>
 
                                 <!-- ACTION -->
                                 <div class="flex justify-end gap-2 pt-2">
 
-                                    <button type="button" @click="open = false"
+                                    <button type="button" @click="closeModalTambah()"
                                         class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">
                                         Batal
                                     </button>
@@ -116,12 +131,12 @@
 
                         <td class="px-4 py-2">
                             <div class="font-medium text-gray-800" x-text="karyawan.nama_lengkap"></div>
-                            <div class="text-xs text-gray-400" x-text="karyawan.nim"></div>
+                            <div class="text-xs text-gray-400" x-text="karyawan.nip"></div>
                         </td>
 
 
                         <td class="px-4 py-2 text-gray-600" x-text="karyawan.email"></td>
-                        <td class="px-4 py-2 text-gray-600" x-text="karyawan.nomor_telepon"></td>
+                        <td class="px-4 py-2 text-gray-600" x-text="karyawan.nomor_tlp"></td>
                         <td class="px-4 py-2 text-gray-500 truncate max-w-xs" x-text="karyawan.alamat"></td>
 
                         <td class="px-4 py-2">
@@ -168,7 +183,7 @@
 
                         <div>
                             <h3 class="text-lg font-semibold text-gray-800" x-text="selected.nama_lengkap"></h3>
-                            <p class="text-xs text-gray-400" x-text="selected.nim"></p>
+                            <p class="text-xs text-gray-400" x-text="selected.nip"></p>
                         </div>
 
                         <button @click="close()" class="ml-auto text-gray-400 hover:text-gray-600 transition">
@@ -186,7 +201,7 @@
 
                         <div class="bg-gray-50 rounded-xl p-3">
                             <p class="text-xs text-gray-400 mb-1">Nomor Telepon</p>
-                            <p class="font-medium text-gray-700" x-text="selected.nomor_telepon"></p>
+                            <p class="font-medium text-gray-700" x-text="selected.nomor_tlp"></p>
                         </div>
 
                         <div class="bg-gray-50 rounded-xl p-3">
@@ -224,13 +239,13 @@
                         <div class="space-y-5">
 
                             <div class="relative">
-                                <input type="text" x-model="selected.nim" placeholder=" "
+                                <input type="text" x-model="selected.nip" placeholder=" "
                                     class="peer w-full border border-gray-200 rounded-xl px-3 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
                                 <label
                                     class="absolute left-3 top-2 text-xs text-gray-400
                                         peer-placeholder-shown:top-3 peer-placeholder-shown:text-sm
                                         peer-focus:top-2 peer-focus:text-xs peer-focus:text-green-500">
-                                    NIM
+                                    NIP
                                 </label>
                             </div>
 
@@ -259,7 +274,7 @@
                             </div>
 
                             <div class="relative">
-                                <input type="text" x-model="selected.nomor_telepon" placeholder=" "
+                                <input type="text" x-model="selected.nomor_tlp" placeholder=" "
                                     class="peer w-full border border-gray-200 rounded-xl px-3 pt-5 pb-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
                                 <label
                                     class="absolute left-3 top-2 text-xs text-gray-400

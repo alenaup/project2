@@ -41,14 +41,13 @@ Route::get('/kepala-departement/pengajuan', function () {
 /* Admin OutSourcing */
 Route::middleware('auth')->group(function () {
     Route::get('/admin-outsourcing/dashboard',  [AdminOutsourcingController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin-outsourcing/kelola-karyawan', [AdminOutsourcingController::class, 'kelolaKaryawan']);
+    Route::get('/admin-outsourcing/api/departemen', [AdminOutsourcingController::class, 'getDepartemen']);
+    Route::post('/admin-outsourcing/api/karyawan', [AdminOutsourcingController::class, 'storeKaryawan']);
 }); 
 
 Route::get('/admin-outsourcing/pengajuan-karyawan', function () {
     return view('adminOutsourcing.pengajuanKaryawan');
-});
-
-Route::get('/admin-outsourcing/kelola-karyawan', function () {
-    return view('adminOutsourcing.kelola-karyawan');
 });
 
 /* Admin OutSourcing */
