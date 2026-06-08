@@ -13,7 +13,7 @@
                         class="rounded-xl mb-4 border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400 backdrop-blur">
                         @foreach ($errors->all() as $error)
                             <div>{{ $error }}</div>
-                        @endforeach
+                        @endforeach 
 
                         <button type="button" @click="showError = false"
                             class="mt-2 text-xs underline opacity-70 hover:opacity-100">
@@ -35,7 +35,7 @@
 
         <div x-data="{ show: false }" class="relative mb-6">
 
-            <input :type="show ? 'text' : 'password'" wire:model.defer="password" placeholder="Enter password"
+            <input :type="show ? 'text' : 'password'" wire:model="password" placeholder="Enter password"
                 class="w-full rounded-lg bg-white/80 py-2 pl-10 pr-10 text-black outline-none" />
 
             <!-- tombol eye -->

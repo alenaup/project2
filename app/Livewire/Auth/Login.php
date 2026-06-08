@@ -39,12 +39,12 @@ class Login extends Component
 
         // 3. mengambil return dari service, jika gagal → tampilkan error, jika berhasil → kirim event ke frontend
         if (! $result['success']) {
+            /* membersihkan rate limiter setelah login supaya tidak terblokir saat  */
+            RateLimiter::clear($key);
             $this->addError('login', $result['message']);
-
             return;
         }
 
-        RateLimiter::clear($key);
         // 4. Kalau berhasil → kirim event ke frontend (animasi)
         // pakai event karena kita tidak ingin melakukan redirect secara langsung, tapi ingin menampilkan animasi terlebih dahulu
         $this->dispatch('login-success', url: $result['redirect']);

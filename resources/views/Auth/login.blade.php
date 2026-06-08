@@ -18,7 +18,7 @@
 <body class="min-h-screen">
     <main>
         <div class="min-h-screen bg-cover bg-center flex items-center justify-center md:justify-start w-full"
-            style="background-image: url('/images/bg (2).webp');">
+            style="background-image: url('/images/bg.webp');">
 
             <!-- OVERLAY ANIMASI -->
             <div id="animationOverlay">
