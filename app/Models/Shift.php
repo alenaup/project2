@@ -8,7 +8,6 @@ class Shift extends Model
 {
     /* pada models ini tidak mengunakan factory */
     protected $table = 'shift';
-
     protected $primaryKey = 'id_shift';
 
     protected $fillable = [
