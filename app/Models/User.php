@@ -167,7 +167,7 @@ class User extends Authenticatable
 
     public function lembur()
     {
-        return $this->hasMany(Lembur::class, 'user_id', 'id_user');
+        return $this->hasMany(Lembur::class, 'karyawan_id', 'id_user');
     }
 
     public function outsourcing() 
