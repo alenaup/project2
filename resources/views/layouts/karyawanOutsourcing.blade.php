@@ -18,8 +18,7 @@
             
             
             <!-- CONTENT -->
-
-
+            @yield('content')
         </div><!-- /main -->
 
 </x-Head-html>

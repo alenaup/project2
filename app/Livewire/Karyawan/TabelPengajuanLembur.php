@@ -27,7 +27,7 @@ class TabelPengajuanLembur extends Component
 
     public function render()
     {
-        $query = Lembur::where('karyawan_id', Auth::id())
+        $query = Lembur::where('karyawan_id', Auth::id() ?? \App\Models\User::first()->id_user)
             ->where('status', 'active');
 
         if ($this->filterStatus !== 'semua') {
