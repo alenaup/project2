@@ -4,10 +4,10 @@
             <h1 class="text-xl font-bold text-gray-800 md:text-2xl">Jadwal Kerjaku </h1>
             <p class="text-gray-500 text-sm">Lihat detail waktu shift kerjamu untuk bulan ini.</p>
         </div>
-        <button wire:click="downloadPdf" wire:loading.attr="disabled"
-            class="bg-white border-2 border-[#3C8B5E] text-[#3C8B5E] px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-emerald-50 transition flex items-center justify-center gap-2 disabled:opacity-50">
-            <i class="fa-solid fa-download" wire:loading.class="animate-bounce"></i> <span wire:loading.remove>Download PDF</span><span wire:loading>Memproses...</span>
-        </button>
+        <a href="/karyawan-outsourcing/jadwal-karyawan/pdf/{{ $currentYear }}/{{ $currentMonth }}"
+            class="bg-white border-2 border-[#3C8B5E] text-[#3C8B5E] px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-emerald-50 transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-download"></i> <span>Download PDF</span>
+        </a>
     </div>
 
     <div class="bg-white rounded-xl shadow p-4 md:p-6 overflow-hidden border-t-4 border-[#3C8B5E]">

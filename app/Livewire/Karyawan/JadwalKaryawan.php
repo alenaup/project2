@@ -45,7 +45,7 @@ class JadwalKaryawan extends Component
     {
         $data = $this->getJadwalData();
         $dateObj = Carbon::createFromDate($this->currentYear, $this->currentMonth, 1);
-        $monthName = clone clone $dateObj;
+        $monthName = clone $dateObj;
         $monthName->locale('id');
         $monthNameStr = $monthName->translatedFormat('F Y');
         
@@ -60,7 +60,7 @@ class JadwalKaryawan extends Component
         ]);
         
         return response()->streamDownload(function () use ($pdf) {
-            echo $pdf->stream();
+            echo $pdf->output();
         }, 'Jadwal_Kerja_' . str_replace(' ', '_', $monthNameStr) . '.pdf');
     }
 
