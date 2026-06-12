@@ -50,6 +50,17 @@ class AjuanDataKaryawan extends Component
     /** @var bool Kontrol visibilitas modal alasan penolakan */
     public bool $showRejectModal = false;
 
+    /**
+     * @var bool Kontrol visibilitas modal konfirmasi setujui.
+     */
+    public bool $showApproveModal = false;
+
+    /**
+     * @var bool Kontrol visibilitas modal konfirmasi penolakan.
+     */
+    public bool $showRejectConfirmModal = false;
+
+
     /* ──────────────────────────────────────────────────────────────
      |  Lifecycle Hooks
      * ──────────────────────────────────────────────────────────── */
@@ -100,7 +111,9 @@ class AjuanDataKaryawan extends Component
         $this->showDetailModal = false;
         $this->selectedUser    = [];
         $this->selectedUserId  = null;
+        $this->showApproveModal = false;
     }
+
 
     /**
      * Membuka modal alasan penolakan (dari modal detail).
@@ -133,6 +146,59 @@ class AjuanDataKaryawan extends Component
         $this->alasanPenolakan = '';
     }
 
+    /**
+     * Membuka modal konfirmasi penolakan (tanpa alasan).
+     */
+    public function openRejectConfirm(int $userId): void
+    {
+        $this->selectedUserId = $userId;
+
+        // Pastikan hanya satu jenis modal yang aktif.
+        $this->showDetailModal = false;
+        $this->showApproveModal = false;
+        $this->showRejectModal = false;
+
+        // Setelah user klik "ya", baru masuk ke modal alasan penolakan.
+        $this->showRejectConfirmModal = true;
+    }
+
+
+    /**
+     * Menutup modal konfirmasi penolakan.
+     */
+    public function closeRejectConfirm(): void
+    {
+        $this->showRejectConfirmModal = false;
+    }
+
+    /**
+     * Lanjutkan proses penolakan dengan membuka modal alasan penolakan.
+     */
+    public function proceedRejectConfirm(): void
+    {
+        $this->showRejectConfirmModal = false;
+        $this->openRejectInline($this->selectedUserId);
+    }
+
+    /**
+     * Menutup modal konfirmasi setujui.
+     */
+    public function closeApproveConfirm(): void
+    {
+        $this->showApproveModal = false;
+    }
+
+    /**
+     * Lanjutkan proses setujui berdasarkan user terpilih.
+     */
+    public function proceedApproveConfirm(): void
+    {
+        $this->approve($this->selectedUserId);
+        $this->showApproveModal = false;
+    }
+
+
+
     /* ──────────────────────────────────────────────────────────────
      |  Business Logic
      * ──────────────────────────────────────────────────────────── */
@@ -143,10 +209,30 @@ class AjuanDataKaryawan extends Component
      *
      * @param int|null $userId  ID user yang disetujui (null = dari modal detail)
      */
+    public function openApproveConfirm(?int $userId = null): void
+    {
+        $this->selectedUserId = $userId ?? $this->selectedUserId;
+
+        if (!$this->selectedUserId) {
+            return;
+        }
+
+        $this->showDetailModal = false;
+        $this->showRejectModal = false;
+        $this->showApproveModal = true;
+    }
+
+
+    /**
+     * Konfirmasi persetujuan ajuan karyawan.
+     *
+     * @param int|null $userId
+     */
     public function approve(?int $userId = null): void
     {
         $id   = $userId ?? $this->selectedUserId;
         $user = User::find($id);
+
 
         if (!$user) {
             session()->flash('error', 'Data karyawan tidak ditemukan.');

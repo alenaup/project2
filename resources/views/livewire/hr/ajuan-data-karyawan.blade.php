@@ -51,8 +51,9 @@
                         {{ $karyawanList->firstItem() + $index }}
                     </td>
                     <td class="p-3 text-left font-mono whitespace-nowrap">
-                        {{ $karyawan->nip }}
+                        NIP-{{ $karyawan->nip }}
                     </td>
+
                     <td class="p-3 text-left whitespace-nowrap">
                         {{ $karyawan->nama_lengkap }}
                     </td>
@@ -60,21 +61,23 @@
                         {{ $karyawan->outsourcing?->nama_outsourcing ?? '-' }}
                     </td>
                     <td class="p-3 text-center whitespace-nowrap">
-                        <button wire:click.stop="approve({{ $karyawan->id_user }})"
+                        <button wire:click.stop="openApproveConfirm({{ $karyawan->id_user }})"
                             class="bg-green-500 hover:bg-green-600 transition text-white px-2 py-1 rounded shadow-sm">
                             <i class="fas fa-check"></i>
                         </button>
-                        <button wire:click.stop="openRejectInline({{ $karyawan->id_user }})"
+
+                        <button wire:click.stop="openRejectConfirm({{ $karyawan->id_user }})"
                             class="bg-red-500 hover:bg-red-600 transition text-white px-2 py-1 rounded shadow-sm">
                             <i class="fas fa-xmark"></i>
                         </button>
+
                     </td>
                 </tr>
             @empty
                 <tr>
                     <td colspan="5" class="p-6 text-center text-gray-400">
                         <i class="fas fa-inbox text-3xl mb-2 block"></i>
-                        Tidak ada data ajuan karyawan.
+                        Tidak ada data pengajuan karyawan.
                     </td>
                 </tr>
             @endforelse
@@ -89,8 +92,101 @@
     @endif
 
     {{-- ══════════════════════════════════════════════════════════
+         MODAL: Konfirmasi Setujui
+         ══════════════════════════════════════════════════════════ --}}
+    @if ($showApproveModal)
+        <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200"
+             wire:click.self="closeApproveConfirm">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden flex flex-col transform transition-transform duration-200">
+
+                {{-- Header --}}
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                        <i class="fas fa-circle-check text-green-600"></i>
+                        Konfirmasi Persetujuan
+                    </h3>
+                    <button wire:click="closeApproveConfirm"
+                        class="text-gray-400 hover:text-green-700 transition-colors bg-white rounded-full w-8 h-8
+                               flex items-center justify-center shadow-sm border border-gray-200 focus:outline-none">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+
+                {{-- Body --}}
+                <div class="p-5 bg-white">
+                    <p class="text-sm text-gray-700">
+                        Apakah anda yakin ingin menyimpan pengajuan karyawan ini?
+                    </p>
+                </div>
+
+                {{-- Footer --}}
+                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                    <button wire:click="closeApproveConfirm"
+                        class="px-5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-700
+                               hover:bg-gray-50 font-semibold text-sm flex items-center justify-center transition shadow-sm focus:outline-none">
+                        Batal
+                    </button>
+                    <button wire:click="proceedApproveConfirm"
+                        class="px-6 py-2.5 rounded-lg border border-green-200 bg-green-600 text-white
+                               hover:bg-green-700 font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm focus:outline-none">
+                        <i class="fas fa-check"></i> Ya, simpan
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    @endif
+
+    {{-- ══════════════════════════════════════════════════════════
+         MODAL: Konfirmasi Penolakan
+         ══════════════════════════════════════════════════════════ --}}
+    @if ($showRejectConfirmModal)
+        <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200"
+             wire:click.self="closeRejectConfirm">
+            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden flex flex-col transform transition-transform duration-200">
+
+                {{-- Header --}}
+                <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+                        <i class="fas fa-triangle-exclamation text-red-600"></i>
+                        Konfirmasi Penolakan
+                    </h3>
+                    <button wire:click="closeRejectConfirm"
+                        class="text-gray-400 hover:text-red-500 transition-colors bg-white rounded-full w-8 h-8
+                               flex items-center justify-center shadow-sm border border-gray-200 focus:outline-none">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+
+                {{-- Body --}}
+                <div class="p-5 bg-white">
+                    <p class="text-sm text-gray-700">
+                        Apakah anda yakin ingin menolak pengajuan karyawan ini?
+                    </p>
+                </div>
+
+                {{-- Footer --}}
+                <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                    <button wire:click="closeRejectConfirm"
+                        class="px-5 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-700
+                               hover:bg-gray-50 font-semibold text-sm flex items-center justify-center transition shadow-sm focus:outline-none">
+                        Batal
+                    </button>
+                    <button wire:click="proceedRejectConfirm"
+                        class="px-6 py-2.5 rounded-lg border border-red-200 bg-red-600 text-white
+                               hover:bg-red-700 font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm focus:outline-none">
+                        <i class="fas fa-xmark"></i> Ya, tolak
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    @endif
+
+    {{-- ══════════════════════════════════════════════════════════
          MODAL: Detail Karyawan
          ══════════════════════════════════════════════════════════ --}}
+
     @if ($showDetailModal)
         <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200"
              wire:click.self="closeDetail">
@@ -114,7 +210,8 @@
                     <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                         <div class="space-y-3 text-sm">
                             @foreach ([
-                                'NIP'           => $selectedUser['nip'] ?? '-',
+                                'NIP'           => ($selectedUser['nip'] ?? null) !== null ? 'NIP-' . $selectedUser['nip'] : 'NIP-',
+
                                 'Nama Lengkap'  => $selectedUser['nama_lengkap'] ?? '-',
                                 'Email'         => $selectedUser['email'] ?? '-',
                                 'Nomor Telepon' => $selectedUser['nomor_tlp'] ?? '-',
@@ -138,16 +235,18 @@
 
                 {{-- Footer --}}
                 <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-                    <button wire:click="openReject"
+                    <button wire:click="openRejectConfirm({{ $selectedUserId }})"
                         class="px-6 py-2.5 rounded-lg border border-red-200 bg-red-50 text-red-600
                                hover:bg-red-100 font-semibold text-sm flex items-center justify-center gap-2 transition">
                         <i class="fas fa-times"></i> Tolak
                     </button>
-                    <button wire:click="approve"
+                    <button wire:click="openApproveConfirm({{ $selectedUserId }})"
                         class="px-6 py-2.5 rounded-lg border border-green-200 bg-green-600 text-white
                                hover:bg-green-700 font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm">
                         <i class="fas fa-check"></i> Setujui
                     </button>
+
+
                 </div>
 
             </div>
@@ -207,6 +306,7 @@
                                hover:bg-red-700 font-semibold text-sm flex items-center justify-center gap-2 transition shadow-sm focus:outline-none">
                         <i class="fas fa-paper-plane"></i> Kirim Penolakan
                     </button>
+
                 </div>
 
             </div>
