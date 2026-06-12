@@ -6,6 +6,8 @@ use App\Enums\Status;
 use App\Enums\Validasi;
 use App\Models\Lembur;
 use App\Models\User;
+use App\Models\RekapKehadiran;
+use App\Enums\UserRole;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Carbon\Carbon;
@@ -14,12 +16,22 @@ class DashboardHR extends Component
 {
     use WithPagination;
 
-    // ── Filter tanggal ──────────────────────────────────────────
+    /**
+     * Filter tanggal untuk tabel lembur.
+     */
     public string $startDate = '';
     public string $endDate   = '';
 
     // ── Jumlah data per halaman ──────────────────────────────────
-    public int $perPage = 7;
+
+    public int $perPage = 10;
+
+    // ── Set default tanggal saat pertama dibuka ──────────────────
+    public function mount(): void
+    {
+        $this->startDate = Carbon::now()->format('Y-m-d');
+        $this->endDate   = Carbon::now()->format('Y-m-d');
+    }
 
     // ── Reset halaman saat filter berubah ───────────────────────
     public function updatedStartDate(): void
@@ -32,31 +44,44 @@ class DashboardHR extends Component
         $this->resetPage();
     }
 
+
     // ── Stat Cards: hitung data dari database ───────────────────
     private function getStats(): array
-{
-    $totalOutsourcingAktif = User::whereNotNull('outsourcing_id')
-        ->where('status', Status::Active->value)
-        ->count();
+    {
+        // Samakan definisi "aktif" dengan dashboard Admin Outsourcing:
+        // aktif = tanggal_keluar IS NULL
+        $totalOutsourcingAktif = User::whereNotNull('outsourcing_id')
+            ->whereNull('tanggal_keluar')
+            ->count();
 
-    $totalOutsourcingTerdaftar = User::whereNotNull('outsourcing_id')->count();
+        $totalOutsourcingTerdaftar = User::whereNotNull('outsourcing_id')->count();
 
-    $totalLemburPending = Lembur::where('status_validasi', Validasi::Pending->value)->count();
+        $totalLemburPending = Lembur::where('status_validasi', Validasi::Pending->value)->count();
+        $totalRekapPending = RekapKehadiran::where('status_validasi', Validasi::Pending->value)->count();
 
-    return [
-        'outsourcing_aktif'     => $totalOutsourcingAktif,
-        'outsourcing_terdaftar' => $totalOutsourcingTerdaftar,
-        'lembur_pending'        => $totalLemburPending,
-        'rekap_pending'         => 0, // model belum ada
-        'ajuan_pending'         => 0, // model belum ada
-    ];
-}
+        $totalAjuanPending = User::whereNotNull('outsourcing_id')
+            ->where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Inactive->value)
+            ->count();
+
+        return [
+            'outsourcing_aktif'     => $totalOutsourcingAktif,
+            'outsourcing_terdaftar' => $totalOutsourcingTerdaftar,
+            'lembur_pending'        => $totalLemburPending,
+            'rekap_pending'         => $totalRekapPending,
+            'ajuan_pending'         => $totalAjuanPending,
+        ];
+    }
+
     // ── Query tabel lembur dengan filter tanggal ─────────────────
     private function getLemburQuery()
     {
+        // Ambil daftar lembur aktif beserta relasi karyawan untuk ditampilkan di tabel.
         $query = Lembur::with(['karyawan.outsourcing', 'karyawan.departemen'])
+
             ->where('status', Status::Active->value)
             ->orderByDesc('mulai_lembur');
+
 
         if ($this->startDate !== '') {
             $query->whereDate('mulai_lembur', '>=', $this->startDate);
@@ -70,17 +95,28 @@ class DashboardHR extends Component
     }
 
     // ── Hitung durasi lembur dalam menit ─────────────────────────
+    /**
+     * Hitung durasi lembur dalam menit.
+     */
     public function hitungDurasi(?string $mulai, ?string $selesai): int
     {
-        if (!$mulai || !$selesai) return 0;
+        if (!$mulai || !$selesai) {
+            return 0;
+        }
+
 
         return (int) Carbon::parse($mulai)->diffInMinutes(Carbon::parse($selesai));
     }
 
+
     // ── Label & warna status validasi ────────────────────────────
+    /**
+     * Label dan warna CSS untuk status validasi.
+     */
     public function statusBadge(string $status): array
     {
         return match ($status) {
+
             Validasi::Valid->value   => [
                 'label' => 'Disetujui',
                 'class' => 'bg-green-100 text-green-600',
@@ -101,8 +137,12 @@ class DashboardHR extends Component
     }
 
     // ── Render ───────────────────────────────────────────────────
+    /**
+     * Render halaman dashboard HR.
+     */
     public function render()
     {
+
         return view('livewire.hr.dashboard-h-r', [
             'stats'   => $this->getStats(),
             'lemburs' => $this->getLemburQuery()->paginate($this->perPage),
