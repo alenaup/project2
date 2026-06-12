@@ -94,7 +94,7 @@ function dashboard() {
 
                 const response = await fetch(url);
                 if (!response.ok) throw new Error('Network response was not ok');
-                
+
                 const data = await response.json();
                 this.employees = data.employees;
                 this.shifts = data.shifts;
@@ -102,21 +102,21 @@ function dashboard() {
                     this.currentPage = data.pagination.current_page;
                     this.lastPage = data.pagination.last_page;
                 }
-                
+
                 let [year, month, day] = data.start_date.split('-');
                 let start = new Date(year, month - 1, day);
-                
+
                 let [endYear, endMonth, endDay] = data.end_date.split('-');
                 let end = new Date(endYear, endMonth - 1, endDay);
-                
+
                 const daysOfWeek = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
                 const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'];
-                
+
                 this.days = [];
                 let tempDate = new Date(start);
                 let today = new Date();
                 today.setHours(0,0,0,0);
-                
+
                 for (let i = 0; i < 7; i++) {
                     this.days.push({
                         day: daysOfWeek[tempDate.getDay()],
@@ -126,7 +126,7 @@ function dashboard() {
                     });
                     tempDate.setDate(tempDate.getDate() + 1);
                 }
-                
+
                 this.currentWeek = `${start.getDate()} ${monthNames[start.getMonth()]} - ${end.getDate()} ${monthNames[end.getMonth()]} ${end.getFullYear()}`;
                 this.currentStartDate = data.start_date;
 
@@ -154,10 +154,10 @@ function dashboard() {
                 alert('Mohon lengkapi semua data: Karyawan, Shift, Tanggal Mulai, dan Selesai!');
                 return;
             }
-            
+
             this.isSaving = true;
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-            
+
             try {
                 const response = await fetch('/kepala-departement/api/jadwal', {
                     method: 'POST',
@@ -180,7 +180,7 @@ function dashboard() {
 
                 alert('Jadwal berhasil ditambahkan!');
                 this.closeModal();
-                this.fetchData(this.currentPage); // Refresh the schedules on the current page
+                this.fetchData(this.currentPage); 
             } catch (error) {
                 alert('Error: ' + error.message);
             } finally {

@@ -32,7 +32,7 @@
 
         <div class="flex-1 p-6 ml-0">
             <x-header>Kepala Departemen {{-- <-- Ganti aja ini kalo mau --}}</x-header>
-           
+
 
             {{-- NONTIFIKASI, CETAK SEBAGAI EXCEL, MODAL MENAMBAHKAN JADWAL --}}
             <div class='flex justify-between border-b pb-4'>
@@ -137,26 +137,21 @@
             <div class="max-w-7xl mx-auto p-4 bg-white rounded-2xl shadow mt-4">
 
                 <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-
-                    <!-- Header -->
-
-
                     <!-- Navigasi tanggal -->
                     <div class="flex items-center gap-3">
-                        <button @click="prevWeek()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition cursor-pointer"><i class="fa-solid fa-arrow-left"></i></button>
+                        <button @click="prevWeek()"
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition cursor-pointer"><i
+                                class="fa-solid fa-arrow-left"></i></button>
 
                         <h2 class="font-semibold text-gray-800" x-text="currentWeek"></h2>
 
-                        <button @click="nextWeek()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition cursor-pointer"><i class="fa-solid fa-arrow-right"></i></button>
+                        <button @click="nextWeek()"
+                            class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition cursor-pointer"><i
+                                class="fa-solid fa-arrow-right"></i></button>
                     </div>
-
-                    <!-- Filter (Removed) -->
                 </div>
-
                 <div class="grid grid-cols-8 border rounded-xl overflow-hidden text-sm overflow-x-auto min-w-[900px]">
-                    <!-- Header -->
                     <div class="bg-gray-50 p-3 font-semibold text-gray-600">KARYAWAN</div>
-
                     <template x-for="d in days">
                         <div class="bg-gray-50 p-3 text-center">
                             <span x-text="d.day"></span><br>
@@ -165,7 +160,6 @@
                         </div>
                     </template>
 
-                    <!-- Rows -->
                     <template x-for="emp in employees">
                         <div class="contents">
 
@@ -183,12 +177,13 @@
 
                             <!-- Shift -->
                             <template x-for="(shift, index) in emp.shifts">
-                                <div @click="openModal(emp.id, days[index].date_full, days[index].date_full)" class="px-2 py-1 rounded-lg text-xs text-center
+                                <div @click="openModal(emp.id, days[index].date_full, days[index].date_full)"
+                                    class="px-2 py-1 rounded-lg text-xs text-center
                                             hover:shadow-md hover:-translate-y-0.5
                                             transition-all duration-200 cursor-pointer"
                                     :class="shiftClass(shift)">
 
-                                    <!-- Kalau kosong -->
+                                    <!-- Kalau tidak ada shift -->
                                     <template x-if="!shift">
                                         <div
                                             class="text-gray-300 text-lg hover:text-blue-500 cursor-pointer transition">
@@ -196,7 +191,7 @@
                                         </div>
                                     </template>
 
-                                    <!-- Kalau ada shift -->
+                                    <!-- Kalau ada -->
                                     <template x-if="shift">
                                         <div class="px-2 py-1 rounded-lg text-xs text-center hover:shadow transition"
                                             :class="shiftClass(shift)">
@@ -204,9 +199,11 @@
                                             <div class="font-semibold capitalize" x-text="shift"></div>
                                             <div class="text-[10px] m-2">
                                                 <template x-if="shift === 'pagi'"><span>06:00 - 14:00</span></template>
-                                                <template x-if="shift === 'siang'"><span>14:00 - 22:00</span></template>
+                                                <template x-if="shift === 'siang'"><span>14:00 -
+                                                        22:00</span></template>
                                                 <template x-if="shift === 'sore'"><span>15:00 - 23:00</span></template>
-                                                <template x-if="shift === 'malam'"><span>22:00 - 06:00</span></template>
+                                                <template x-if="shift === 'malam'"><span>22:00 -
+                                                        06:00</span></template>
                                                 <template x-if="shift === 'libur'"><span>Hari Libur</span></template>
                                             </div>
 
@@ -219,17 +216,18 @@
                     </template>
                 </div>
 
-                <!-- Pagination Controls -->
+                <!-- Paginasi -->
                 <div class="flex items-center justify-between mt-4 px-2">
                     <button @click="changePage(currentPage - 1)" :disabled="currentPage <= 1"
                         class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg disabled:opacity-50 hover:bg-gray-200 transition cursor-pointer flex items-center gap-2">
                         <i class="fa-solid fa-chevron-left"></i> Prev
                     </button>
-                    
+
                     <span class="text-sm text-gray-600">
-                        Halaman <span class="font-semibold" x-text="currentPage"></span> dari <span class="font-semibold" x-text="lastPage"></span>
+                        Halaman <span class="font-semibold" x-text="currentPage"></span> dari <span
+                            class="font-semibold" x-text="lastPage"></span>
                     </span>
-                    
+
                     <button @click="changePage(currentPage + 1)" :disabled="currentPage >= lastPage"
                         class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg disabled:opacity-50 hover:bg-gray-200 transition cursor-pointer flex items-center gap-2">
                         Next <i class="fa-solid fa-chevron-right"></i>
@@ -240,7 +238,7 @@
         </div>
     </div>
 
-    <!-- Unified Modal Tambah Jadwal -->
+    <!-- Modal Tambah Jadwal -->
     <div x-show="isModalOpen" style="display: none;"
         class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
 
@@ -249,8 +247,7 @@
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-90 translate-y-6"
             x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-90">
 
             <!-- Header -->
@@ -264,7 +261,7 @@
 
             <!-- Form -->
             <form @submit.prevent="submitSchedule" class="space-y-5">
-                <!-- Employee -->
+                <!-- Karyawan -->
                 <div>
                     <label class="text-sm font-medium text-gray-600">Karyawan</label>
                     <select x-model="form.user_id"
@@ -288,7 +285,7 @@
                     </select>
                 </div>
 
-                <!-- Date Range -->
+                <!-- Tanggal -->
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="text-sm text-gray-600">Mulai</label>
@@ -303,7 +300,7 @@
                     </div>
                 </div>
 
-                <!-- Action -->
+                <!-- Aksi -->
                 <div class="flex justify-end gap-2 pt-4">
                     <button type="button" @click="closeModal()"
                         class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition">
@@ -318,8 +315,6 @@
             </form>
         </div>
     </div>
-
-
 </body>
 <script src="/js/alert.js"></script>
 

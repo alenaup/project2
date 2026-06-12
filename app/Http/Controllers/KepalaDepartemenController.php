@@ -21,12 +21,12 @@ class KepalaDepartemenController extends Controller
     public function getDashboardSummary()
     {
         $deptId = Auth::check() ? Auth::user()->departemen_id : null;
-        
+
         $queryKaryawan = User::where('role', UserRole::Karyawan->value)->where('status', Status::Active->value);
         if ($deptId) {
             $queryKaryawan->where('departemen_id', $deptId);
         }
-        
+
         $totalKaryawan = $queryKaryawan->count();
         $userIds = $queryKaryawan->pluck('id_user');
 
@@ -64,7 +64,7 @@ class KepalaDepartemenController extends Controller
         $startDate = $request->query('start_date', Carbon::now()->startOfWeek()->format('Y-m-d'));
         $endDate = $request->query('end_date', Carbon::now()->endOfWeek()->format('Y-m-d'));
 
-        // Query users. You can filter by department if needed using Auth::user()->departemen_id
+        // Query users. Filter berdasarkan department
         $query = User::where('role', UserRole::Karyawan->value)
             ->with(['jadwal' => function($query) use ($startDate, $endDate) {
                 $query->where(function ($q) use ($startDate, $endDate) {
@@ -72,7 +72,7 @@ class KepalaDepartemenController extends Controller
                       ->where('tanggal_akhir', '>=', $startDate);
                 })->with('shift');
             }]);
-            
+
         // If logged in user has department, filter by it.
         if (Auth::check() && Auth::user()->departemen_id) {
             $query->where('departemen_id', Auth::user()->departemen_id);
@@ -82,21 +82,19 @@ class KepalaDepartemenController extends Controller
 
         $formattedData = [];
         foreach ($karyawans->items() as $karyawan) {
-            // Generate initials
             $names = explode(' ', $karyawan->nama_lengkap);
             $initials = strtoupper(substr($names[0], 0, 1) . (isset($names[1]) ? substr($names[1], 0, 1) : ''));
 
-            // We'll create an array of 7 elements corresponding to Mon-Sun
             $shiftsArr = array_fill(0, 7, null);
-            
+
             foreach ($karyawan->jadwal as $j) {
                 if ($j->shift) {
                     $shiftType = strtolower($j->shift->nama_shift ?? '');
-                    
+
                     // Populate the shifts array for each day in the requested week that falls within the jadwal period
                     $jStart = Carbon::parse($j->tanggal_mulai);
                     $jEnd = Carbon::parse($j->tanggal_akhir);
-                    
+
                     $weekStart = Carbon::parse($startDate);
                     $weekEnd = Carbon::parse($endDate);
 
