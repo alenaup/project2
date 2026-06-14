@@ -115,7 +115,7 @@
                 {{-- Body --}}
                 <div class="p-5 bg-white">
                     <p class="text-sm text-gray-700">
-                        Apakah anda yakin ingin menyimpan pengajuan karyawan ini?
+                        Apakah anda yakin ingin menyimpan pengajuan karyawan?
                     </p>
                 </div>
 
@@ -161,7 +161,7 @@
                 {{-- Body --}}
                 <div class="p-5 bg-white">
                     <p class="text-sm text-gray-700">
-                        Apakah anda yakin ingin menolak pengajuan karyawan ini?
+                        Apakah anda yakin ingin menolak pengajuan karyawan?
                     </p>
                 </div>
 
