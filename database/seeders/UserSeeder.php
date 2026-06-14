@@ -108,6 +108,7 @@ class UserSeeder extends Seeder
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userAtma'),
+            'nip' => 'NIP-' . rand(100000, 999999),
             'outsourcing_id' => 1,
             'departemen_id' => 1,
             'created_at' => now(),
@@ -121,6 +122,7 @@ class UserSeeder extends Seeder
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userRangga'),
+            'nip' => 'NIP-' . rand(100000, 999999),
             'outsourcing_id' => 2,
             'departemen_id' => 1,
             'created_at' => now(),
@@ -134,6 +136,7 @@ class UserSeeder extends Seeder
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userJason'),
+            'nip' => 'NIP-' . rand(100000, 999999),
             'outsourcing_id' => 3,
             'departemen_id' => 2,
             'created_at' => now(),
@@ -147,6 +150,7 @@ class UserSeeder extends Seeder
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userZahra'),
+            'nip' => 'NIP-' . rand(100000, 999999),
             'outsourcing_id' => 4,
             'departemen_id' => 3,
             'created_at' => now(),
@@ -160,11 +164,13 @@ class UserSeeder extends Seeder
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
             'password' => Hash::make('userThoriq'),
+            'nip' => 'NIP-' . rand(100000, 999999),
             'outsourcing_id' => 4,
             'departemen_id' => 3,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
 
         /* membuat data dummy 20 karyawan */
         User::factory()->count(20)->create();
