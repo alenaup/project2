@@ -7,9 +7,9 @@
     <title>Rekapan Detail Karyawan</title>
 
     <link rel="icon" type="image/x-icon" href="/images/logo.png">
+    @livewireStyles
     @vite('resources/css/app.css')
-
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
@@ -29,14 +29,12 @@
             <x-header>HR</x-header>
             {{-- // BUAT ISI CONTENT DIBAWAH SINIIIIIII --}}
 
-            <x-hr.filter-rekapan></x-hr.filter-rekapan>
-
-            <x-hr.tabel-rekapan></x-hr.tabel-rekapan>
-
-
+            <livewire:hr.rekapan-detail />
             {{-- SELESAI CONTENT --}}
         </div>
     </div>
+
+    @livewireScripts
 
 </body>
 
