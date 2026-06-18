@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login ecoGreen E-outsourcing</title>
-    <link rel="preload" as="image" href="/images/bg (2).webp">
+    <link rel="preload" as="image" href="/images/bg.webp">
     <link rel="preload" as="image" href="/images/logo (2).webp">
     <link rel="icon" type="image/x-icon" href="/images/logo (2).webp">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -34,8 +34,8 @@
                 <!-- LEFT -->
                 <div class="hidden md:flex w-7/12 text-white items-center justify-center p-12">
                     <div class="max-w-md text-center">
-                        <img src="/images/logo (2).webp"
-                            class="w-32 mx-auto mb-6 hidden md:block ftransition duration-300 transform hover:scale-110 hover:-translate-y-1 hover:shadow-xl"
+                        <img src="/images/logo (2).webp" style="max-width: 135px; max-height: 135px;"
+                            class="mx-auto mb-6 hidden md:block ftransition duration-300 transform hover:scale-110 hover:-translate-y-1 hover:shadow-xl"
                             alt="Logo">
 
                         <h1 class="text-3xl font-bold mb-4">
@@ -51,10 +51,10 @@
 
                 <!-- RIGHT -->
                 <div
-                    class="w-full p-4 mx-[8%] my-[20%] md:w-5/12 md:my-0 md:mx-0 flex rounded-2xl md:rounded-0 items-center justify-center bg-white/10 backdrop-blur-md">
+                    class="w-full p-4 mx-[8%] my-[20%] md:w-5/12 md:my-0 md:mx-0 flex rounded-2xl md:rounded-0 items-center justify-center bg-white/10 " style="backdrop-filter: blur(5px);">
                     <div class="w-full max-w-md md:p-10 p-4">
-                        <img src="/images/logo (2).webp"
-                            class="block md:hidden w-16 mx-auto mb-6 transition duration-300 transform animate-[spin_16s_linear_infinite]"
+                        <img src="/images/logo (2).webp" style="max-width: 135px; max-height: 135px;"
+                            class="block md:hidden mx-auto mb-6 transition duration-300 transform animate-[spin_16s_linear_infinite]"
                             alt="Logo">
 
                         <h1
@@ -76,7 +76,7 @@
     </main>
     @livewireScripts
     {{-- letak untuk script push --}}
-    <script src="{{ asset('js/login.js') }}"></script>
+    <script defer src="{{ asset('js/login.js') }}"></script>
 </body>
 
 </html>

@@ -6,7 +6,7 @@
     </button>
     <div>
         <h1 class="text-xl font-bold text-gray-800 md:text-2xl">
-            Selamat Datang, {{ $slot }} 👋
+            Selamat Datang, {{ $slot }}
         </h1>
         <p class="text-gray-500 text-sm">
             Semoga harimu produktif dan menyenangkan
@@ -34,8 +34,13 @@
         <div x-show="openProfile" @click.outside="openProfile = false" x-transition
             class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden z-50">
 
-            <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">
-                👤 Profile
+            <a href="#" class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100">
+                <svg xmlns="http://www.w3.org/2000/svg" class="inline-block w-5 h-5 text-gray-800" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 6a3.75 3.75 0 1 1-7.5 0
+        3.75 3.75 0 0 1 7.5 0ZM4.5 20.25a8.25 8.25 0 0 1 15 0" />
+                </svg>  Profile
             </a>
 
             <hr>
@@ -45,4 +50,3 @@
 
     </div>
 </div>
-@yield('content')

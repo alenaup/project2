@@ -99,18 +99,17 @@ function ambilLokasi() {
 
             // Cek radius
             if (jarak > radiusKantor) {
-
-                alert(
-                    `Anda berada di luar area kantor.\nJarak: ${Math.round(jarak)} meter`
-                );
-
+                // Tampilkan pesan error dengan dispatch event
+                window.dispatchEvent(new CustomEvent('flash-error', {
+                    detail: { message: `Anda berada di luar area kantor. Jarak: ${Math.round(jarak)} meter` }
+                }));
                 return;
             }
 
             // Jika dalam radius
-            alert(
-                `Lokasi valid.\nJarak ke kantor: ${Math.round(jarak)} meter`
-            );
+            window.dispatchEvent(new CustomEvent('flash-success', {
+                detail: { message: `Lokasi valid. Jarak ke kantor: ${Math.round(jarak)} meter` }
+            }));
 
             // Kirim ke Livewire component dashboardAbsensi
             // Ambil komponen Livewire menggunakan Livewire.find() agar mendapatkan Proxy Object yang benar
@@ -150,19 +149,19 @@ function ambilLokasi() {
             switch (err.code) {
 
                 case err.PERMISSION_DENIED:
-                    alert("Izin lokasi ditolak. Silakan izinkan akses lokasi pada browser Anda.");
+                    window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Izin lokasi ditolak. Silakan izinkan akses lokasi pada browser Anda." } }));
                     break;
 
                 case err.POSITION_UNAVAILABLE:
-                    alert("Lokasi tidak tersedia. Pastikan GPS Anda aktif.");
+                    window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Lokasi tidak tersedia. Pastikan GPS Anda aktif." } }));
                     break;
 
                 case err.TIMEOUT:
-                    alert("Pengambilan lokasi terlalu lama (timeout).");
+                    window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Pengambilan lokasi terlalu lama (timeout)." } }));
                     break;
 
                 default:
-                    alert("Gagal mengambil lokasi.");
+                    window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Gagal mengambil lokasi." } }));
             }
 
         },

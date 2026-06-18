@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 animate-item">
     <div class="bg-white rounded-xl p-4 shadow flex items-center gap-4 border border-gray-200">
         <div class="w-12 h-12 bg-pink-100 flex items-center justify-center rounded-xl">
             <i class="fas fa-user text-pink-600 text-lg"></i>

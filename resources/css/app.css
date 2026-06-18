@@ -1,7 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 @import 'tailwindcss';
-/* @import '@fortawesome/fontawesome-free/css/all.min.css'; */
 
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
@@ -41,5 +40,10 @@
 }
 
 .animate-item.show {
+    animation: fadeUp 0.7s ease-out forwards;
+}
+
+
+.animate-bitem.show {
     animation: fadeUp 0.7s ease-out forwards;
 }

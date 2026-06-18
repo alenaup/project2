@@ -3,20 +3,22 @@ namespace App\Services;
 
 use App\Enums\Status;
 use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 /* Bagian untukk mengatur Logic pada Auth */
 class AuthService
 {
     public function login(string $email, string $password): array
     {
-        //* mengeksekusi Login dengan Auth facades bawaan laravel
-        //* pada Auth facades ini terdapat fitur autentikasi terhubung dengan Model User dan database user
-        if (!Auth::attempt([
-            // * mencocokkan validasi dengan kolom User
-            'email' => $email,
-            'password' => $password
-        ])) {
+        // * Mengambil data user berdasarkan email dengan memilih (select) kolom spesifik yang dibutuhkan saja
+        $user = User::select('id_user', 'email', 'password', 'status', 'role')
+                    ->where('email', $email)
+                    ->first();
+
+        // * Mencocokkan data user dan melakukan verifikasi password secara manual menggunakan facade Hash
+        if (!$user || !Hash::check($password, $user->password)) {
             return [
                 // * mengembalikan data dengan format array, jika gagal maka success bernilai false dan message berisi string
                 'success' => false,
@@ -24,18 +26,17 @@ class AuthService
             ];
         }
 
-        // * jika berhasil maka menginisiasi ke varbel $user
-        $user = Auth::user();
-
         // * mengecek apakah status user aktif atau tidak,
-        // * jika tidak aktif maka akan logout dan mengembalikan data dengan massege berisi string
+        // * jika tidak aktif maka akan mengembalikan data dengan message berisi string
         if ($user->status !== Status::Active->value) {
-            Auth::logout();
             return [
                 'success' => false,
                 'message' => 'Akun Anda sedang tidak aktif'
             ];
         }
+
+        // * Jika lolos semua pengecekan, login user tersebut secara manual menggunakan facade Auth
+        Auth::login($user);
 
         // * jika status user active maka session akan di generate ulang demi keamanan
         session()->regenerate();

@@ -12,29 +12,13 @@
     <div class="flex-1 p-4 md:p-6 max-w-7xl mx-auto">
         {{-- Card yang menampilkan jadwal karyawan pada hari ini --}}
         <livewire:Karyawan.dashboard/>
-        </div>
-        {{-- menampilkan status absensi masuk dan absensi keluar --}}
         
-
+        {{-- menampilkan status absensi masuk dan absensi keluar --}}
         {{-- mengecek lokasi --}}
         <livewire:Karyawan.dashboardAbsensi/> 
 
-        <!-- GRAFIK -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mt-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="font-semibold text-gray-800">Rekap Kehadiran</h2>
-                <select class="border rounded-lg px-3 py-1 text-sm">
-                    <option>2026</option>
-                    <option>2025</option>
-                </select>
-            </div>
-
-            <div class="w-full overflow-x-auto">
-                <div class="min-w-200 h-100">
-                    <canvas id="grafikAbsensi"></canvas>
-                </div>
-            </div>
-        </div>
+        <!-- GRAFIK (LIVEWIRE) -->
+        <livewire:karyawan.grafik-rekap-kehadiran />
 
     </div>
     

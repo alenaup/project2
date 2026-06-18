@@ -1,5 +1,5 @@
 <div
-    class="relative bg-linear-to-br from-white to-gray-50 rounded-3xl border border-gray-100 shadow-md p-6 space-y-5 overflow-hidden">
+    class="animate-bitem relative bg-linear-to-br from-white to-gray-50 rounded-3xl border border-gray-100 shadow-md p-6 space-y-5 overflow-hidden">
 
     <!-- subtle glow -->
     <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-100 blur-3xl opacity-30"></div>
@@ -13,39 +13,18 @@
     </div>
 
     <!-- ── FLASH MESSAGES ──────────────────────────────────────────────── -->
-    @if (session()->has('success'))
-        <div
-            class="relative z-10 flex items-center gap-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-xl px-4 py-3">
-            <i class="fas fa-check-circle"></i>
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session()->has('error'))
-        <div
-            class="relative z-10 flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3">
-            <i class="fas fa-exclamation-circle"></i>
-            {{ session('error') }}
-        </div>
-    @endif
-
-    <!-- ── INFO JADWAL ─────────────────────────────────────────────────── -->
-    @if ($adaJadwal && $jamMasuk)
-        <div class="relative z-10 flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3">
-            <i class="fas fa-calendar-check text-blue-500"></i>
-            <div class="text-xs text-blue-700 leading-relaxed">
-                <span class="font-semibold">Jadwal Hari Ini</span><br>
-                Jam Masuk: <strong>{{ \Carbon\Carbon::parse($jamMasuk)->format('H:i') }}</strong>
-                &nbsp;|&nbsp;
-                Jam Keluar: <strong>{{ \Carbon\Carbon::parse($jamKeluar)->format('H:i') }}</strong>
-            </div>
-        </div>
-    @endif
+    <x-flash-message sessionKey="success" type="success" on="flash-success" />
+    <x-flash-message sessionKey="error" type="error" on="flash-error" />
 
     <!-- ── TIDAK ADA JADWAL ────────────────────────────────────────────── -->
     @if (!$adaJadwal)
         <div class="relative z-10 flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3">
-            <i class="fas fa-calendar-times text-amber-500 text-lg"></i>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-500" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6.75 3v2.25M17.25 3v2.25M3.75 7.5h16.5M5.25 5.25h13.5A1.5 1.5 0 0 1 20.25 6.75v12A1.5 1.5 0 0 1 18.75 20.25H5.25A1.5 1.5 0 0 1 3.75 18.75v-12A1.5 1.5 0 0 1 5.25 5.25Z
+        M9 15l6-6M15 15l-6-6" />
+            </svg>
             <div class="text-sm text-amber-700">
                 <span class="font-semibold">Tidak Ada Jadwal</span><br>
                 <span class="text-xs">{{ $pesanJadwal ?? 'Hubungi admin untuk informasi lebih lanjut.' }}</span>
@@ -61,7 +40,14 @@
                 </div>
             </div>
             <div class="w-full bg-gray-200 text-gray-400 py-3 rounded-2xl text-center text-sm font-semibold">
-                <i class="fas fa-lock mr-1"></i> Form Tidak Tersedia
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-1 inline" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M16.5 10.5V7a4.5 4.5 0 0 0-9 0v3.5M6.75 10.5h10.5A1.75 1.75 0 0 1 19 12.25v7A1.75 1.75 0 0 1 17.25 21h-10.5A1.75 1.75 0 0 1 5 19.25v-7a1.75 1.75 0 0 1 1.75-1.75Z" />
+                </svg>
+
+                Form Tidak Tersedia
             </div>
         </div>
     @else
@@ -128,15 +114,6 @@
 
                 <!-- LOKASI GPS -->
                 <div class="relative z-10 space-y-2">
-                    <div class="flex items-center justify-between">
-                        <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Lokasi GPS</label>
-                        <button onclick="ambilLokasi()" type="button"
-                            class="text-xs bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-medium hover:bg-blue-200 transition flex items-center gap-1">
-                            <i class="fas fa-location-arrow text-[10px]"></i>
-                            Ambil Lokasi
-                        </button>
-                    </div>
-
                     <div id="map" wire:ignore
                         class="w-full h-100 rounded-2xl border border-gray-100 overflow-hidden shadow-inner"></div>
 
@@ -146,46 +123,52 @@
                 </div>
 
                 <!-- SUBMIT -->
-                <div
-                    x-data="{ buttonDisabled: @entangle('sudahAbsenMasuk') && @entangle('sudahAbsenKeluar') }"    
-                >
-                    <template x-if="buttonDisabled" >
-                        <button type="submit" :disabled="buttonDisabled"
-                        class="relative z-10 w-full bg-emerald-600 text-white py-3 rounded-2xl font-semibold shadow-sm
+                <div x-data="{ sudahMasuk: @entangle('sudahAbsenMasuk'), sudahKeluar: @entangle('sudahAbsenKeluar') }" x-bind:class="''">
+                    <div class="flex items-end justify-end mb-2">
+                        <button onclick="ambilLokasi()" type="button"
+                            class="relative z-10 w-full bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-medium hover:bg-blue-200 transition flex items-center justify-center gap-2">
+                            <i class="fas fa-location-arrow text-[10px]"></i>
+                            Ambil Lokasi
+                        </button>
+                    </div>
+                    <template x-if="sudahMasuk && sudahKeluar">
+                        <button type="submit" :disabled="true"
+                            class="relative z-10 w-full bg-emerald-600 text-white py-3 rounded-2xl font-semibold shadow-sm
                        hover:shadow-lg hover:-translate-y-0.5 transition flex items-center justify-center gap-2
-                       disabled:opacity-50 disabled:cursor-not-allowed"
-                        >Anda Sudah absen hari ini <i class="fas fa-check"></i> </button>
+                       disabled:opacity-50 disabled:cursor-not-allowed">Anda
+                            Sudah absen hari ini <i class="fas fa-check"></i> </button>
                     </template>
-                    <template x-if="!buttonDisabled" >
-                        <button type="submit" 
+                    <template x-if="!(sudahMasuk && sudahKeluar)">
+                        <button type="submit"
                             class="relative z-10 w-full bg-emerald-600 text-white py-3 rounded-2xl font-semibold shadow-sm
                         hover:shadow-lg hover:-translate-y-0.5 transition flex items-center justify-center gap-2
-                        disabled:opacity-50 disabled:cursor-not-allowed"
-                        >Absen <i class="fas fa-paper-plane"></i> </button>
+                        disabled:opacity-50 disabled:cursor-not-allowed">Absen
+                            <i class="fas fa-paper-plane"></i> </button>
                     </template>
                 </div>
             </div>
+            <x-loading-modal target="simpanAbsensi" message="Sedang menyimpan absensi..." keepAlive="true" />
         </form>
+
     @endif
 
+    <script>
+        // Mengambil lokasi kantor dari departemen user yang login
+        @php
+            $user = auth()->user();
+            $lokasi = $user && $user->departemen ? $user->departemen->lokasi : null;
+            $lat = $lokasi ? $lokasi->latitude : 1.083481;
+            $lng = $lokasi ? $lokasi->longitude : 104.030512;
+            $radius = $lokasi ? $lokasi->radius : 100;
+            $namaLokasi = $lokasi ? $lokasi->nama_lokasi : 'Kantor Pusat';
+        @endphp
+
+        var kantor = {
+            lat: {{ $lat }},
+            lng: {{ $lng }},
+            nama: "{{ $namaLokasi }}"
+        };
+        var radiusKantor = {{ $radius }};
+        var lokasi = null;
+    </script>
 </div>
-
-<script>
-    // Mengambil lokasi kantor dari departemen user yang login
-    @php
-        $user = auth()->user();
-        $lokasi = $user && $user->departemen ? $user->departemen->lokasi : null;
-        $lat = $lokasi ? $lokasi->latitude : 1.083481;
-        $lng = $lokasi ? $lokasi->longitude : 104.030512;
-        $radius = $lokasi ? $lokasi->radius : 100;
-        $namaLokasi = $lokasi ? $lokasi->nama_lokasi : 'Kantor Pusat';
-    @endphp
-
-    var kantor = {
-        lat: {{ $lat }},
-        lng: {{ $lng }},
-        nama: "{{ $namaLokasi }}"
-    };
-    var radiusKantor = {{ $radius }};
-    var lokasi = null;
-</script>
