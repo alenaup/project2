@@ -79,12 +79,13 @@ class User extends Authenticatable
         'nomor_tlp',
         'alamat',
         'nip',
-        'nama_departemen',
+        'departemen_id',
         'tanggal_keluar',
         'tanggal_masuk',
         'role',
         'status',
-        'dibuat_oleh',
+        'user_id',
+        'outsourcing_id',
     ];
 
     /* mengisi nilai default untuk atribut */

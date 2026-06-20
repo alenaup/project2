@@ -16,10 +16,8 @@
 
     {{-- kode CDN untuk font awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
     {{-- bawaan style livewire --}}
     @livewireStyles
-
     {{-- letak untuk style push --}}
     @stack('styles')
 </head>

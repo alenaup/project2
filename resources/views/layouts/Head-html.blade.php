@@ -14,8 +14,7 @@
     {{-- mengambil css dan js styling tailwind --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- kode CDN untuk alpine js --}}
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- kode CDN untuk alpine js (Dihapus karena Livewire 3 sudah mem-bundle AlpineJS) --}}
 
     {{-- kode CDN untuk font awesome --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
