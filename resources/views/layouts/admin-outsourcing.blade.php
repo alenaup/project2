@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" class="animate-item">
+<html lang="en">
 
-<head >
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'Login ecoGreen E-outsourcing' }}</title>
 
     {{-- icon untuk logo Perusahaan --}}
-    <link rel="icon" type="image/x-icon" href="/images/logo.png">
+    <link rel="preload" as="image" href="/images/logo (2).webp">
+    <link rel="icon" type="image/x-icon" href="/images/logo (2).webp">
+    
     {{-- untuk mengambil data dari css js vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     {{-- kode CDN untuk font awesome --}}
@@ -24,14 +26,32 @@
 <body class="min-h-screen">
     <div class="flex">
         <x-sidebar :menus="[
-            ['title' => 'Dashboard', 'icon' => 'fas fa-home', 'ref' => '/admin-outsourcing/dashboard'],
+            [
+                'title' => 'Dashboard',
+                'icon' => '<svg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'2\' stroke=\'currentColor\' class=\'w-5 h-5\'>
+                    <path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M3 12l9-9 9 9M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10\' />
+                </svg>',
+                'ref' => '/admin-outsourcing/dashboard',
+            ],
+        
             [
                 'title' => 'Perizinan Karyawan',
-                'icon' => 'fas fa-users',
+                'icon' => '<svg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'2\' stroke=\'currentColor\' class=\'w-5 h-5\'>
+                    <path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M17 20h5v-2a4 4 0 0 0-4-4h-1M9 20H4v-2a4 4 0 0 1 4-4h1m8-4a4 4 0 1 0-8 0 4 4 0 0 0 8 0zm6 2a3 3 0 1 0-6 0\' />
+                </svg>',
                 'ref' => '/admin-outsourcing/pengajuan-karyawan',
             ],
-            ['title' => 'Kelola Karyawan', 'icon' => 'fas fa-user-cog', 'ref' => '/admin-outsourcing/kelola-karyawan'],
-        ]">Admin Outsourcing</x-sidebar>
+        
+            [
+                'title' => 'Kelola Karyawan',
+                'icon' => '<svg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'2\' stroke=\'currentColor\' class=\'w-5 h-5\'>
+                    <path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M15 7a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM4 21a8 8 0 0 1 16 0M19.4 15a2 2 0 0 1 0 3.6l-1 .4-.3 1.1-1.5.9-1-.6-1 .6-1.5-.9-.3-1.1-1-.4a2 2 0 0 1 0-3.6l1-.4.3-1.1 1.5-.9 1 .6 1-.6 1.5.9.3 1.1 1 .4Z\' />
+                </svg>',
+                'ref' => '/admin-outsourcing/kelola-karyawan',
+            ],
+        ]">
+            Admin Outsourcing
+        </x-sidebar>
 
         {{-- mengisi untuk letak isi --}}
 
@@ -47,9 +67,13 @@
         </div><!-- /main -->
     </div>
 
+    {{-- ✅ Loading Modal diletakkan di root body agar fixed inset-0 bisa menutupi seluruh halaman --}}
+    <x-loading-modal target="logout" message="Sedang keluar dari sistem..." keepAlive="true" />
+    
+
     {{-- js bawaan untuk livewire --}}
     @livewireScripts
-    
+
     {{-- letak untuk script push --}}
     @stack('scripts')
 </body>

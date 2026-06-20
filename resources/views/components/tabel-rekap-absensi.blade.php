@@ -44,9 +44,7 @@
                     NAMA KARYAWAN</th>
                 <th class="px-4 py-3 border-b border-gray-200">POSISI</th>
                 @foreach ($koloms as $kolom)
-                    <th
-                        class="px-4 py-3 border-b border-gray-200 text-center w-6 {{ in_array($kolom, [7, 14, 21, 28]) ? 'text-red-500' : '' }}">
-                        {{ $kolom }}</th>
+                    <th class="px-4 py-3 border-b border-gray-200 text-center w-6">{{ $kolom }}</th>
                 @endforeach
                 <th class="px-4 py-3 text-center border-b">H</th>
                 <th class="px-4 py-3 text-center border-b">A</th>

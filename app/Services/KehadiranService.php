@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class KehadiranService
 {
-    // array untuk menyimpan nama kehadiran
+    // array untuk menyimpan nama defauld kehadiran
     private $nama_kehadiran = [
         1 => 'Hadir',
         2 => 'Sakit',
@@ -22,12 +22,15 @@ class KehadiranService
 
     // fungsi untuk memvalidasi kehadiran user pada hari ini
     // mengembalikan status kehadiran, waktu masuk dan waktu keluar
+
+    // memiliki dua pengembalian data memiliki absensi dan tidak memiliki absensi
     public function validasiKehadiran()
     {
         // mengecek apakah user sudah melakukan absensi
         $data = $this->cekKehadiran();
 
-        if (!$data) {
+        // mengembalikan data jika belum melakukan absensi
+        if (! $data) {
             return [
                 'tipe_kehadiran' => null,
                 'status_kehadiran' => false,
@@ -37,6 +40,7 @@ class KehadiranService
         }
 
         // melakukan pengecekan berdasarkan tipe kehadiran
+        // mengisi properti nama_kehadiran berdasarkan tipe kehadiran yang dimiliki
         switch ($data->tipe_kehadiran_id) {
             case 1:
                 $nama_kehadiran = $this->nama_kehadiran[1];
@@ -61,9 +65,13 @@ class KehadiranService
                 break;
 
         }
-
-        // melakukan pengecekan apakah user sudah melakukan absensi masuk dan keluar
-
+        // mengembalikan data kehadiran
+        /*  data yang dikembalikan adalah
+        - tipe kehadiran
+        - status kehadiran
+        - waktu masuk
+        - waktu keluar
+        */
         return [
             'tipe_kehadiran' => $nama_kehadiran,
             'status_kehadiran' => true,
@@ -73,29 +81,44 @@ class KehadiranService
     }
 
     // method yang berungsi mengecek kehadiran pada hari ini
-    // mengembalikan data kehadiran
+    // mengembalikan data kehadiran satu karyawan
     public function cekKehadiran()
     {
         // mengambil user yang sedang login
-        $user = User::select('id_user')
-            ->where('id_user', Auth::id())
-            ->first();
+        // menggunakan service UserService untuk mempermudah dalam mendapatkan data user
+        $user = (new UserService)->getUserById();
         // mengambil tanggal hari ini
         $tanggal = now()->toDateString();
+
         // melakukan query ke database berdasarkan karyawan_id dan tanggal
-        return Kehadiran::select('id_kehadiran', 'tipe_kehadiran_id', 'waktu_masuk', 'waktu_keluar')
+        $query = Kehadiran::select('id_kehadiran', 'tipe_kehadiran_id', 'waktu_masuk', 'waktu_keluar')
             ->where('karyawan_id', $user->id_user)->where('tanggal', $tanggal)->first();
+        return $query;
     }
     
+    // method untuk mengecek kehadiran banyak karyawan berdasarkan tipe kehadiran dan bulan dan tahun
+    /* mengembalikan data
+    - jumlah int data yang cocok */
+    public function cekKehadiranBanyakKaryawan($tipeKehadiran, $arrayKaryawanIds, $bulan, $tahun)
+    {
+        // melakukan pengecekan berdasarkan tipe kehadiran
+        $query = Kehadiran::whereHas('tipeKehadiran', function ($q) use ($tipeKehadiran) {
+            $q->where('status_kehadiran', $tipeKehadiran);
+        })
+            ->whereIn('karyawan_id', $arrayKaryawanIds)
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->count();
+        return $query;
+    }
 
     // fungsi melakukan absensi kehadiran masuk kerja
     public function absenMasuk(array $data)
     {
-        // mengambil status kehadiran pada hari ini
+        // mengambil status kehadiran pada hari ini dengan method cekKehadiran
         $kehadiran = $this->cekKehadiran();
         // melakukan pengecekan apakah sudah melakukan absensi masuk
-        if ($kehadiran && $kehadiran->waktu_masuk) 
-        {
+        if ($kehadiran && $kehadiran->waktu_masuk) {
             // mengembalikan info bahwa user sudah melakukan absensi masuk
             return [
                 'success' => false,
@@ -111,8 +134,7 @@ class KehadiranService
         );
 
         // mengecek aapakah hari ini sudah memiliki status
-        if ($kehadiran && $kehadiran->tipe_kehadiran_id != 1)
-        {
+        if ($kehadiran && $kehadiran->tipe_kehadiran_id != 1) {
             return [
                 'success' => false,
                 'message' => 'Anda sudah memiliki kehadiran bukan absensi kerja',
@@ -120,24 +142,24 @@ class KehadiranService
         }
 
         // memperbarui data kehadiran
-        if($kehadiran) {
+        if ($kehadiran) {
             $kehadiran->update([
-                'waktu_masuk'=>$data['waktu'],
-                'latitude_masuk'=>$data['latitude'],
-                'longitude_masuk'=>$data['longitude'],
-                'tipe_kehadiran_id'=>$tipeId,
+                'waktu_masuk' => $data['waktu'],
+                'latitude_masuk' => $data['latitude'],
+                'longitude_masuk' => $data['longitude'],
+                'tipe_kehadiran_id' => $tipeId,
             ]);
         } else { // membuat data kehadiran baru
-             Kehadiran::create([
-                'tanggal'=>now()->toDateString(),
-                'waktu_masuk'=>$data['waktu'],
-                'waktu_keluar'=>null,
-                'latitude_masuk'=>$data['latitude'],
-                'longitude_masuk'=>$data['longitude'],
-                'jadwal_id'=>$data['jadwalId'],
-                'tipe_kehadiran_id'=>$tipeId,
-                'rekapan_kehadiran_id'=>$data['rekapId'],
-                'karyawan_id'=>Auth::id()
+            Kehadiran::create([
+                'tanggal' => now()->toDateString(),
+                'waktu_masuk' => $data['waktu'],
+                'waktu_keluar' => null,
+                'latitude_masuk' => $data['latitude'],
+                'longitude_masuk' => $data['longitude'],
+                'jadwal_id' => $data['jadwalId'],
+                'tipe_kehadiran_id' => $tipeId,
+                'rekapan_kehadiran_id' => $data['rekapId'],
+                'karyawan_id' => Auth::id(),
             ]);
         }
 
@@ -147,38 +169,36 @@ class KehadiranService
         ];
     }
 
-
     // fungsi melakukan absensi kehadiran kelluar kerja
     public function absenKeluar(array $data)
     {
         $kehadiran = $this->cekKehadiran();
-        if (!$kehadiran || !$kehadiran->waktu_masuk) {
+        if (! $kehadiran || ! $kehadiran->waktu_masuk) {
             return [
-                'success'=>false,
-                'message'=>'Belum melakukan absen masuk'
+                'success' => false,
+                'message' => 'Belum melakukan absen masuk',
             ];
         }
 
         if ($kehadiran->waktu_keluar) {
             return [
-                'success'=>false,
-                'message'=>'Sudah melakukan absen keluar'
+                'success' => false,
+                'message' => 'Sudah melakukan absen keluar',
             ];
         }
 
         $kehadiran->update([
-            'waktu_keluar'=>$data['waktu'],
-            'latitude_keluar'=>$data['latitude'],
-            'longitude_keluar'=>$data['longitude']
+            'waktu_keluar' => $data['waktu'],
+            'latitude_keluar' => $data['latitude'],
+            'longitude_keluar' => $data['longitude'],
         ]);
 
         return [
-            'success'=>true,
-            'message'=>'Absen keluar berhasil'
+            'success' => true,
+            'message' => 'Absen keluar berhasil',
         ];
 
     }
-
 
     // method yang berfungsi mengecek tipe kehadiran dan menentukan batas toleransi keterlambatan
     public function tentukanTipeKehadiran($waktu, $jamMasuk, $toleransiTelat)
@@ -204,26 +224,87 @@ class KehadiranService
 
     public function ambilKehadiranRange($tahun, $bulan)
     {
-        if($tahun == null && $bulan == null) {
-            return Kehadiran::where('karyawan_id', Auth::user()->id_user)
+        if ($tahun == null && $bulan == null) {
+            $query = Kehadiran::where('karyawan_id', Auth::user()->id_user)
                 ->selectRaw('YEAR(tanggal) as tahun')
                 ->groupBy('tahun')
                 ->orderBy('tahun', 'desc')
                 ->pluck('tahun')
-            ->toArray();
-        } else if($tahun && $bulan == null) {
-            return Kehadiran::where('karyawan_id', Auth::user()->id_user)
+                ->toArray();
+        } elseif ($tahun && $bulan == null) {
+            $query = Kehadiran::where('karyawan_id', Auth::user()->id_user)
                 ->whereYear('tanggal', $tahun)
                 ->get();
-        } else if($tahun == null && $bulan ) {
-            return Kehadiran::where('karyawan_id', Auth::user()->id_user)
+        } elseif ($tahun == null && $bulan) {
+            $query = Kehadiran::where('karyawan_id', Auth::user()->id_user)
                 ->whereMonth('tanggal', $bulan)
                 ->get();
-        } else if($tahun && $bulan ) {
-            return Kehadiran::where('karyawan_id', Auth::user()->id_user)
-            ->whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $bulan)
-            ->get();
+        } elseif ($tahun && $bulan) {
+            $query = Kehadiran::where('karyawan_id', Auth::user()->id_user)
+                ->whereYear('tanggal', $tahun)
+                ->whereMonth('tanggal', $bulan)
+                ->get();
         }
+        return $query;
+    }
+
+    
+    public function ambilBanyaklKehadiranRange(
+        $karyawanIds,
+        int $bulan,
+        int $tahun
+    ) {
+        $query = Kehadiran::whereIn('karyawan_id', $karyawanIds)
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->get();
+        return $query;
+    }
+
+    public function ambilBanyakKehadiranByDateRange($karyawanIds, $startDate, $endDate)
+    {
+        $query = Kehadiran::whereIn('karyawan_id', $karyawanIds)
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->get();
+        return $query;
+    }
+
+    public function totalHadir(
+        array $karyawanIds,
+        int $tahun,
+        int $bulan
+    ): int {
+
+        $query = Kehadiran::query()
+            ->whereIn('karyawan_id', $karyawanIds)
+            ->whereMonth('tanggal', $bulan)
+            ->whereYear('tanggal', $tahun)
+            ->whereHas('tipeKehadiran', function ($query) {
+                $query->where('status_kehadiran', 'hadir');
+            })
+            ->count();
+        return $query;
+    }
+
+    public function totalHadirByDateRange(array $karyawanIds, $startDate, $endDate): int {
+        $query = Kehadiran::query()
+            ->whereIn('karyawan_id', $karyawanIds)
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->whereHas('tipeKehadiran', function ($query) {
+                $query->where('status_kehadiran', 'hadir');
+            })
+            ->count();
+        return $query;
+    }
+
+    public function cekKehadiranBanyakKaryawanByDateRange($tipeKehadiran, $arrayKaryawanIds, $startDate, $endDate)
+    {
+        $query = Kehadiran::whereHas('tipeKehadiran', function ($q) use ($tipeKehadiran) {
+            $q->where('status_kehadiran', $tipeKehadiran);
+        })
+            ->whereIn('karyawan_id', $arrayKaryawanIds)
+            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->count();
+        return $query;
     }
 }

@@ -98,12 +98,22 @@ class dashboardAbsensi extends Component
             return;
         }
 
-        session()->flash(
-            'success',
-            $hasil['message']
+        $this->dispatch(
+            'flash-success',
+            message: $hasil['message']
         );
 
-        $this->redirect(route('dashboard'));
+        // Update status absensi tanpa reload halaman
+        $kehadiranHariIni = (new KehadiranService)->cekKehadiran();
+
+        if ($kehadiranHariIni) {
+            $this->sudahAbsenMasuk = ! is_null($kehadiranHariIni->waktu_masuk);
+            $this->sudahAbsenKeluar = ! is_null($kehadiranHariIni->waktu_keluar);
+            // Pindahkan pilihan otomatis ke 'keluar' jika baru saja absen masuk
+            if ($this->sudahAbsenMasuk && ! $this->sudahAbsenKeluar) {
+                $this->jenisAbsensi = 'keluar';
+            }
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────────

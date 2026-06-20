@@ -6,49 +6,151 @@ use App\Models\Kehadiran;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use App\Enums\UserRole;
+use App\Services\UserService;
+use App\Services\KehadiranService;
 use Livewire\Component;
 
+// class component livewire
 class RekapanKaryawan extends Component
 {
+    /** @var string Bulan dan tahun yang difilter (format: Y-m) */
+    public string $bulan;
+
+    public array $karyawanByOutsourcing;
     public array $datas = [];
+    public array $koloms = [];
 
     public function mount()
+    {
+        $this->bulan = Carbon::now()->format('Y-m');
+        $this->loadData();
+    }
+
+    public function updatedBulan()
     {
         $this->loadData();
     }
 
+    // ──────────────────────────────────────────────────────
+    // Computed Properties (data dari database)
+    // ──────────────────────────────────────────────────────
+
+    private function getDateRange()
+    {
+        [$tahun, $bulan] = $this->parseBulan();
+        
+        $currentMonthStart = Carbon::create($tahun, $bulan, 1);
+        $prevMonthStart = $currentMonthStart->copy()->subMonth();
+        
+        $startDate = $prevMonthStart->copy()->day(26)->format('Y-m-d');
+        $endDate = $currentMonthStart->copy()->day(25)->format('Y-m-d');
+        
+        return [$startDate, $endDate];
+    }
+
+    /**
+     * Mengambil total karyawan hadir pada bulan yang dipilih.
+     * Kehadiran bertipe 'hadir' dihitung dari tabel tipe_kehadiran.
+     */
+    public function getTotalHadirProperty(): int
+    {
+        $karyawanIds = $this->karyawanByOutsourcing;
+        [$startDate, $endDate] = $this->getDateRange();
+
+        return (new KehadiranService)
+            ->totalHadirByDateRange(
+                $karyawanIds,
+                $startDate,
+                $endDate
+            );
+    }
+
+    /**
+     * Mengambil total kehadiran bertipe alpha / tidak hadir tanpa keterangan.
+     */
+    public function getTotalAlphaProperty(): int
+    {
+        $getKaryawan = $this->karyawanByOutsourcing;
+        [$startDate, $endDate] = $this->getDateRange();
+
+        return (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange('mankir', $getKaryawan, $startDate, $endDate);
+    }
+
+    /**
+     * Mengambil total kehadiran bertipe izin atau sakit.
+     */
+    public function getTotalIzinSakitProperty(): int
+    {
+        $getKaryawan = $this->karyawanByOutsourcing;
+        [$startDate, $endDate] = $this->getDateRange();
+
+        return (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange(['izin', 'sakit'], $getKaryawan, $startDate, $endDate);
+    }
+
+    /**
+     * Mengambil total karyawan aktif (tanpa tanggal_keluar / tanggal_keluar NULL).
+     */
+    public function getTotalKaryawanProperty(): int
+    {
+        return User::query()->whereNull('tanggal_keluar')
+            ->where('role', UserRole::Karyawan->value)
+            ->where('outsourcing_id', Auth::user()->outsourcing_id)
+            ->count();
+    }
+
+    // ──────────────────────────────────────────────────────
+    // Helpers
+    // ──────────────────────────────────────────────────────
+
+    /**
+     * Memparse properti $bulan (format Y-m) menjadi [$tahun, $bulan].
+     *
+     * @return array{int, int}
+     */
+    private function parseBulan(): array
+    {
+        $carbon = Carbon::createFromFormat('Y-m', $this->bulan);
+
+        return [(int) $carbon->format('Y'), (int) $carbon->format('m')];
+    }
+
+    /**
+     * Render component ke view livewire/admin-outsourcing/dashboard-stats.
+     */
     protected function loadData(): void
     {
+        $this->karyawanByOutsourcing = (new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+
+        // inisiasi array
         $this->datas = [];
+        $this->koloms = [];
 
-        $bulan = now()->month;
-        $tahun = now()->year;
+        [$tahun, $bulan] = $this->parseBulan();
+        
+        $currentMonthStart = Carbon::create($tahun, $bulan, 1);
+        $prevMonthStart = $currentMonthStart->copy()->subMonth();
+        
+        $startDate = $prevMonthStart->copy()->day(26);
+        $endDate = $currentMonthStart->copy()->day(25);
+        
+        $dates = [];
+        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+            $dates[] = $date->copy();
+            $this->koloms[] = $date->format('d/m');
+        }
 
-        $jumlahHari = Carbon::create($tahun, $bulan)->daysInMonth;
-
-        // Ambil semua karyawan outsourcing yang sedang login
-        $karyawans = User::where('role', 'karyawan')
-            ->where('outsourcing_id', Auth::user()->outsourcing_id)
-            ->get();
+        $jenisData = "object";
+        // mengambil semua karyawan outsourcing yang sedang login
+        $karyawans = (new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, $jenisData);
 
         // Ambil ID karyawan
         $userIds = $karyawans->pluck('id_user');
 
-        // Ambil seluruh kehadiran bulan ini dalam 1 query
-        $kehadirans = Kehadiran::whereIn('karyawan_id', $userIds)
-            ->whereMonth('tanggal', $bulan)
-            ->whereYear('tanggal', $tahun)
-            ->get();
+        // Ambil seluruh kehadiran dalam range tanggal ini dalam 1 query
+        $kehadirans = (new KehadiranService)->ambilBanyakKehadiranByDateRange($userIds, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
 
-        /*
-         * Bentuk hasil:
-         * [
-         *   user_id => [
-         *      '2026-06-01' => Kehadiran,
-         *      '2026-06-02' => Kehadiran,
-         *   ]
-         * ]
-         */
+        // mengubah array menjadi object dengan key adalah karyawan_id dan value adalah object kehadiran
         $kehadiranMap = $kehadirans
             ->groupBy('karyawan_id')
             ->map(function ($items) {
@@ -61,13 +163,8 @@ class RekapanKaryawan extends Component
 
             $absens = [];
 
-            for ($hari = 1; $hari <= $jumlahHari; $hari++) {
-
-                $tanggal = Carbon::create(
-                    $tahun,
-                    $bulan,
-                    $hari
-                )->format('Y-m-d');
+            foreach ($dates as $date) {
+                $tanggal = $date->format('Y-m-d');
 
                 $kehadiran = $kehadiranMap[$karyawan->id_user][$tanggal] ?? null;
 
@@ -133,6 +230,13 @@ class RekapanKaryawan extends Component
 
     public function render()
     {
-        return view('livewire.admin-outsourcing.rekapan-karyawan');
+        return view('livewire.admin-outsourcing.rekapan-karyawan', [
+            'totalHadir' => $this->totalHadir,
+            'totalAlpha' => $this->totalAlpha,
+            'totalIzinSakit' => $this->totalIzinSakit,
+            'totalKaryawan' => $this->totalKaryawan,
+            'labelBulan' => Carbon::createFromFormat('Y-m', $this->bulan)
+                ->translatedFormat('F Y'),
+        ]);
     }
 }

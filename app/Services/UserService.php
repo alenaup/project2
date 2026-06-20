@@ -1,9 +1,11 @@
-<?php 
+<?php
 
 namespace App\Services;
+
+use App\Enums\Status;
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
-use App\Enums\UserRole;
 
 class UserService
 {
@@ -46,17 +48,32 @@ class UserService
             ->get();
     }
 
-    public function getKaryawanByOutsourcing($outsourcing)
+    public function getKaryawanByOutsourcing($outsourcing, $jenis)
     {
-        return User::where('role', UserRole::Karyawan->value)
-            ->where('outsourcing_id', $outsourcing)
-            ->get(); 
+        if ($jenis == 'array') {
+            return User::where('role', UserRole::Karyawan->value)
+                ->where('outsourcing_id', $outsourcing)
+                ->where('status', Status::Active->value)
+                ->whereNull('tanggal_keluar')
+                ->pluck('id_user')
+                ->toArray();
+        } elseif ($jenis == 'object') {
+            return User::where('role', UserRole::Karyawan->value)
+                ->where('outsourcing_id', $outsourcing)
+                ->where('status', Status::Active->value)
+                ->whereNull('tanggal_keluar')
+                ->get();
+        }
     }
 
-    
-
-    /* public function getDataPengajuanPengguna()
+    public function getOutsourcing()
     {
-        return 
-    } */
+        $query = User::where('outsourcing_id', Auth::user()->outsourcing_id)
+            ->where('status', Status::Active->value)
+            ->where('role', UserRole::Karyawan->value)
+            ->pluck('id_user')
+            ->toArray();
+
+        return $query;
+    }
 }

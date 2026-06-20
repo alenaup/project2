@@ -8,6 +8,7 @@
             {{-- Pilih Mode --}}
             <select wire:model.live="mode" x-data 
     @change="$dispatch('show-loading', { message: 'Menyiapkan data...' })" class="border rounded-lg px-3 py-1 text-sm">
+ class="border rounded-lg px-3 py-1 text-sm">
 
                 <option value="tahunan">
                     Tahunan
@@ -16,12 +17,13 @@
                 <option value="bulanan">
                     Bulanan
                 </option>
-
             </select>
 
             {{-- Pilih Tahun --}}
-            <select wire:model.live="tahun" x-data 
-    @change="$dispatch('show-loading', { message: 'Menyiapkan data tahun...' })" class="border rounded-lg px-3 py-1 text-sm">
+            <select wire:model.live="tahun" 
+            x-data 
+    @change="$dispatch('show-loading', { message: 'Menyiapkan data dalam tahun...' })" class="border rounded-lg px-3 py-1 text-sm">
+                 class="border rounded-lg px-3 py-1 text-sm">
                 @foreach ($listTahun as $t)
                     <option value="{{ $t }}">
                         {{ $t }}
@@ -30,15 +32,11 @@
 
             </select>
 
-
-
             {{-- Pilih Bulan --}}
             @if ($mode === 'bulanan')
-
-                <select wire:model.live="bulan" x-data 
-    @change="$dispatch('show-loading', { message: 'Menyiapkan data bulan...' })"
-    class="border rounded-lg px-3 py-1 text-sm">
-
+                <select wire:model.live="bulan" 
+                x-data 
+    @change="$dispatch('show-loading', { message: 'Menyiapkan data dalam bulan...' })" class="border rounded-lg px-3 py-1 text-sm">
 
                     @foreach ($listBulan as $key => $nama)
                         <option value="{{ $key }}">

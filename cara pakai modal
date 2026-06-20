@@ -1,0 +1,85 @@
+entu! Karena komponen <x-loading-modal> sekarang sudah diletakkan secara global di level Layout utama (seperti admin-outsourcing.blade.php), Anda tidak perlu lagi memanggil tag <x-loading-modal> berkali-kali di setiap halaman komponen.
+
+Konsep kerjanya sekarang adalah Event-Driven. Artinya, Anda hanya perlu "memberitahu" sistem untuk menampilkan modal dengan mengirimkan event show-loading, dan modal tersebut akan otomatis tertutup sendiri begitu proses Livewire di background selesai.
+
+Berikut adalah panduan detail cara menggunakannya untuk berbagai jenis input:
+
+1. Untuk Tombol Aksi (Klik / wire:click)
+Gunakan kombinasi wire:click dengan AlpineJS @click untuk memicu modal.
+
+html
+<button 
+    wire:click="simpanData" 
+    x-data 
+    @click="$dispatch('show-loading', { message: 'Sedang menyimpan data...' })"
+    class="bg-blue-500 text-white px-4 py-2 rounded">
+    Simpan Data
+</button>
+2. Untuk Form Submit (wire:submit)
+Ketika menggunakan form, Anda pasang triggernya di bagian <form> menggunakan @submit.
+
+html
+<form 
+    wire:submit="submitForm" 
+    x-data 
+    @submit="$dispatch('show-loading', { message: 'Memproses formulir Anda...' })">
+    
+    <input type="text" wire:model="nama" placeholder="Masukkan Nama">
+    <button type="submit">Kirim</button>
+</form>
+3. Untuk Dropdown / Select Option (wire:model.live)
+Ketika Anda membuat filter (seperti filter bulan/tahun) di mana perubahan select langsung men-trigger Livewire, gunakan @change.
+
+html
+<select 
+    wire:model.live="bulan" 
+    x-data 
+    @change="$dispatch('show-loading', { message: 'Menyiapkan data bulan ini...' })"
+    class="border rounded p-2">
+    
+    <option value="01">Januari</option>
+    <option value="02">Februari</option>
+    <!-- opsi lainnya -->
+</select>
+4. Untuk Input Upload File (wire:model)
+Upload file di Livewire otomatis memicu request server saat file dipilih. Sama seperti select, kita gunakan @change.
+
+html
+<input 
+    type="file" 
+    wire:model="fileLaporan" 
+    x-data 
+    @change="$dispatch('show-loading', { message: 'Sedang mengunggah file...' })"
+    class="border p-2">
+5. Untuk Input Pencarian / Text (wire:model.live)
+Jika input teks otomatis melakukan pencarian, Anda bisa memicu loading saat user sedang mengetik atau selesai mengetik. (Direkomendasikan menggunakan debounce agar loading tidak muncul berulang-ulang dengan cepat).
+
+html
+<input 
+    type="text" 
+    wire:model.live.debounce.500ms="search" 
+    x-data 
+    @input="$dispatch('show-loading', { message: 'Mencari data...' })"
+    placeholder="Cari karyawan...">
+💡 Catatan Penting:
+Atribut x-data: Pastikan Anda menambahkan x-data pada elemen tersebut (jika belum ada x-data di parent-nya) agar perintah AlpineJS $dispatch() bisa berjalan.
+Pesan Bebas Diubah: Anda bisa dengan mudah mengganti isi message: '...' untuk menyesuaikan teks yang muncul di dalam modal.
+Otomatis Berhenti: Anda TIDAK PERLU membuat event $dispatch('hide-loading'). Sistem kita sudah diprogram untuk menangkap kapan Livewire selesai bekerja dan akan menutup loading modal secara otomatis.
+Aman untuk Redirect: Jika proses yang Anda panggil di controller (misalnya logout atau submit data) berujung pada perpindahan halaman (redirect()), loading modal akan tetap menahan layar (tidak berkedip putih) sampai halaman baru sepenuhnya dimuat!
+11:02 AM
+apakah target di bagian kode x-loading-modal dibiarkan logout
+1:27 PM
+Ya, biarkan saja! Atribut target="logout" tersebut boleh Anda biarkan.
+
+Alasannya, karena pada perbaikan sebelumnya kita sudah memodifikasi komponen <x-loading-modal> menjadi sistem Event-Driven (global). Artinya:
+
+Modal Didaur Ulang (Reusable): Layar loading yang sama (satu elemen HTML) digunakan bergantian untuk semua aksi (logout, filter bulan, simpan data).
+Atribut Target Diabaikan: Karena kita menggunakan sistem event window.dispatchEvent (atau $dispatch di Alpine), modal tidak lagi peduli dengan nama target spesifik.
+Pesan Dinamis: Teks "Sedang keluar dari sistem..." yang ada di komponen itu hanya akan menjadi pesan default/bawaan. Begitu Anda mengirim event dengan pesan baru (misal: $dispatch('show-loading', { message: 'Memuat data...' })), pesannya akan otomatis tertimpa menjadi teks yang baru.
+Jadi, satu baris kode ini di layout:
+
+html
+<x-loading-modal target="logout" message="Sedang keluar dari sistem..." keepAlive="true" />
+sudah lebih dari cukup untuk menangani loading di seluruh halaman Anda tanpa perlu ditambahkan atau diubah lagi!
+
+1:27 PM

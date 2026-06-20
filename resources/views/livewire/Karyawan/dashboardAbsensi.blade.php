@@ -52,7 +52,8 @@
         </div>
     @else
         <!-- ── FORM ABSENSI (jadwal tersedia) ─────────────────────────────── -->
-        <form wire:submit.prevent="simpanAbsensi">
+        <form wire:submit.prevent="simpanAbsensi" x-data
+            @submit="$dispatch('show-loading', { message: 'Memproses absensi...' })">
             <div x-data="{ jenisAbsensi: @entangle('jenisAbsensi') }" class="space-y-4">
 
                 <!-- STATUS ABSENSI HARI INI -->
@@ -125,7 +126,8 @@
                 <!-- SUBMIT -->
                 <div x-data="{ sudahMasuk: @entangle('sudahAbsenMasuk'), sudahKeluar: @entangle('sudahAbsenKeluar') }" x-bind:class="''">
                     <div class="flex items-end justify-end mb-2">
-                        <button onclick="ambilLokasi()" type="button"
+                        <button onclick="ambilLokasi()" x-data 
+    @click="$dispatch('show-loading', { message: 'Mengambil lokasi...' })" type="button"
                             class="relative z-10 w-full bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-medium hover:bg-blue-200 transition flex items-center justify-center gap-2">
                             <i class="fas fa-location-arrow text-[10px]"></i>
                             Ambil Lokasi
@@ -147,7 +149,6 @@
                     </template>
                 </div>
             </div>
-            <x-loading-modal target="simpanAbsensi" message="Sedang menyimpan absensi..." keepAlive="true" />
         </form>
 
     @endif
