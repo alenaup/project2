@@ -3,7 +3,6 @@
 use App\Http\Controllers\AdminOutsourcingController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Karyawan\dashboard;
 
 
 /* Route untuk login berfungsi menyalurkan reuest dan melakukan validasi awal */
