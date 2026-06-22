@@ -21,7 +21,7 @@
     @stack('styles')
 </head>
 
-<body class="min-h-screen bg-gray-50">
+<body x-data="{ open: false }" class="min-h-screen bg-gray-50">
     <div class="flex min-h-screen" x-data="{ open: false }">
 
         {{-- SIDEBAR --}}
