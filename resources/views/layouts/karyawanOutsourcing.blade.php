@@ -73,7 +73,6 @@
 
     {{-- ✅ Loading Modal diletakkan di root body agar fixed inset-0 bisa menutupi seluruh halaman --}}
     <x-loading-modal target="logout" message="Sedang keluar dari sistem..." keepAlive="true" />
-    <x-loading-modal target="logout" message="Sedang keluar dari sistem..." keepAlive="true" />
 
     {{-- js bawaan untuk livewire --}}
     @livewireScripts

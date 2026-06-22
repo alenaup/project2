@@ -9,12 +9,6 @@
 {{-- mengisi konten halaman adminOutsourcing --}}
 @section('content')
     <div class="flex flex-col gap-4 overflow-y-auto">
-
-        {{-- Bagian statistik karyawan — menggunakan Livewire (terhubung ke database) --}}
-
-
-
-
         <!-- ───  TABEL REKAP ────────────────────── -->
         @livewire('admin-outsourcing.rekapan-karyawan')
 

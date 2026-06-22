@@ -92,7 +92,7 @@ class KehadiranService
 
         // melakukan query ke database berdasarkan karyawan_id dan tanggal
         $query = Kehadiran::select('id_kehadiran', 'tipe_kehadiran_id', 'waktu_masuk', 'waktu_keluar')
-            ->where('karyawan_id', $user->id_user)->where('tanggal', $tanggal)->first();
+            ->where('karyawan_id', $user)->where('tanggal', $tanggal)->first();
         return $query;
     }
     

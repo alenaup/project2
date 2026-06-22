@@ -94,21 +94,26 @@ Route::get('/super-admin/pengaturan', function () {
 /* Karyawan Outsourcing */
 
 Route::middleware('auth')->group(function () {
+
     Route::get('/karyawan-outsourcing/dashboard', function () {
         return view('karyawanOutsourcing.dashboardKaryawan');
     })->name('dashboard');
-});
 
-Route::get('/karyawan-outsourcing/pengajuanKaryawan', function () {
-    return view('karyawanOutsourcing.pengajuanKaryawan');
-});
 
-Route::get('/karyawan-outsourcing/jadwal-karyawan', function () {
-    return view('karyawanOutsourcing.jadwalKaryawan');
-});
+    Route::get('/karyawan-outsourcing/pengajuanKaryawan', function () {
+        return view('karyawanOutsourcing.pengajuanKaryawan');
+    });
 
-Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
-    return view('karyawanOutsourcing.perizinan');
+
+    Route::get('/karyawan-outsourcing/jadwal-karyawan', function () {
+        return view('karyawanOutsourcing.jadwalKaryawan');
+    });
+
+
+    Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
+        return view('karyawanOutsourcing.perizinan');
+    });
+
 });
 
 
