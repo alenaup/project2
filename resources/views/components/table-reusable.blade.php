@@ -1,5 +1,5 @@
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-    <table class="w-full text-sm border-separate border-spacing-y-2">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto w-full">
+    <table class="w-full text-sm border-separate border-spacing-y-2 whitespace-nowrap min-w-max">
 
         {{-- HEADER --}}
         <thead class="bg-green-100 text-gray-600 uppercase text-xs tracking-wide">
