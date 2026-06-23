@@ -4,6 +4,7 @@ namespace App\Livewire\HR;
 
 use App\Enums\Status;
 use App\Enums\Validasi;
+use App\Models\Departemen;
 use App\Models\Lembur;
 use App\Models\User;
 use App\Models\RekapKehadiran;
@@ -17,20 +18,27 @@ class DashboardHR extends Component
     use WithPagination;
 
     /**
-     * Filter tanggal untuk tabel lembur.
+     * Filter tanggal dan departemen untuk tabel lembur.
      */
-    public string $startDate = '';
-    public string $endDate   = '';
+    public string $startDate    = '';
+    public string $endDate      = '';
+    public string $departemenId = '';
+
+    // ── Daftar departemen untuk dropdown ─────────────────────────
+    public array $departemens = [];
 
     // ── Jumlah data per halaman ──────────────────────────────────
 
     public int $perPage = 10;
 
-    // ── Set default tanggal saat pertama dibuka ──────────────────
+    // ── Saat pertama dibuka, semua filter dikosongkan ────────────
+    // agar semua data lembur karyawan langsung tampil
     public function mount(): void
     {
-        $this->startDate = Carbon::now()->format('Y-m-d');
-        $this->endDate   = Carbon::now()->format('Y-m-d');
+        $this->startDate    = '';
+        $this->endDate      = '';
+        $this->departemenId = '';
+        $this->departemens  = Departemen::orderBy('nama_departemen')->get(['id_departemen', 'nama_departemen'])->toArray();
     }
 
     // ── Reset halaman saat filter berubah ───────────────────────
@@ -40,6 +48,11 @@ class DashboardHR extends Component
     }
 
     public function updatedEndDate(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDepartemenId(): void
     {
         $this->resetPage();
     }
@@ -89,6 +102,12 @@ class DashboardHR extends Component
 
         if ($this->endDate !== '') {
             $query->whereDate('mulai_lembur', '<=', $this->endDate);
+        }
+
+        if ($this->departemenId !== '') {
+            $query->whereHas('karyawan', function ($q) {
+                $q->where('departemen_id', $this->departemenId);
+            });
         }
 
         return $query;
