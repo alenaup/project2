@@ -183,7 +183,7 @@ class User extends Authenticatable
 
     public function kehadiran()
     {
-        return $this->hasMany(Kehadiran::class, 'karyawan_id', 'id_user');
+        return $this->hasMany(Kehadiran::class, 'user_id', 'id_user');
     }
 
     public function jadwal()
