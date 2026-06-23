@@ -13,45 +13,51 @@ class LemburSeeder extends Seeder
 {
     public function run(): void
     {
-        // Ambil data karyawan dan kepala departemen yang valid secara dinamis
-        $karyawans = User::where('role', UserRole::Karyawan)->limit(3)->get();
-        $kepalaDepartemen = User::where('role', UserRole::KepalaDepartemen)->first();
+        // Ambil semua kepala departemen yang memiliki departemen_id
+        $kepalaDepartemens = User::where('role', UserRole::KepalaDepartemen)
+            ->whereNotNull('departemen_id')
+            ->get();
 
-        $karyawan1 = $karyawans->get(0) ?? User::factory()->create();
-        $karyawan2 = $karyawans->get(1) ?? User::factory()->create();
-        $validator = $kepalaDepartemen ?? User::factory()->kepalaDepartemen()->create();
+        foreach ($kepalaDepartemens as $kd) {
+            // Dapatkan karyawan di departemen yang sama
+            $karyawans = User::where('role', UserRole::Karyawan)
+                ->where('departemen_id', $kd->departemen_id)
+                ->get();
 
-        Lembur::create([
-            'mulai_lembur' => '2026-04-21 17:00:00',
-            'selesai_lembur' => '2026-04-21 20:00:00',
-            'tanggal_dibuat' => '2026-04-21 10:00:00',
-            'status' => Status::Active->value,
-            'status_validasi' => Validasi::Valid->value,
-            'karyawan_id' => $karyawan1->id_user,
-            'pemvalidasi_id' => $validator->id_user,
-            'keterangan' => 'Penyelesaian proyek akhir bulan',
-        ]);
+            // Jika tidak ada karyawan di departemen ini, buat 1 dummy karyawan menggunakan factory
+            if ($karyawans->isEmpty()) {
+                $karyawan = User::factory()->create([
+                    'role' => UserRole::Karyawan->value,
+                    'departemen_id' => $kd->departemen_id,
+                ]);
+                $karyawans = collect([$karyawan]);
+            }
 
-        Lembur::create([
-            'mulai_lembur' => '2026-04-22 18:00:00',
-            'selesai_lembur' => '2026-04-22 21:00:00',
-            'tanggal_dibuat' => '2026-04-22 11:00:00',
-            'status' => Status::Active->value,
-            'status_validasi' => Validasi::Valid->value,
-            'karyawan_id' => $karyawan1->id_user,
-            'pemvalidasi_id' => $validator->id_user,
-            'keterangan' => 'Penyelesaian laporan keuangan',
-        ]);
+            // Buat beberapa lembur dummy untuk karyawan di departemen ini
+            foreach ($karyawans as $index => $karyawan) {
+                // Tentukan status validasi secara bergantian (Pending, Valid, Invalid)
+                // index 0 -> Pending, index 1 -> Valid, index 2 -> Invalid, dst.
+                $statusValidasi = ($index % 3 === 0) 
+                    ? Validasi::Pending->value 
+                    : (($index % 3 === 1) ? Validasi::Valid->value : Validasi::Invalid->value);
+                
+                // Variasi tanggal untuk data dummy agar lebih realistis
+                $dayOffset = $index * 2;
+                $tanggalDibuat = now()->subDays($dayOffset + 1)->setTime(10, 0, 0);
+                $mulaiLembur = now()->subDays($dayOffset)->setTime(17, 0, 0);
+                $selesaiLembur = now()->subDays($dayOffset)->setTime(20, 0, 0);
 
-        Lembur::create([
-            'mulai_lembur' => '2026-04-23 19:00:00',
-            'selesai_lembur' => '2026-04-23 22:00:00',
-            'tanggal_dibuat' => '2026-04-23 12:00:00',
-            'status' => Status::Active->value,
-            'status_validasi' => Validasi::Pending->value,
-            'karyawan_id' => $karyawan2->id_user,
-            'pemvalidasi_id' => $validator->id_user,
-            'keterangan' => 'Penyelesaian tugas mendesak',
-        ]);
+                Lembur::create([
+                    'mulai_lembur' => $mulaiLembur,
+                    'selesai_lembur' => $selesaiLembur,
+                    'tanggal_dibuat' => $tanggalDibuat,
+                    'status' => Status::Active->value,
+                    'status_validasi' => $statusValidasi,
+                    'karyawan_id' => $karyawan->id_user,
+                    'pemvalidasi_id' => $statusValidasi !== Validasi::Pending->value ? $kd->id_user : null,
+                    'keterangan' => 'Pekerjaan lembur untuk penyelesaian tugas di departemen ' . ($kd->departemen?->nama_departemen ?? 'IT'),
+                ]);
+            }
+        }
     }
 }
