@@ -43,10 +43,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin-outsourcing/kelola-karyawan', [AdminOutsourcingController::class, 'kelolaKaryawan']);
     Route::get('/admin-outsourcing/api/departemen', [AdminOutsourcingController::class, 'getDepartemen']);
     Route::post('/admin-outsourcing/api/karyawan', [AdminOutsourcingController::class, 'storeKaryawan']);
-});
-
-Route::get('/admin-outsourcing/pengajuan-karyawan', function () {
-    return view('adminOutsourcing.pengajuanKaryawan');
+    Route::get('/admin-outsourcing/pengajuan-karyawan', function () {
+        return view('adminOutsourcing.pengajuanKaryawan');
+    })->name('admin.pengajuan-karyawan');
 });
 
 /* Admin OutSourcing */

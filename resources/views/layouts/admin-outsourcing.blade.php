@@ -24,7 +24,7 @@
 
 </head>
 
-<body class="min-h-screen">
+<body class="min-h-screen h-64 overflow-y-scroll [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-emerald-700 [&::-webkit-scrollbar-thumb]:rounded-md">
     <div class="flex">
         <x-sidebar :menus="[
             [

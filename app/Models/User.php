@@ -190,4 +190,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Jadwal::class, 'karyawan_jadwal', 'user_id', 'jadwal_id');
     }
+
+    public function perizinanSakit()
+    {
+        return $this->hasMany(\App\Models\PerizinanSakit::class, 'karyawan_id', 'id_user');
+    }
 }
