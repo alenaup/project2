@@ -86,6 +86,7 @@ class User extends Authenticatable
         'status',
         'user_id',
         'outsourcing_id',
+
     ];
 
     /* mengisi nilai default untuk atribut */
