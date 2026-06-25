@@ -1,11 +1,4 @@
 <div>
-    {{-- Success Message --}}
-    @if (session()->has('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4 shadow-sm" role="alert">
-            <span class="block sm:inline"><i class="fas fa-check-circle mr-2"></i>{{ session('success') }}</span>
-        </div>
-    @endif
-
     {{-- FORM CARD --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden fade-in-up"
         style="animation-delay:.05s">
@@ -29,7 +22,35 @@
         </div>
 
         {{-- Form body --}}
-        <form wire:submit.prevent="simpanPengajuan" class="px-6 py-6">
+        <form wire:submit.prevent="simpanPengajuan" class="px-6 py-6"
+              x-data="{
+                  init() {
+                      if (typeof Livewire !== 'undefined') {
+                          Livewire.hook('commit', ({ succeed }) => {
+                              succeed(() => {
+                                  setTimeout(() => {
+                                      const errorEl = document.querySelector('.border-red-500');
+                                      if (errorEl) {
+                                          errorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                          errorEl.focus();
+                                      }
+                                  }, 50);
+                              });
+                          });
+                      }
+                  }
+              }">
+              
+            {{-- Success Message --}}
+            @if (session()->has('success'))
+                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
+                     x-transition.duration.500ms
+                     class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold mb-5 shadow-sm">
+                    <i class="fa-solid fa-circle-check text-lg"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
+
             {{-- Section title --}}
             <div class="flex items-center gap-2 mb-5">
                 <div class="section-bar bg-[#3C8B5E]"></div>

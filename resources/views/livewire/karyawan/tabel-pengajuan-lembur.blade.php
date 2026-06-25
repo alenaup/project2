@@ -1,10 +1,11 @@
-<div>
+<div x-data="{ openEdit: false, openDelete: false, deleteId: null }"
+     @open-modal-edit.window="openEdit = true"
+     @close-modal-edit.window="openEdit = false">
     {{-- TABEL RIWAYAT --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden fade-in-up"
         style="animation-delay:.10s">
 
-        <div
-            class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
                 <h2 class="font-bold text-gray-800 text-base flex items-center gap-2">
                     <i class="fa-solid fa-list-check text-[#3C8B5E]"></i>
@@ -23,6 +24,21 @@
             </div>
         </div>
 
+        @if (session('success_riwayat'))
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition.duration.500ms
+                 class="mx-5 mt-4 bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold fade-in-up">
+                <i class="fa-solid fa-circle-check text-lg"></i>
+                {{ session('success_riwayat') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition.duration.500ms
+                 class="mx-5 mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold fade-in-up">
+                <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                {{ session('error') }}
+            </div>
+        @endif
+
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -37,6 +53,8 @@
                             Keterangan</th>
                         <th class="px-5 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">
                             Status</th>
+                        <th class="px-5 py-3 text-center text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                            Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
@@ -70,10 +88,24 @@
                                     </span>
                                 @endif
                             </td>
+                            <td class="px-5 py-3.5">
+                                @if ($item->status_validasi === 'pending')
+                                    <div class="flex items-center justify-center gap-2">
+                                        <button wire:click="editLembur({{ $item->id_lembur }})" class="text-blue-500 hover:text-blue-700 transition w-8 h-8 flex items-center justify-center bg-blue-50 hover:bg-blue-100 rounded-lg">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button @click="deleteId = {{ $item->id_lembur }}; openDelete = true" class="text-red-500 hover:text-red-700 transition w-8 h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 rounded-lg">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                @else
+                                    <span class="text-gray-300 text-xs text-center block">-</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-12 text-gray-300">
+                            <td colspan="6" class="text-center py-12 text-gray-300">
                                 <i class="fa-solid fa-folder-open text-4xl mb-2 block"></i>
                                 <p class="text-sm">Belum ada riwayat pengajuan</p>
                             </td>
@@ -85,6 +117,103 @@
 
         <div class="px-5 py-3 border-t border-gray-50">
             {{ $pengajuan->links() }}
+        </div>
+    </div>
+
+    <!-- Modal Hapus -->
+    <div x-show="openDelete" style="display: none;"
+         class="fixed inset-0 z-50 flex items-center justify-center px-4"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <div class="absolute inset-0 bg-gray-900/60" @click="openDelete = false"></div>
+        
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative z-10 overflow-hidden text-center p-6"
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:scale-95">
+             
+            <div class="w-16 h-16 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-triangle-exclamation text-3xl"></i>
+            </div>
+            
+            <h3 class="text-lg font-bold text-gray-900 mb-2">Hapus Riwayat?</h3>
+            <p class="text-sm text-gray-500 mb-6">Apakah Anda yakin ingin menghapus pengajuan lembur ini? Data yang dihapus tidak dapat dikembalikan.</p>
+            
+            <div class="flex gap-3">
+                <button @click="openDelete = false" type="button" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 rounded-xl transition">Batal</button>
+                <button @click="$wire.deleteLembur(deleteId); openDelete = false" type="button" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-xl transition shadow-md">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Edit -->
+    <div x-show="openEdit" style="display: none;"
+         class="fixed inset-0 z-50 flex items-center justify-center px-4"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        
+        <div class="absolute inset-0 bg-gray-900/60" @click="openEdit = false"></div>
+        
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative z-10 overflow-hidden text-left"
+             x-transition:enter="transition ease-out duration-300 transform"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="transition ease-in duration-200 transform"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:scale-95">
+             
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-gray-900">Edit Pengajuan Lembur</h3>
+                <button @click="openEdit = false" type="button" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <form wire:submit.prevent="updateLembur" class="p-6 space-y-4">
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-semibold text-gray-700">Tanggal Lembur</label>
+                    <input type="date" wire:model="edit_tanggal" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
+                    @error('edit_tanggal') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-semibold text-gray-700">Jam Mulai</label>
+                        <input type="time" wire:model="edit_mulai" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
+                        @error('edit_mulai') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-semibold text-gray-700">Jam Selesai</label>
+                        <input type="time" wire:model="edit_selesai" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
+                        @error('edit_selesai') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-semibold text-gray-700">Keterangan / Alasan</label>
+                    <textarea wire:model="edit_keterangan" rows="3" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm resize-none"></textarea>
+                    @error('edit_keterangan') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
+                </div>
+
+                <div class="pt-4">
+                    <button type="submit" wire:loading.attr="disabled" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                        <span wire:loading.remove wire:target="updateLembur">Simpan Perubahan</span>
+                        <span wire:loading wire:target="updateLembur"><i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
