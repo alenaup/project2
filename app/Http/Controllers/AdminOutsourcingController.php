@@ -428,6 +428,61 @@ class AdminOutsourcingController extends Controller
 
         return view('adminOutsourcing.dashboard', compact('datas'));
     }
+    public function kelolaKaryawan()
+    {
+        return view('adminOutsourcing.kelola-karyawan');
+    }
 
+    public function getDepartemen()
+    {
+        $departemens = \App\Models\Departemen::all();
+        return response()->json($departemens);
+    }
 
+    public function storeKaryawan(\Illuminate\Http\Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'nama_lengkap' => 'required|string|max:255',
+                'email' => 'required|email|unique:user,email',
+                'nomor_tlp' => 'required|string|max:15',
+                'alamat' => 'required|string',
+                'nip' => 'required|string',
+                'departemen_id' => 'required|exists:departemen,id_departemen',
+            ]);
+
+            $user = \App\Models\User::create([
+                'nama_lengkap' => $validated['nama_lengkap'],
+                'email' => $validated['email'],
+                'password' => bcrypt('admin123'),
+                'nomor_tlp' => $validated['nomor_tlp'],
+                'alamat' => $validated['alamat'],
+                'nip' => 'NIP-' . $validated['nip'],
+                'departemen_id' => $validated['departemen_id'],
+                'tanggal_keluar' => null,
+                'tanggal_masuk' => null,
+                'role' => \App\Enums\UserRole::Karyawan->value,
+                'status' => \App\Enums\Status::Inactive->value,
+                'user_id' => auth()->id(),
+                'outsourcing_id' => auth()->user()->outsourcing_id,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Data karyawan berhasil diajukan',
+                'data' => $user
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

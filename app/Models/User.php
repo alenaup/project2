@@ -86,6 +86,7 @@ class User extends Authenticatable
         'status',
         'user_id',
         'outsourcing_id',
+
     ];
 
     /* mengisi nilai default untuk atribut */
@@ -183,11 +184,16 @@ class User extends Authenticatable
 
     public function kehadiran()
     {
-        return $this->hasMany(Kehadiran::class, 'karyawan_id', 'id_user');
+        return $this->hasMany(Kehadiran::class, 'user_id', 'id_user');
     }
 
     public function jadwal()
     {
         return $this->belongsToMany(Jadwal::class, 'karyawan_jadwal', 'user_id', 'jadwal_id');
+    }
+
+    public function perizinanSakit()
+    {
+        return $this->hasMany(\App\Models\PerizinanSakit::class, 'karyawan_id', 'id_user');
     }
 }
