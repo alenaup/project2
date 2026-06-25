@@ -18,11 +18,16 @@
             class="flex items-center gap-1 bg-white px-2 py-1 rounded-xl shadow
                     cursor-pointer hover:shadow-lg transition md:px-4 md:py-2 md:gap-3">
 
-            <img src="/images/profile.jpg" class="w-10 h-10 rounded-full object-cover">
+            @php
+                $profilPath = 'profiles/profil_' . Auth::id() . '.jpg';
+                $hasFoto = Storage::disk('public')->exists($profilPath);
+                $fotoUrl = $hasFoto ? asset('storage/' . $profilPath) . '?v=' . Storage::disk('public')->lastModified($profilPath) : null;
+            @endphp
+            <img src="{{ $fotoUrl ?? '/images/profile.jpg' }}" onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->nama_lengkap ?? 'User') }}&background=10b981&color=fff&size=128'" class="w-10 h-10 rounded-full object-cover">
 
             <div class="hidden md:block">
-                <p class="text-sm font-semibold text-gray-800">{{ $slot }}</p>
-                <p class="text-xs text-gray-500">Admin</p>
+                <p class="text-sm font-semibold text-gray-800">{{ Auth::user()->nama_lengkap ?? 'User' }}</p>
+                <p class="text-xs text-gray-500 capitalize">{{ str_replace('_', ' ', Auth::user()->role->value ?? 'karyawan') }}</p>
             </div>
 
             <i class="fa-solid fa-chevron-down text-gray-400 text-xs transition md:text-sm"
@@ -31,14 +36,15 @@
 
 
         <!-- DROPDOWN -->
-        <div x-show="openProfile" @click.outside="openProfile = false" x-transition
+        <div x-show="openProfile" style="display: none;" @click.outside="openProfile = false" x-transition
             class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg overflow-hidden z-50">
 
-            <a href="#" class="block px-4 py-2 text-sm hover:bg-gray-100">
-                👤 Profile
-            </a>
-
-            <hr>
+            @if(!request()->routeIs('profil'))
+                <a href="{{ route('profil') }}" class="block px-4 py-2 text-sm hover:bg-gray-100">
+                    👤 Profile
+                </a>
+                <hr>
+            @endif
 
             <livewire:auth.logout />
         </div>

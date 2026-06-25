@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Route;
 /* mengembalikan data ke controller Auth dan mengeksekusi  method atau fungsi login*/
 Route::get('/', [AuthController::class, 'login'])->/* ini adalah nama rute */name('login');
 
-
 /* Route Kepala departement */
 Route::get('/kepala-departement/dashboard', function () {
     return view('kepala-departement.dashboard');
@@ -107,4 +106,10 @@ Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
     return view('karyawanOutsourcing.perizinan');
 });
 
+
+
+/* Profil Semua User */
+Route::get('/profil', function () {
+    return view('profil.index');
+})->name('profil')->middleware('auth');
 
