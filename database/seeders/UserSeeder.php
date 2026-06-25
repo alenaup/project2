@@ -173,7 +173,7 @@ class UserSeeder extends Seeder
 
 
         /* membuat data dummy 20 karyawan */
-        User::factory()->count(20)->create();
+        User::factory()->count(1000)->create();
         /* KARYAWAN END */
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminOutsourcingController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KaryawanController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -69,6 +70,10 @@ Route::get('/hr/ajuan-data-karyawan', function () {
 Route::get('/hr/data-karyawan', function () {
     return view('hr.dataKaryawan');
 });
+
+Route::get('/api/hr/karyawan', [KaryawanController::class, 'index'])->name('api.hr.karyawan');
+
+Route::get('/api/hr/vendors', [KaryawanController::class, 'getVendors'])->name('api.hr.vendors');
 
 /* USER HR SELESAI*/
 

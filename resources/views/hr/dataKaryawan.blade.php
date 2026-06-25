@@ -43,8 +43,6 @@
                 <div class="w-full overflow-x-auto pb-4">
                     <x-hr.tabel-karyawan></x-hr.tabel-karyawan>
                 </div>
-
-                <x-hr.pagination></x-hr.pagination>
             </div>
 
 
