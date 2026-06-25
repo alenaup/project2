@@ -47,7 +47,7 @@
         {{-- Filter (tanggal) & Export --}}
 
         <div class="flex flex-col md:flex-row md:justify-between gap-4 sm:gap-3 mb-4">
-            <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+            <div class="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto flex-wrap">
                 <div class="relative w-full sm:w-auto">
                     <input
                         type="date"
@@ -65,6 +65,21 @@
                         wire:model.live.debounce.300ms="endDate"
                         class="w-full sm:w-40 border rounded-lg px-3 py-2 text-sm text-gray-700 transition-all focus:ring-2 focus:ring-green-500 outline-none bg-white shadow-sm cursor-pointer"
                         title="Tanggal Akhir">
+                </div>
+
+                {{-- Filter Departemen --}}
+                <div class="relative w-full sm:w-auto">
+                    <select
+                        wire:model.live="departemenId"
+                        class="w-full sm:w-48 border rounded-lg px-3 py-2 text-sm text-gray-700 transition-all focus:ring-2 focus:ring-green-500 outline-none bg-white shadow-sm cursor-pointer appearance-none pr-8">
+                        <option value="">Semua Departemen</option>
+                        @foreach ($departemens as $dep)
+                            <option value="{{ $dep['id_departemen'] }}">{{ $dep['nama_departemen'] }}</option>
+                        @endforeach
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400">
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </div>
                 </div>
             </div>
 
