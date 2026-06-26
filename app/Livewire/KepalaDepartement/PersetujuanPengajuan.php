@@ -118,6 +118,41 @@ class PersetujuanPengajuan extends Component
     }
 
     /**
+     * Menyetujui semua pengajuan lembur yang masih pending di departemen yang sama.
+     *
+     * @return void
+     */
+    public function approveAllPending()
+    {
+        $user = Auth::user();
+        if (!$user || !$user->departemen_id) {
+            return;
+        }
+
+        $pendingLemburs = Lembur::whereHas('karyawan', function ($query) use ($user) {
+                $query->where('departemen_id', $user->departemen_id);
+            })
+            ->where('status_validasi', Validasi::Pending->value)
+            ->get();
+
+        if ($pendingLemburs->isEmpty()) {
+            session()->flash('success', 'Tidak ada pengajuan yang berstatus pending.');
+            return;
+        }
+
+        $count = 0;
+        foreach ($pendingLemburs as $lembur) {
+            $lembur->update([
+                'status_validasi' => Validasi::Valid->value,
+                'pemvalidasi_id' => Auth::id(),
+            ]);
+            $count++;
+        }
+
+        session()->flash('success', $count . ' pengajuan lembur berhasil disetujui.');
+    }
+
+    /**
      * Render view komponen Livewire.
      *
      * @return \Illuminate\View\View

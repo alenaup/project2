@@ -1,12 +1,24 @@
 <div>
     <!-- Title -->
-    <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Persetujuan Lembur</h2>
-        <p class="text-gray-500 text-sm">
-            Kepala Departemen: <span class="font-semibold text-gray-700">{{ Auth::user()->nama_lengkap ?? '-' }}</span> 
-            | Departemen: <span class="font-semibold text-emerald-600">{{ Auth::user()->departemen?->nama_departemen ?? 'Tidak Ada Departemen' }}</span>
-        </p>
-        <p class="text-gray-400 text-xs mt-1">Klik salah satu data di bawah untuk melihat detail dan memberikan keputusan.</p>
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Persetujuan Lembur</h2>
+            <p class="text-gray-500 text-sm">
+                Kepala Departemen: <span class="font-semibold text-gray-700">{{ Auth::user()->nama_lengkap ?? '-' }}</span> 
+                | Departemen: <span class="font-semibold text-emerald-600">{{ Auth::user()->departemen?->nama_departemen ?? 'Tidak Ada Departemen' }}</span>
+            </p>
+            <p class="text-gray-400 text-xs mt-1">Klik salah satu data di bawah untuk melihat detail dan memberikan keputusan.</p>
+        </div>
+        <div>
+            @if(collect($lemburList)->where('status_validasi', \App\Enums\Validasi::Pending->value)->count() > 0)
+                <button wire:click="approveAllPending" 
+                    wire:confirm="Apakah Anda yakin ingin menyetujui semua pengajuan yang masih pending?"
+                    class="px-4 py-2.5 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition shadow-sm font-semibold text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-check-double"></i>
+                    Setujui Semua Pending
+                </button>
+            @endif
+        </div>
     </div>
 
     <!-- Alert Success -->
@@ -127,11 +139,13 @@
                 <div class="flex justify-end gap-3 mt-6 pt-3 border-t border-gray-100">
                     @if ($this->selectedLembur->status_validasi === \App\Enums\Validasi::Pending->value)
                         <button wire:click="reject"
+                            wire:confirm="Apakah Anda yakin ingin menolak pengajuan ini?"
                             class="px-4 py-2.5 bg-red-500 text-white rounded-xl hover:bg-red-600 transition shadow-sm font-semibold text-xs flex items-center gap-1.5">
                             <i class="fa-solid fa-times-circle"></i>
                             Tolak
                         </button>
                         <button wire:click="approve"
+                            wire:confirm="Apakah Anda yakin ingin menyetujui pengajuan ini?"
                             class="px-4 py-2.5 bg-green-500 text-white rounded-xl hover:bg-green-600 transition shadow-sm font-semibold text-xs flex items-center gap-1.5">
                             <i class="fa-solid fa-check-circle"></i>
                             Terima
