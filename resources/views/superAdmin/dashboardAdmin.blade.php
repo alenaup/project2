@@ -7,7 +7,10 @@
     @vite('resources/css/app.css')
     @vite('resources/js/app.js')
 
-    <link rel="icon" type="image/x-icon" href="/images/logo.png">
+    {{-- icon untuk logo Perusahaan --}}
+    <link rel="preload" as="image" href="/images/logo (2).webp">
+    <link rel="icon" type="image/x-icon" href="/images/logo (2).webp">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -22,7 +25,7 @@
         class="bg-linear-to-r from-green-900 to-green-700 px-10 h-16 flex items-center justify-between text-white shadow">
         <div class="flex items-center gap-3">
             <div class="w-9 h-9  rounded-lg flex items-center justify-center overflow-hidden">
-                <img src="/images/logo.png" alt="Logo" class="w-full h-full object-contain">
+                <img src="/images/logo (2).webp" alt="Logo" class="w-full h-full object-contain">
             </div>
             <div>
                 <h1 class="text-sm font-extrabold">Ecogreen e-Outsourcing</h1>
@@ -67,6 +70,9 @@
         {{-- melakukan request kepada bagian service folder app/livewire/superAdmin/user-management --}}
         @livewire('super-admin.user-management')
     </div>
+
+    {{-- ✅ Loading Modal diletakkan di root body agar fixed inset-0 bisa menutupi seluruh halaman --}}
+    <x-loading-modal target="logout" message="Sedang keluar dari sistem..." keepAlive="true" />
 
     <script>
         function toggleDropdown() {

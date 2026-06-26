@@ -142,12 +142,6 @@ Route::middleware('auth')->group(function () {
 
 });
 
-<<<<<<< HEAD
-/* Profil Semua User */
-Route::get('/profil', function () {
-    return view('profil.index');
-})->name('profil')->middleware('auth');
-=======
 Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
     return view('karyawanOutsourcing.perizinan');
 });
@@ -160,5 +154,3 @@ Route::get('/karyawan-outsourcing/jadwal-karyawan', function () {
     return view('karyawanOutsourcing.jadwalKaryawan');
 });
 
-});
->>>>>>> 98a0186ae991df2310e6da8c86406568878e8d35

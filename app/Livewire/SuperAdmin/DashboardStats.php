@@ -2,9 +2,8 @@
 
 namespace App\Livewire\SuperAdmin;
 
-use App\Enums\UserRole;
-use App\Models\User;
 use Livewire\Component;
+use App\Services\UserService;
 
 /**
  * Class DashboardStats
@@ -14,48 +13,43 @@ use Livewire\Component;
  */
 class DashboardStats extends Component
 {
-    /**
-     * selalu stay update ketika ada perubahan data pengguna
-     */
-    protected $listeners = ['userAdded' => '$refresh'];
+    // jika memiliki update pada data pengguna, maka komponen ini akan di-refresh
+    protected $listeners = [
+        'userAdded' => '$refresh'
+    ];
+    // variabel untuk menyimpan data statistik
+    protected UserService $userService;
 
-    /* melakukan query count */
-    /**
-     * Mengambil total Admin Outsourcing
-     */
+    // boot method untuk menginisialisasi UserService
+    public function boot(UserService $userService): void
+    {
+        $this->userService = $userService;
+    }
+
+
+    // query count untuk masing-masing role pengguna
     public function getTotalAdminVendorProperty(): int
     {
-        return User::query()->where('role', UserRole::AdminVendor->value)->count();
+        return $this->userService->getUserAdmin()->count();
     }
 
-    /**
-     * Mengambil total HR
-     */
     public function getTotalHrProperty(): int
     {
-        return User::query()->where('role', UserRole::Hr->value)->count();
+        return $this->userService->getUserHr()->count();
     }
 
-    /**
-     * Mengambil total Kepala Departemen
-     */
     public function getTotalKepalaDepartemenProperty(): int
     {
-        return User::query()->where('role', UserRole::KepalaDepartemen->value)->count();
+        return $this->userService->getUserKepalaDepartemen()->count();
     }
 
-    /**
-     * Mengambil total dari ketiga role di atas
-     */
+    // menghitung total pengguna dengan menjumlahkan semua role
     public function getTotalPenggunaProperty(): int
     {
         return $this->totalAdminVendor + $this->totalHr + $this->totalKepalaDepartemen;
     }
-    /* query count selesai di sini */
-
-    /**
-     * Render komponen mengembalikan view dengan data statistik pengguna ke component CardStats
-     */
+    
+    // render komponen
     public function render()
     {
         return view('livewire.super-admin.dashboard-stats', [

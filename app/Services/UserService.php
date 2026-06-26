@@ -16,28 +16,37 @@ class UserService
 
     public function getUserSuperAdmin()
     {
-        return User::where('role', UserRole::SuperAdmin->value)->get();
+        return User::where('role', UserRole::SuperAdmin->value)
+            ->where('status', Status::Active->value)
+            ->get();
     }
 
     public function getUserKepalaDepartemen()
     {
-        return User::where('role', UserRole::KepalaDepartemen->value)->get();
+        return User::where('role', UserRole::KepalaDepartemen->value)
+            ->where('status', Status::Active->value)
+            ->get();
     }
 
     public function getUserAdmin()
     {
-        return User::where('role', UserRole::AdminVendor->value)->get();
+        return User::where('role', UserRole::AdminVendor->value)
+            ->where('status', Status::Active->value)
+            ->get();
     }
 
     public function getUserHr()
     {
-        return User::where('role', UserRole::Hr->value)->get();
+        return User::where('role', UserRole::Hr->value)
+            ->where('status', Status::Active->value)
+            ->get();
     }
 
     public function getUserKaryawanByDepartemen($departemen)
     {
         return User::where('role', UserRole::Karyawan->value)
             ->where('departemen_id', $departemen)
+            ->where('status', Status::Active->value)
             ->get();
     }
 
