@@ -25,7 +25,7 @@ return new class extends Migration
 
                     /* eksekusi menggunakan enums */
             $table->enum('role', [UserRole::SuperAdmin->value, UserRole::AdminVendor->value, UserRole::Hr->value, UserRole::Karyawan->value, UserRole::KepalaDepartemen->value])->default(UserRole::Karyawan->value);
-            $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
+            $table->enum('status', [Status::Active->value, Status::Inactive->value, Status::Pending->value])->default(Status::Active->value);
 
             /* hanaya untuk karyawan */
             $table->string('alamat', 255)->nullable();
