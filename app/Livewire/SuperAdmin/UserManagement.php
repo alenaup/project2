@@ -71,6 +71,7 @@ class UserManagement extends Component
     {
         $this->activeTab = $tab;
         $this->resetPage();
+        $this->dispatch('hide-loading');
     }
 
     // =========================================================
