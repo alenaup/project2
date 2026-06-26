@@ -3,13 +3,14 @@
 use App\Http\Controllers\AdminOutsourcingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KaryawanController;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-
 /* Route untuk login berfungsi menyalurkan reuest dan melakukan validasi awal */
-/* mengembalikan data ke controller Auth dan mengeksekusi  method atau fungsi login*/
-Route::get('/', [AuthController::class, 'login'])->/* ini adalah nama rute */name('login');
-
+/* mengembalikan data ke controller Auth dan mengeksekusi  method atau fungsi login */
+Route::get('/', [AuthController::class, 'login'])->/* ini adalah nama rute */ name('login');
 
 /* Route Kepala departement */
 Route::get('/kepala-departement/dashboard', function () {
@@ -34,13 +35,11 @@ Route::get('/kepala-departement/pengajuan', function () {
 
 /* Kepala departement seelesai */
 
-
 /* ============================================================== */
-
 
 /* Admin OutSourcing */
 Route::middleware('auth')->group(function () {
-    Route::get('/admin-outsourcing/dashboard',  [AdminOutsourcingController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin-outsourcing/dashboard', [AdminOutsourcingController::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/admin-outsourcing/kelola-karyawan', [AdminOutsourcingController::class, 'kelolaKaryawan']);
     Route::get('/admin-outsourcing/api/departemen', [AdminOutsourcingController::class, 'getDepartemen']);
     Route::post('/admin-outsourcing/api/karyawan', [AdminOutsourcingController::class, 'storeKaryawan']);
@@ -75,7 +74,7 @@ Route::get('/api/hr/karyawan', [KaryawanController::class, 'index'])->name('api.
 
 Route::get('/api/hr/vendors', [KaryawanController::class, 'getVendors'])->name('api.hr.vendors');
 
-/* USER HR SELESAI*/
+/* USER HR SELESAI */
 
 /* ======================================================================== */
 
@@ -101,44 +100,49 @@ Route::middleware('auth')->group(function () {
         return view('karyawanOutsourcing.dashboardKaryawan');
     })->name('dashboard');
 
-Route::get('/karyawan-outsourcing/jadwal-karyawan/pdf/{year}/{month}', function($year, $month) {
-    $userId = Illuminate\Support\Facades\Auth::id() ?? 1; // Fallback to user 1 for test if session is missing
+    Route::get('/karyawan-outsourcing/jadwal-karyawan/pdf/{year}/{month}', function ($year, $month) {
+        $userId = Auth::id() ?? 1; // Fallback to user 1 for test if session is missing
 
-    $startDate = Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth();
-    $endDate = $startDate->copy()->endOfMonth();
+        $startDate = Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
 
-    $jadwals = Illuminate\Support\Facades\DB::table('karyawan_jadwal')
-        ->join('jadwal', 'karyawan_jadwal.jadwal_id', '=', 'jadwal.id_jadwal')
-        ->join('shift', 'jadwal.shift_id', '=', 'shift.id_shift')
-        ->where('karyawan_jadwal.user_id', $userId)
-        ->whereBetween('jadwal.tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
-        ->get();
+        $jadwals = DB::table('karyawan_jadwal')
+            ->join('jadwal', 'karyawan_jadwal.jadwal_id', '=', 'jadwal.id_jadwal')
+            ->join('shift', 'jadwal.shift_id', '=', 'shift.id_shift')
+            ->where('karyawan_jadwal.user_id', $userId)
+            ->whereBetween('jadwal.tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->get();
 
-    $jadwalByDate = [];
-    foreach ($jadwals as $j) {
-        $jadwalByDate[$j->tanggal] = $j;
-    }
+        $jadwalByDate = [];
+        foreach ($jadwals as $j) {
+            $jadwalByDate[$j->tanggal] = $j;
+        }
 
-    $dateObj = Carbon\Carbon::createFromDate($year, $month, 1);
-    $monthName = clone $dateObj;
-    $monthName->locale('id');
-    $monthNameStr = $monthName->translatedFormat('F Y');
+        $dateObj = Carbon\Carbon::createFromDate($year, $month, 1);
+        $monthName = clone $dateObj;
+        $monthName->locale('id');
+        $monthNameStr = $monthName->translatedFormat('F Y');
 
-    $pdf = Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.jadwal-karyawan', [
-        'calendarData' => $jadwalByDate,
-        'monthName' => $monthNameStr,
-        'user' => Illuminate\Support\Facades\Auth::user(),
-        'daysInMonth' => $dateObj->daysInMonth,
-        'firstDayOfWeek' => $dateObj->copy()->startOfMonth()->dayOfWeekIso,
-        'currentYear' => $year,
-        'currentMonth' => $month,
-    ]);
+        $pdf = Pdf::loadView('pdf.jadwal-karyawan', [
+            'calendarData' => $jadwalByDate,
+            'monthName' => $monthNameStr,
+            'user' => Auth::user(),
+            'daysInMonth' => $dateObj->daysInMonth,
+            'firstDayOfWeek' => $dateObj->copy()->startOfMonth()->dayOfWeekIso,
+            'currentYear' => $year,
+            'currentMonth' => $month,
+        ]);
 
-    return $pdf->download('Jadwal_Kerja_' . str_replace(' ', '_', $monthNameStr) . '.pdf');
+        return $pdf->download('Jadwal_Kerja_'.str_replace(' ', '_', $monthNameStr).'.pdf');
+    });
+
+    Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
+        return view('karyawanOutsourcing.perizinan');
+    });
+
 });
 
-Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
-    return view('karyawanOutsourcing.perizinan');
-});
-
-
+/* Profil Semua User */
+Route::get('/profil', function () {
+    return view('profil.index');
+})->name('profil')->middleware('auth');
