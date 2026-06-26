@@ -140,17 +140,21 @@ Route::middleware('auth')->group(function () {
         return view('karyawanOutsourcing.perizinan');
     });
 
+    Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
+        return view('karyawanOutsourcing.perizinan');
+    });
+
+    Route::get('/karyawan-outsourcing/pengajuanKaryawan', function () {
+        return view('karyawanOutsourcing.pengajuanKaryawan');
+    });
+
+    Route::get('/karyawan-outsourcing/jadwal-karyawan', function () {
+        return view('karyawanOutsourcing.jadwalKaryawan');
+    });
+
 });
 
-Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
-    return view('karyawanOutsourcing.perizinan');
-});
-
-Route::get('/karyawan-outsourcing/pengajuanKaryawan', function () {
-    return view('karyawanOutsourcing.pengajuanKaryawan');
-});
-
-Route::get('/karyawan-outsourcing/jadwal-karyawan', function () {
-    return view('karyawanOutsourcing.jadwalKaryawan');
-});
-
+/* Profil Semua User */
+Route::get('/profil', function () {
+    return view('profil.index');
+})->name('profil')->middleware('auth');
