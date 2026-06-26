@@ -141,4 +141,12 @@ Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
     return view('karyawanOutsourcing.perizinan');
 });
 
+Route::get('/karyawan-outsourcing/pengajuanKaryawan', function () {
+    return view('karyawanOutsourcing.pengajuanKaryawan');
+});
 
+Route::get('/karyawan-outsourcing/jadwal-karyawan', function () {
+    return view('karyawanOutsourcing.jadwalKaryawan');
+});
+
+});
