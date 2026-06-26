@@ -133,6 +133,18 @@ class KehadiranService
             $data['toleransi'],
         );
 
+        // Cek batas maksimal absensi masuk: tidak boleh setelah jam keluar shift
+        if (! empty($data['jamKeluar'])) {
+            $batasMaksimal = Carbon::parse(now()->toDateString() . ' ' . $data['jamKeluar']);
+            if (Carbon::parse($data['waktu'])->greaterThan($batasMaksimal)) {
+                return [
+                    'success' => false,
+                    'message' => 'Absensi masuk tidak dapat dilakukan, waktu shift sudah berakhir pukul '
+                                 . Carbon::parse($data['jamKeluar'])->format('H:i') . '.',
+                ];
+            }
+        }
+
         // mengecek aapakah hari ini sudah memiliki status
         if ($kehadiran && $kehadiran->tipe_kehadiran_id != 1) {
             return [

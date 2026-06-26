@@ -26,7 +26,6 @@ class DashboardStats extends Component
         $this->userService = $userService;
     }
 
-
     // query count untuk masing-masing role pengguna
     public function getTotalAdminVendorProperty(): int
     {
@@ -48,7 +47,7 @@ class DashboardStats extends Component
     {
         return $this->totalAdminVendor + $this->totalHr + $this->totalKepalaDepartemen;
     }
-    
+
     // render komponen
     public function render()
     {

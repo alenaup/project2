@@ -173,6 +173,10 @@
         <x-karyawan.dashboard.sakit-info-card />
     @elseif ($status_kehadiran === true && $tipe_kehadiran === 'Izin')
         <x-karyawan.dashboard.izin-info-card />
+    @elseif ($status_kehadiran === true && $tipe_kehadiran === 'Mankir')
+        <x-karyawan.dashboard.mankir-info-card />
+    @elseif ($status_kehadiran === true && $tipe_kehadiran === 'Terlambat')
+        <x-karyawan.dashboard.terlambat-info-card />
     @endif
     <!-- CARD -->
 

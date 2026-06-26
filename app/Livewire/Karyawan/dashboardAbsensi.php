@@ -5,6 +5,7 @@ namespace App\Livewire\Karyawan;
 use App\Services\JadwalService;
 use App\Services\KehadiranService;
 use App\Services\RekapService;
+use App\Enums\TipeKehadiran;
 use Livewire\Component;
 
 class dashboardAbsensi extends Component
@@ -26,6 +27,10 @@ class dashboardAbsensi extends Component
     public bool $adaJadwal = false;
     public ?string $pesanJadwal = null;
     public ?int $rekapId = null;
+
+    // ── Status kehadiran non-absensi hari ini (sakit/izin/cuti/mankir) ────
+    public ?string $tipeKehadiranHariIni = null;   // nilai string dari enum, mis: 'sakit', 'izin'
+    public bool $kehadiranSudahTerisi = false;      // true jika ada status bukan hadir/terlambat
 
     // ──────────────────────────────────────────────────────────────────────
 
@@ -68,20 +73,43 @@ class dashboardAbsensi extends Component
         if ($rekap) {
             $this->rekapId = $rekap->id_rekapan;
         }
-    }
+
+        // ── Deteksi status kehadiran non-absensi (sakit / izin / cuti / mankir) ──
+        // Jika rekaman kehadiran hari ini memiliki tipe selain Hadir & Terlambat,
+        // form absensi harus diblokir dan karyawan diberi notifikasi.
+        $kehadiranHariIniDetail = (new KehadiranService)->cekKehadiran();
+        if ($kehadiranHariIniDetail) {
+            $tipeId = $kehadiranHariIniDetail->tipe_kehadiran_id;
+            // ID: 2=Sakit, 3=Mankir, 4=Cuti, 5=Izin (bukan 1=Hadir, bukan 6=Terlambat)
+            $tipeNonAbsensi = [2, 3, 4, 5];
+            if (in_array($tipeId, $tipeNonAbsensi)) {
+                $this->kehadiranSudahTerisi = true;
+                $namaMap = [
+                    2 => 'Sakit',
+                    3 => 'Mankir',
+                    4 => 'Cuti',
+                    5 => 'Izin',
+                ];
+                $this->tipeKehadiranHariIni = $namaMap[$tipeId] ?? null;
+            }
+        }
+
+    // ──────────────────────────────────────────────────────────────────────
+    } // end mount()
 
     // ──────────────────────────────────────────────────────────────────────
 
     public function simpanAbsensi(KehadiranService $service)
     {
         $data = [
-            'waktu' => $this->waktu,
-            'latitude' => $this->latitude,
+            'waktu'     => $this->waktu,
+            'latitude'  => $this->latitude,
             'longitude' => $this->longitude,
-            'jadwalId' => $this->jadwalId,
-            'jamMasuk' => $this->jamMasuk,
+            'jadwalId'  => $this->jadwalId,
+            'jamMasuk'  => $this->jamMasuk,
+            'jamKeluar' => $this->jamKeluar,
             'toleransi' => $this->toleransiTelat,
-            'rekapId' => $this->rekapId,
+            'rekapId'   => $this->rekapId,
         ];
 
         if ($this->jenisAbsensi === 'masuk') {
@@ -121,8 +149,10 @@ class dashboardAbsensi extends Component
     public function render()
     {
         return view('livewire.Karyawan.dashboardAbsensi', [
-            'jamMasuk' => $this->jamMasuk,
-            'jamKeluar' => $this->jamKeluar,
+            'jamMasuk'              => $this->jamMasuk,
+            'jamKeluar'             => $this->jamKeluar,
+            'kehadiranSudahTerisi'  => $this->kehadiranSudahTerisi,
+            'tipeKehadiranHariIni'  => $this->tipeKehadiranHariIni,
         ]);
     }
 }

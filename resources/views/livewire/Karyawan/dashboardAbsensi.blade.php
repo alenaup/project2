@@ -12,9 +12,7 @@
         </span>
     </div>
 
-    <!-- ── FLASH MESSAGES ──────────────────────────────────────────────── -->
-    <x-flash-message sessionKey="success" type="success" on="flash-success" />
-    <x-flash-message sessionKey="error" type="error" on="flash-error" />
+    {{-- Flash Message ditangani di layout global (karyawanOutsourcing.blade.php) --}}
 
     <!-- ── TIDAK ADA JADWAL ────────────────────────────────────────────── -->
     @if (!$adaJadwal)
@@ -50,8 +48,64 @@
                 Form Tidak Tersedia
             </div>
         </div>
+    @elseif ($kehadiranSudahTerisi)
+        {{-- ── STATUS KEHADIRAN SUDAH TERISI (bukan absensi kerja) ──────── --}}
+        @php
+            $tipeConfig = match($tipeKehadiranHariIni) {
+                'Sakit'  => ['bg' => 'bg-red-50',    'border' => 'border-red-200',    'icon_bg' => 'bg-red-100',    'text' => 'text-red-600',    'badge_bg' => 'bg-red-100',    'badge_text' => 'text-red-700',    'icon' => 'fa-heart-pulse',    'desc' => 'Kamu tercatat sakit hari ini. Semoga lekas pulih!'],
+                'Izin'   => ['bg' => 'bg-yellow-50', 'border' => 'border-yellow-200', 'icon_bg' => 'bg-yellow-100', 'text' => 'text-yellow-600', 'badge_bg' => 'bg-yellow-100', 'badge_text' => 'text-yellow-700', 'icon' => 'fa-file-signature', 'desc' => 'Kamu memiliki izin yang telah disetujui hari ini.'],
+                'Cuti'   => ['bg' => 'bg-blue-50',   'border' => 'border-blue-200',   'icon_bg' => 'bg-blue-100',   'text' => 'text-blue-600',   'badge_bg' => 'bg-blue-100',   'badge_text' => 'text-blue-700',   'icon' => 'fa-umbrella-beach',  'desc' => 'Kamu sedang dalam masa cuti hari ini. Nikmati hari liburmu!'],
+                'Mankir' => ['bg' => 'bg-gray-50',   'border' => 'border-gray-300',   'icon_bg' => 'bg-gray-200',   'text' => 'text-gray-600',   'badge_bg' => 'bg-gray-200',   'badge_text' => 'text-gray-700',   'icon' => 'fa-ban',             'desc' => 'Kamu tercatat tidak hadir tanpa keterangan. Hubungi atasan.'],
+                default  => ['bg' => 'bg-gray-50',   'border' => 'border-gray-200',   'icon_bg' => 'bg-gray-100',   'text' => 'text-gray-600',   'badge_bg' => 'bg-gray-100',   'badge_text' => 'text-gray-700',   'icon' => 'fa-circle-info',     'desc' => 'Status kehadiran hari ini sudah tercatat.'],
+            };
+        @endphp
+
+        <div class="relative z-10 rounded-2xl border {{ $tipeConfig['border'] }} {{ $tipeConfig['bg'] }} p-5 space-y-4">
+            {{-- Icon + Label --}}
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 {{ $tipeConfig['icon_bg'] }} {{ $tipeConfig['text'] }} flex items-center justify-center rounded-2xl shadow-inner">
+                    <i class="fas {{ $tipeConfig['icon'] }} text-base"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-400 uppercase tracking-wide font-medium">Status Kehadiran Hari Ini</p>
+                    <span class="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $tipeConfig['badge_bg'] }} {{ $tipeConfig['badge_text'] }}">
+                        {{ $tipeKehadiranHariIni }}
+                    </span>
+                </div>
+            </div>
+
+            {{-- Deskripsi --}}
+            <p class="text-sm text-gray-500 leading-relaxed">{{ $tipeConfig['desc'] }}</p>
+
+            {{-- Divider --}}
+            <div class="border-t border-dashed {{ $tipeConfig['border'] }}"></div>
+
+            {{-- Notifikasi blokir absensi --}}
+            <div class="flex items-start gap-3 rounded-xl bg-white/70 border {{ $tipeConfig['border'] }} px-4 py-3">
+                <i class="fas fa-lock text-sm {{ $tipeConfig['text'] }} mt-0.5 flex-shrink-0"></i>
+                <div>
+                    <p class="text-sm font-semibold text-gray-700">Absensi Tidak Tersedia</p>
+                    <p class="text-xs text-gray-400 mt-0.5">
+                        Form absensi dinonaktifkan karena status kehadiran kamu hari ini
+                        sudah tercatat sebagai <strong class="{{ $tipeConfig['text'] }}">{{ $tipeKehadiranHariIni }}</strong>.
+                        Jika ada kesalahan, hubungi HR atau Kepala Departemen.
+                    </p>
+                </div>
+            </div>
+
+            {{-- Form nonaktif (visual saja) --}}
+            <div class="opacity-30 pointer-events-none select-none space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="py-2.5 rounded-xl bg-gray-100 text-center text-gray-400 text-sm font-medium">Absen Masuk</div>
+                    <div class="py-2.5 rounded-xl bg-gray-100 text-center text-gray-400 text-sm font-medium">Absen Keluar</div>
+                </div>
+                <div class="w-full bg-gray-200 text-gray-400 py-3 rounded-2xl text-center text-sm font-semibold">
+                    <i class="fas fa-lock mr-1"></i> Form Terkunci
+                </div>
+            </div>
+        </div>
     @else
-        <!-- ── FORM ABSENSI (jadwal tersedia) ─────────────────────────────── -->
+        {{-- ── FORM ABSENSI (jadwal tersedia, tidak ada status lain) ────── --}}
         <form wire:submit.prevent="simpanAbsensi" x-data
             @submit="$dispatch('show-loading', { message: 'Memproses absensi...' })">
             <div x-data="{ jenisAbsensi: @entangle('jenisAbsensi') }" class="space-y-4">
@@ -126,8 +180,7 @@
                 <!-- SUBMIT -->
                 <div x-data="{ sudahMasuk: @entangle('sudahAbsenMasuk'), sudahKeluar: @entangle('sudahAbsenKeluar') }" x-bind:class="''">
                     <div class="flex items-end justify-end mb-2">
-                        <button onclick="ambilLokasi()" x-data 
-    @click="$dispatch('show-loading', { message: 'Mengambil lokasi...' })" type="button"
+                        <button onclick="ambilLokasi()" type="button"
                             class="relative z-10 w-full bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-medium hover:bg-blue-200 transition flex items-center justify-center gap-2">
                             <i class="fas fa-location-arrow text-[10px]"></i>
                             Ambil Lokasi

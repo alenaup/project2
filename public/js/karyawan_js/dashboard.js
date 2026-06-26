@@ -70,107 +70,122 @@ function updateMapUser() {
 function ambilLokasi() {
 
     if (!navigator.geolocation) {
-        alert("Browser tidak mendukung GPS");
+        window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Browser tidak mendukung GPS." } }));
         return;
     }
 
-    navigator.geolocation.getCurrentPosition(
+    // ✅ Cek status izin GPS terlebih dulu sebelum menampilkan loading modal
+    // Ini mencegah modal berkedip saat izin sudah ditolak sebelumnya
+    const doGetPosition = () => {
+        // Tampilkan loading modal SETELAH kita tahu izin tidak ditolak
+        window.dispatchEvent(new CustomEvent('show-loading', { detail: { message: 'Mengambil lokasi GPS...' } }));
 
-        function (pos) {
+        navigator.geolocation.getCurrentPosition(
 
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
+            function (pos) {
 
-            // Hitung jarak ke kantor (meter)
-            const jarak = map.distance(
-                [lat, lng],
-                [kantor.lat, kantor.lng]
-            );
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
 
-            // Update marker pada map
-            lokasi = {
-                lat: lat,
-                lng: lng
-            };
+                // Hitung jarak ke kantor (meter)
+                const jarak = map.distance(
+                    [lat, lng],
+                    [kantor.lat, kantor.lng]
+                );
 
-            updateMapUser();
+                // Update marker pada map
+                lokasi = {
+                    lat: lat,
+                    lng: lng
+                };
 
-            console.log("Jarak ke kantor:", jarak);
+                updateMapUser();
 
-            // Cek radius
-            if (jarak > radiusKantor) {
-                // Tampilkan pesan error dengan dispatch event
-                window.dispatchEvent(new CustomEvent('flash-error', {
-                    detail: { message: `Anda berada di luar area kantor. Jarak: ${Math.round(jarak)} meter` }
+                console.log("Jarak ke kantor:", jarak);
+
+                // Cek radius
+                if (jarak > radiusKantor) {
+                    window.dispatchEvent(new CustomEvent('flash-error', {
+                        detail: { message: `Anda berada di luar area kantor. Jarak: ${Math.round(jarak)} meter` }
+                    }));
+                    // Sembunyikan modal — tidak ada Livewire request yang akan terjadi
+                    window.dispatchEvent(new CustomEvent('hide-loading'));
+                    return;
+                }
+
+                // Jika dalam radius — kirim ke Livewire (hook Livewire akan menutup modal otomatis)
+                window.dispatchEvent(new CustomEvent('flash-success', {
+                    detail: { message: `Lokasi valid. Jarak ke kantor: ${Math.round(jarak)} meter` }
                 }));
-                return;
-            }
 
-            // Jika dalam radius
-            window.dispatchEvent(new CustomEvent('flash-success', {
-                detail: { message: `Lokasi valid. Jarak ke kantor: ${Math.round(jarak)} meter` }
-            }));
+                const componentEl = document.getElementById('map').closest('[wire\\:id]');
+                let component = null;
+                if (componentEl && typeof Livewire !== 'undefined') {
+                    component = Livewire.find(componentEl.getAttribute('wire:id'));
+                }
 
-            // Kirim ke Livewire component dashboardAbsensi
-            // Ambil komponen Livewire menggunakan Livewire.find() agar mendapatkan Proxy Object yang benar
-            const componentEl = document.getElementById('map').closest('[wire\\:id]');
-            let component = null;
-            if (componentEl && typeof Livewire !== 'undefined') {
-                component = Livewire.find(componentEl.getAttribute('wire:id'));
-            }
+                if (component) {
+                    component.$set('latitude', String(lat));
+                    component.$set('longitude', String(lng));
+                    component.$set('jarak', Math.round(jarak));
 
-            if (component) {
-                // Gunakan $set (dengan tanda dollar $) agar perubahan langsung tersinkronisasi ke server Livewire
-                component.$set('latitude', String(lat));
-                component.$set('longitude', String(lng));
-                component.$set('jarak', Math.round(jarak));
+                    const now = new Date();
+                    const waktu = now.getFullYear() + '-'
+                        + String(now.getMonth() + 1).padStart(2, '0') + '-'
+                        + String(now.getDate()).padStart(2, '0') + ' '
+                        + String(now.getHours()).padStart(2, '0') + ':'
+                        + String(now.getMinutes()).padStart(2, '0') + ':'
+                        + String(now.getSeconds()).padStart(2, '0');
 
-                // Isi waktu dengan datetime saat ini (format Y-m-d H:i:s)
-                const now = new Date();
-                const waktu = now.getFullYear() + '-'
-                    + String(now.getMonth() + 1).padStart(2, '0') + '-'
-                    + String(now.getDate()).padStart(2, '0') + ' '
-                    + String(now.getHours()).padStart(2, '0') + ':'
-                    + String(now.getMinutes()).padStart(2, '0') + ':'
-                    + String(now.getSeconds()).padStart(2, '0');
+                    component.$set('waktu', waktu);
 
-                component.$set('waktu', waktu);
+                    console.log("Data lokasi & waktu dikirim ke Livewire:", { lat, lng, jarak: Math.round(jarak), waktu });
+                } else {
+                    // Komponen tidak ditemukan, tutup modal manual
+                    window.dispatchEvent(new CustomEvent('hide-loading'));
+                    console.error("Komponen Livewire tidak ditemukan!");
+                }
 
-                console.log("Data lokasi & waktu dikirim ke Livewire:", { lat, lng, jarak: Math.round(jarak), waktu });
+            },
+
+            function (err) {
+                // Sembunyikan loading modal saat GPS gagal
+                window.dispatchEvent(new CustomEvent('hide-loading'));
+
+                switch (err.code) {
+                    case err.PERMISSION_DENIED:
+                        window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Izin lokasi ditolak. Silakan izinkan akses lokasi pada browser Anda." } }));
+                        break;
+                    case err.POSITION_UNAVAILABLE:
+                        window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Lokasi tidak tersedia. Pastikan GPS Anda aktif." } }));
+                        break;
+                    case err.TIMEOUT:
+                        window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Pengambilan lokasi terlalu lama (timeout)." } }));
+                        break;
+                    default:
+                        window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Gagal mengambil lokasi." } }));
+                }
+            },
+
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    };
+
+    // Gunakan Permissions API untuk cek status izin SEBELUM membuka loading modal
+    if (navigator.permissions) {
+        navigator.permissions.query({ name: 'geolocation' }).then(function (result) {
+            if (result.state === 'denied') {
+                // Izin sudah ditolak — langsung tampilkan pesan error TANPA membuka modal
+                window.dispatchEvent(new CustomEvent('flash-error', {
+                    detail: { message: "Izin lokasi ditolak. Silakan izinkan akses lokasi di pengaturan browser Anda." }
+                }));
             } else {
-                console.error("Komponen Livewire tidak ditemukan!");
+                // Izin 'granted' atau 'prompt' — aman untuk menampilkan loading dan meminta lokasi
+                doGetPosition();
             }
-
-
-        },
-
-        function (err) {
-
-            switch (err.code) {
-
-                case err.PERMISSION_DENIED:
-                    window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Izin lokasi ditolak. Silakan izinkan akses lokasi pada browser Anda." } }));
-                    break;
-
-                case err.POSITION_UNAVAILABLE:
-                    window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Lokasi tidak tersedia. Pastikan GPS Anda aktif." } }));
-                    break;
-
-                case err.TIMEOUT:
-                    window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Pengambilan lokasi terlalu lama (timeout)." } }));
-                    break;
-
-                default:
-                    window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: "Gagal mengambil lokasi." } }));
-            }
-
-        },
-
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-        }
-
-    );
+        });
+    } else {
+        // Browser tidak mendukung Permissions API — langsung coba (fallback)
+        doGetPosition();
+    }
 }
