@@ -20,8 +20,8 @@ Route::get('/kepala-departement/karyawan', function () {
     return view('kepala-departement.karyawan');
 });
 
-Route::get('/kepala-departement/shift', function () {
-    return view('kepala-departement.shift');
+Route::get('/kepala-departement/atur-lokasi', function () {
+    return view('kepala-departement.atur-lokasi');
 });
 
 Route::get('/kepala-departement/laporan', function () {
