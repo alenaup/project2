@@ -50,6 +50,14 @@
                 </svg>',
                 'ref' => '/admin-outsourcing/kelola-karyawan',
             ],
+        
+            [
+                'title' => 'Pengajuan Akun',
+                'icon' => '<svg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke-width=\'2\' stroke=\'currentColor\' class=\'w-5 h-5\'>
+                    <path stroke-linecap=\'round\' stroke-linejoin=\'round\' d=\'M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0zM3 19.235v-.111c0-1.748 1.154-3.238 2.825-3.66a9.98 9.98 0 0 1 6.35 0c1.671.422 2.825 1.912 2.825 3.66v.111M12 18.75V21m-4.5-2.25H16.5\' />
+                </svg>',
+                'ref' => '/admin-outsourcing/pengajuan-akun',
+            ],
         ]">
             Admin Outsourcing
         </x-sidebar>

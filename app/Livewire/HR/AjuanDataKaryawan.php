@@ -14,7 +14,7 @@ use Livewire\WithPagination;
  * Livewire component untuk mengelola ajuan data karyawan outsourcing.
  *
  * Fitur:
- * - Menampilkan daftar karyawan outsourcing yang berstatus inactive (pending approval)
+ * - Menampilkan daftar karyawan outsourcing yang berstatus pending (menunggu persetujuan)
  * - Pencarian berdasarkan NIP, nama, atau asal vendor
  * - Pagination data karyawan
  * - Menyetujui ajuan karyawan (mengubah status menjadi active)
@@ -205,7 +205,7 @@ class AjuanDataKaryawan extends Component
 
     /**
      * Menyetujui ajuan karyawan outsourcing.
-     * Mengubah status user dari inactive menjadi active.
+     * Mengubah status user dari pending menjadi active.
      *
      * @param int|null $userId  ID user yang disetujui (null = dari modal detail)
      */
@@ -248,7 +248,8 @@ class AjuanDataKaryawan extends Component
 
     /**
      * Menolak ajuan karyawan outsourcing.
-     * Menghapus data user yang ditolak beserta alasan penolakan.
+     * Mengubah status user dari pending menjadi inactive.
+     * tanggal_keluar tetap null.
      */
     public function reject(): void
     {
@@ -268,7 +269,11 @@ class AjuanDataKaryawan extends Component
 
         $namaKaryawan = $user->nama_lengkap;
 
-        $user->delete();
+        // Ubah status menjadi inactive (ditolak), tanggal_keluar tetap null
+        $user->update([
+            'status'         => Status::Inactive->value,
+            'tanggal_keluar' => null,
+        ]);
 
         session()->flash('success', "Karyawan {$namaKaryawan} ditolak dengan alasan: {$this->alasanPenolakan}");
 
@@ -280,7 +285,7 @@ class AjuanDataKaryawan extends Component
      * ──────────────────────────────────────────────────────────── */
 
     /**
-     * Mengambil data karyawan outsourcing yang berstatus inactive (pending).
+     * Mengambil data karyawan outsourcing yang berstatus pending (menunggu persetujuan).
      * Mendukung pencarian berdasarkan NIP, nama, dan nama vendor.
      *
      * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
@@ -289,7 +294,8 @@ class AjuanDataKaryawan extends Component
     {
         return User::with('outsourcing')
             ->where('role', UserRole::Karyawan->value)
-            ->where('status', Status::Inactive->value)
+            ->where('status', Status::Pending->value)
+            ->whereNull('tanggal_keluar')
             ->when($this->search, function ($query) {
                 $keyword = '%' . $this->search . '%';
                 $query->where(function ($q) use ($keyword) {

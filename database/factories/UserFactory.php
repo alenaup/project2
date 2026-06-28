@@ -118,13 +118,14 @@ class UserFactory extends Factory
 
     /**
      * State untuk karyawan yang menunggu persetujuan HR (pending approval).
-     * Status diatur ke inactive agar muncul di halaman ajuan data karyawan.
+     * Status diatur ke pending agar muncul di halaman ajuan data karyawan.
+     * tanggal_keluar tetap null.
      */
     public function pendingApproval(): static
     {
         return $this->state(fn () => [
             'role' => UserRole::Karyawan->value,
-            'status' => Status::Inactive->value,
+            'status' => Status::Pending->value,
             'alamat' => $this->faker->address(),
             'nip' => $this->faker->numerify('NIP-########'),
             'tanggal_masuk' => null,

@@ -38,20 +38,12 @@ class KelolaKaryawan extends Component
      |  Properties — State Modal
      * ──────────────────────────────────────────────────────────── */
 
+    /* ──────────────────────────────────────────────────────────────
+     |  Properties — State Modal (Managed by Alpine.js)
+     * ──────────────────────────────────────────────────────────── */
+
     /** @var int|null ID karyawan yang sedang dipilih */
     public ?int $selectedId = null;
-
-    /** @var bool Kontrol visibilitas modal detail */
-    public bool $showDetailModal = false;
-
-    /** @var bool Kontrol visibilitas modal edit */
-    public bool $showEditModal = false;
-
-    /** @var bool Kontrol visibilitas modal konfirmasi edit */
-    public bool $showConfirmEditModal = false;
-
-    /** @var bool Kontrol visibilitas modal hapus */
-    public bool $showDeleteModal = false;
 
 
     /* ──────────────────────────────────────────────────────────────
@@ -111,8 +103,6 @@ class KelolaKaryawan extends Component
             'vendor'       => $user->outsourcing?->nama_outsourcing ?? '-',
             'departemen'   => $user->departemen?->nama_departemen ?? '-',
         ];
-
-        $this->showDetailModal = true;
     }
 
     /**
@@ -120,7 +110,6 @@ class KelolaKaryawan extends Component
      */
     public function closeDetail(): void
     {
-        $this->showDetailModal = false;
         $this->detailKaryawan  = [];
     }
 
@@ -142,8 +131,6 @@ class KelolaKaryawan extends Component
         $this->editEmail    = $user->email ?? '';
         $this->editTelepon  = $user->nomor_tlp ?? '';
         $this->editAlamat   = $user->alamat ?? '';
-
-        $this->showEditModal = true;
     }
 
     /**
@@ -151,7 +138,6 @@ class KelolaKaryawan extends Component
      */
     public function closeEdit(): void
     {
-        $this->showEditModal = false;
         $this->resetEditForm();
     }
 
@@ -172,7 +158,7 @@ class KelolaKaryawan extends Component
             'editEmail.email'    => 'Format email tidak valid.',
         ]);
 
-        $this->showConfirmEditModal = true;
+        $this->dispatch('open-confirm-edit');
     }
 
     /**
@@ -180,7 +166,7 @@ class KelolaKaryawan extends Component
      */
     public function closeConfirmEdit(): void
     {
-        $this->showConfirmEditModal = false;
+        // Handled by Alpine
     }
 
     /**
@@ -192,7 +178,7 @@ class KelolaKaryawan extends Component
 
         if (!$user) {
             session()->flash('error', 'Data karyawan tidak ditemukan.');
-            $this->closeConfirmEdit();
+            $this->dispatch('close-confirm-edit');
             return;
         }
 
@@ -205,8 +191,7 @@ class KelolaKaryawan extends Component
 
         session()->flash('success', "✅ Data karyawan {$user->nama_lengkap} berhasil diperbarui.");
 
-        $this->closeConfirmEdit();
-        $this->closeEdit();
+        $this->dispatch('close-edit');
     }
 
     /* ──────────────────────────────────────────────────────────────
@@ -219,7 +204,6 @@ class KelolaKaryawan extends Component
     public function openDelete(int $userId): void
     {
         $this->selectedId = $userId;
-        $this->showDeleteModal = true;
     }
 
     /**
@@ -227,7 +211,6 @@ class KelolaKaryawan extends Component
      */
     public function closeDelete(): void
     {
-        $this->showDeleteModal = false;
         $this->selectedId = null;
     }
 
@@ -240,7 +223,7 @@ class KelolaKaryawan extends Component
 
         if (!$user) {
             session()->flash('error', 'Data karyawan tidak ditemukan.');
-            $this->closeDelete();
+            $this->dispatch('close-delete');
             return;
         }
 
@@ -249,7 +232,7 @@ class KelolaKaryawan extends Component
 
         session()->flash('success', "🗑️ Karyawan {$nama} berhasil dihapus.");
 
-        $this->closeDelete();
+        $this->dispatch('close-delete');
     }
 
     /* ──────────────────────────────────────────────────────────────

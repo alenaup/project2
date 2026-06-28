@@ -51,7 +51,7 @@
                         {{ $karyawanList->firstItem() + $index }}
                     </td>
                     <td class="p-3 text-left font-mono whitespace-nowrap">
-                        NIP-{{ $karyawan->nip }}
+                        {{ $karyawan->nip }}
                     </td>
 
                     <td class="p-3 text-left whitespace-nowrap">
@@ -210,7 +210,7 @@
                     <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                         <div class="space-y-3 text-sm">
                             @foreach ([
-                                'NIP'           => ($selectedUser['nip'] ?? null) !== null ? 'NIP-' . $selectedUser['nip'] : 'NIP-',
+                                'NIP'           => $selectedUser['nip'] ?? '-',
 
                                 'Nama Lengkap'  => $selectedUser['nama_lengkap'] ?? '-',
                                 'Email'         => $selectedUser['email'] ?? '-',

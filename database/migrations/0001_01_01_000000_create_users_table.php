@@ -22,10 +22,10 @@
                 $table->string('nomor_tlp', 20)->nullable();
                 $table->string('email')->unique();
                 $table->timestamp('email_verified_at')->nullable();
-
                         /* eksekusi menggunakan enums */
                 $table->enum('role', [UserRole::SuperAdmin->value, UserRole::AdminVendor->value, UserRole::Hr->value, UserRole::Karyawan->value, UserRole::KepalaDepartemen->value])->default(UserRole::Karyawan->value);
-                $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
+                $table->enum('status', [Status::Active->value, Status::Inactive->value, Status::Pending->value])->default(Status::Active->value);
+
 
                 /* hanaya untuk karyawan */
                 $table->string('alamat', 255)->nullable();
@@ -42,7 +42,7 @@
                 $table->foreign('departemen_id', 'karyawan berasal dari departemen')
                 ->references('id_departemen')->on('departemen')
                 ->onDelete('cascade')->onUpdate('cascade');
-                
+
                 $table->unsignedBigInteger('user_id')->nullable();
                 $table->foreign('user_id', 'user dibuat oleh user')
                 ->references('id_user')->on('user')

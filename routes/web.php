@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin-outsourcing/pengajuan-karyawan', function () {
         return view('adminOutsourcing.pengajuanKaryawan');
     })->name('admin.pengajuan-karyawan');
+    Route::get('/admin-outsourcing/pengajuan-akun', [AdminOutsourcingController::class, 'pengajuanAkun'])->name('admin.pengajuan-akun');
 });
 
 /* Admin OutSourcing */

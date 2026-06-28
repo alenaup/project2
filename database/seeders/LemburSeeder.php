@@ -51,7 +51,7 @@ class LemburSeeder extends Seeder
                 Lembur::create([
                     'mulai_lembur' => $mulaiLembur,
                     'selesai_lembur' => $selesaiLembur,
-                    'tanggal_dibuat' => $tanggalDibuat,
+                    'created_at' => $tanggalDibuat,
                     'status' => Status::Active->value,
                     'status_validasi' => $statusValidasi,
                     'karyawan_id' => $karyawan->id_user,

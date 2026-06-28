@@ -433,6 +433,11 @@ class AdminOutsourcingController extends Controller
         return view('adminOutsourcing.kelola-karyawan');
     }
 
+    public function pengajuanAkun()
+    {
+        return view('adminOutsourcing.pengajuan-akun');
+    }
+
     public function getDepartemen()
     {
         $departemens = \App\Models\Departemen::all();
