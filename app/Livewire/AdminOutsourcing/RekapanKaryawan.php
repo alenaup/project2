@@ -14,21 +14,46 @@ use Livewire\Component;
 // class component livewire
 class RekapanKaryawan extends Component
 {
-    /** @var string Bulan dan tahun yang difilter (format: Y-m) */
-    public string $bulan;
+    public string $startDate;
+    public string $endDate;
+    public string $rekapBulan;
 
-    public array $karyawanByOutsourcing;
+    public array $karyawanByOutsourcing = [];
     public array $datas = [];
     public array $koloms = [];
 
+    public int $perPage = 10;
+    public int $halamanAktif = 1;
+    public int $totalKaryawan = 0;
+
     public function mount()
     {
-        $this->bulan = Carbon::now()->format('Y-m');
+        $this->startDate = Carbon::now()->subMonth()->day(26)->format('Y-m-d');
+        $this->endDate = Carbon::now()->day(25)->format('Y-m-d');
+        $this->rekapBulan = Carbon::now()->format('Y-m');
         $this->loadData();
     }
 
-    public function updatedBulan()
+    public function updatedStartDate()
     {
+        $this->halamanAktif = 1;
+        $this->loadData();
+    }
+
+    public function updatedEndDate()
+    {
+        $this->halamanAktif = 1;
+        $this->loadData();
+    }
+
+    public function updatedRekapBulan()
+    {
+        $this->loadRekapRecord();
+    }
+
+    public function gantiHalaman(int $halaman): void
+    {
+        $this->halamanAktif = $halaman;
         $this->loadData();
     }
 
@@ -36,33 +61,17 @@ class RekapanKaryawan extends Component
     // Computed Properties (data dari database)
     // ──────────────────────────────────────────────────────
 
-    private function getDateRange()
-    {
-        [$tahun, $bulan] = $this->parseBulan();
-        
-        $currentMonthStart = Carbon::create($tahun, $bulan, 1);
-        $prevMonthStart = $currentMonthStart->copy()->subMonth();
-        
-        $startDate = $prevMonthStart->copy()->day(26)->format('Y-m-d');
-        $endDate = $currentMonthStart->copy()->day(25)->format('Y-m-d');
-        
-        return [$startDate, $endDate];
-    }
-
     /**
-     * Mengambil total karyawan hadir pada bulan yang dipilih.
-     * Kehadiran bertipe 'hadir' dihitung dari tabel tipe_kehadiran.
+     * Mengambil total karyawan hadir pada tanggal range.
      */
     public function getTotalHadirProperty(): int
     {
         $karyawanIds = $this->karyawanByOutsourcing;
-        [$startDate, $endDate] = $this->getDateRange();
-
         return (new KehadiranService)
             ->totalHadirByDateRange(
                 $karyawanIds,
-                $startDate,
-                $endDate
+                $this->startDate,
+                $this->endDate
             );
     }
 
@@ -72,9 +81,7 @@ class RekapanKaryawan extends Component
     public function getTotalAlphaProperty(): int
     {
         $getKaryawan = $this->karyawanByOutsourcing;
-        [$startDate, $endDate] = $this->getDateRange();
-
-        return (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange('mankir', $getKaryawan, $startDate, $endDate);
+        return (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange('mankir', $getKaryawan, $this->startDate, $this->endDate);
     }
 
     /**
@@ -83,13 +90,13 @@ class RekapanKaryawan extends Component
     public function getTotalIzinSakitProperty(): int
     {
         $getKaryawan = $this->karyawanByOutsourcing;
-        [$startDate, $endDate] = $this->getDateRange();
-
-        return (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange(['izin', 'sakit'], $getKaryawan, $startDate, $endDate);
+        $sakit = (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange('sakit', $getKaryawan, $this->startDate, $this->endDate);
+        $izin = (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange('izin', $getKaryawan, $this->startDate, $this->endDate);
+        return $sakit + $izin;
     }
 
     /**
-     * Mengambil total karyawan aktif (tanpa tanggal_keluar / tanggal_keluar NULL).
+     * Mengambil total karyawan aktif.
      */
     public function getTotalKaryawanProperty(): int
     {
@@ -103,20 +110,19 @@ class RekapanKaryawan extends Component
     // Helpers
     // ──────────────────────────────────────────────────────
 
-    /**
-     * Memparse properti $bulan (format Y-m) menjadi [$tahun, $bulan].
-     *
-     * @return array{int, int}
-     */
-    private function parseBulan(): array
+    private function getRekapDateRange()
     {
-        $carbon = Carbon::createFromFormat('Y-m', $this->bulan);
-
-        return [(int) $carbon->format('Y'), (int) $carbon->format('m')];
+        $carbon = Carbon::createFromFormat('Y-m', $this->rekapBulan);
+        $prevMonthStart = $carbon->copy()->subMonth();
+        
+        $start = $prevMonthStart->day(26)->format('Y-m-d');
+        $end = $carbon->day(25)->format('Y-m-d');
+        
+        return [$start, $end];
     }
 
     /**
-     * Render component ke view livewire/admin-outsourcing/dashboard-stats.
+     * Render component ke view
      */
     protected function loadData(): void
     {
@@ -126,31 +132,32 @@ class RekapanKaryawan extends Component
         $this->datas = [];
         $this->koloms = [];
 
-        [$tahun, $bulan] = $this->parseBulan();
-        
-        $currentMonthStart = Carbon::create($tahun, $bulan, 1);
-        $prevMonthStart = $currentMonthStart->copy()->subMonth();
-        
-        $startDate = $prevMonthStart->copy()->day(26);
-        $endDate = $currentMonthStart->copy()->day(25);
+        $start = Carbon::parse($this->startDate);
+        $end = Carbon::parse($this->endDate);
         
         $dates = [];
-        for ($date = $startDate->copy(); $date->lte($endDate); $date->addDay()) {
+        for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
             $dates[] = $date->copy();
             $this->koloms[] = $date->format('d/m');
         }
 
-        $jenisData = "object";
-        // mengambil semua karyawan outsourcing yang sedang login
-        $karyawans = (new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, $jenisData);
+        $query = User::where('role', UserRole::Karyawan->value)
+            ->where('outsourcing_id', Auth::user()->outsourcing_id)
+            ->where('status', \App\Enums\Status::Active->value)
+            ->whereNull('tanggal_keluar');
 
-        // Ambil ID karyawan
+        $this->totalKaryawan = $query->count();
+
+        $karyawans = $query
+            ->skip(($this->halamanAktif - 1) * $this->perPage)
+            ->take($this->perPage)
+            ->get();
+
         $userIds = $karyawans->pluck('id_user');
 
         // Ambil seluruh kehadiran dalam range tanggal ini dalam 1 query
-        $kehadirans = (new KehadiranService)->ambilBanyakKehadiranByDateRange($userIds, $startDate->format('Y-m-d'), $endDate->format('Y-m-d'));
+        $kehadirans = (new KehadiranService)->ambilBanyakKehadiranByDateRange($userIds, $this->startDate, $this->endDate);
 
-        // mengubah array menjadi object dengan key adalah karyawan_id dan value adalah object kehadiran
         $kehadiranMap = $kehadirans
             ->groupBy('karyawan_id')
             ->map(function ($items) {
@@ -160,7 +167,6 @@ class RekapanKaryawan extends Component
             });
 
         foreach ($karyawans as $karyawan) {
-
             $absens = [];
 
             foreach ($dates as $date) {
@@ -178,7 +184,6 @@ class RekapanKaryawan extends Component
                 }
 
                 switch ($kehadiran->tipe_kehadiran_id) {
-
                     case 1: // Hadir
                         $absens[] = [
                             'value' => 'H',
@@ -226,17 +231,123 @@ class RekapanKaryawan extends Component
                 'absens' => $absens,
             ];
         }
+
+        $this->loadRekapRecord();
+    }
+
+    public $rekapRecord = null;
+
+    public function loadRekapRecord()
+    {
+        if (empty($this->rekapBulan)) {
+            $this->rekapRecord = null;
+            return;
+        }
+
+        [$start, $end] = $this->getRekapDateRange();
+        $karyawanIds = $this->karyawanByOutsourcing;
+
+        $firstKehadiranWithRekapan = Kehadiran::whereIn('karyawan_id', $karyawanIds)
+            ->whereBetween('tanggal', [$start, $end])
+            ->whereNotNull('rekapan_kehadiran_id')
+            ->first();
+
+        if ($firstKehadiranWithRekapan) {
+            $this->rekapRecord = \App\Models\RekapKehadiran::find($firstKehadiranWithRekapan->rekapan_kehadiran_id);
+        } else {
+            $this->rekapRecord = null;
+        }
+    }
+
+    public function kirimRekapan()
+    {
+        $this->karyawanByOutsourcing = (new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+        [$start, $end] = $this->getRekapDateRange();
+        $karyawanIds = $this->karyawanByOutsourcing;
+
+        $kehadiranQuery = Kehadiran::whereIn('karyawan_id', $karyawanIds)
+            ->whereBetween('tanggal', [$start, $end]);
+
+        if ($kehadiranQuery->count() === 0) {
+            session()->flash('error', 'Tidak ada data absensi pada periode rekap ini untuk dikirim.');
+            return;
+        }
+
+        $this->loadRekapRecord();
+        if ($this->rekapRecord) {
+            session()->flash('error', 'Rekapan absensi untuk periode ini sudah pernah dikirim.');
+            return;
+        }
+
+        $kehadiranService = new KehadiranService;
+        $totalHadir = (new KehadiranService)->totalHadirByDateRange($karyawanIds, $start, $end);
+        $totalAlpha = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('mankir', $karyawanIds, $start, $end);
+        $totalSakit = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('sakit', $karyawanIds, $start, $end);
+        $totalIzin = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('izin', $karyawanIds, $start, $end);
+        $totalCuti = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('cuti', $karyawanIds, $start, $end);
+        $totalTerlambat = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('terlambat', $karyawanIds, $start, $end);
+
+        $rekap = \App\Models\RekapKehadiran::create([
+            'pengaju' => Auth::id(),
+            'status_validasi' => \App\Enums\Validasi::Pending->value,
+            'status' => \App\Enums\Status::Active->value,
+            'total_hadir' => $totalHadir,
+            'total_mankir' => $totalAlpha,
+            'total_sakit' => $totalSakit,
+            'total_izin' => $totalIzin,
+            'total_cuti' => $totalCuti,
+            'total_terlambat' => $totalTerlambat,
+            'total_jam_kerja' => $totalHadir * 8,
+        ]);
+
+        $kehadiranQuery->update([
+            'rekapan_kehadiran_id' => $rekap->id_rekapan
+        ]);
+
+        $this->loadRekapRecord();
+        session()->flash('success', 'Rekapan absensi berhasil dikirim.');
+    }
+
+    public function kirimUlang()
+    {
+        $this->karyawanByOutsourcing = (new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+        $this->loadRekapRecord();
+        if ($this->rekapRecord && $this->rekapRecord->status_validasi === \App\Enums\Validasi::Invalid->value) {
+            [$start, $end] = $this->getRekapDateRange();
+            $karyawanIds = $this->karyawanByOutsourcing;
+            $kehadiranService = new KehadiranService;
+
+            $totalHadir = (new KehadiranService)->totalHadirByDateRange($karyawanIds, $start, $end);
+            $totalAlpha = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('mankir', $karyawanIds, $start, $end);
+            $totalSakit = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('sakit', $karyawanIds, $start, $end);
+            $totalIzin = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('izin', $karyawanIds, $start, $end);
+            $totalCuti = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('cuti', $karyawanIds, $start, $end);
+            $totalTerlambat = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('terlambat', $karyawanIds, $start, $end);
+
+            $this->rekapRecord->update([
+                'status_validasi' => \App\Enums\Validasi::Pending->value,
+                'total_hadir' => $totalHadir,
+                'total_mankir' => $totalAlpha,
+                'total_sakit' => $totalSakit,
+                'total_izin' => $totalIzin,
+                'total_cuti' => $totalCuti,
+                'total_terlambat' => $totalTerlambat,
+                'total_jam_kerja' => $totalHadir * 8,
+            ]);
+
+            session()->flash('success', 'Rekapan absensi berhasil dikirim ulang.');
+        }
     }
 
     public function render()
     {
+        $label = Carbon::parse($this->startDate)->translatedFormat('d M Y') . ' - ' . Carbon::parse($this->endDate)->translatedFormat('d M Y');
         return view('livewire.admin-outsourcing.rekapan-karyawan', [
             'totalHadir' => $this->totalHadir,
             'totalAlpha' => $this->totalAlpha,
             'totalIzinSakit' => $this->totalIzinSakit,
             'totalKaryawan' => $this->totalKaryawan,
-            'labelBulan' => Carbon::createFromFormat('Y-m', $this->bulan)
-                ->translatedFormat('F Y'),
+            'labelBulan' => $label,
         ]);
     }
 }

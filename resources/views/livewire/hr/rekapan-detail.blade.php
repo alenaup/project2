@@ -285,6 +285,23 @@
                 <div class="flex items-center gap-2">
                     @php
                         $totalHalaman = (int) ceil($totalKaryawan / $perPage);
+                        $range = 3;
+                        $pages = [];
+                        $pages[] = 1;
+                        $start = max(2, $halamanAktif - $range);
+                        $end = min($totalHalaman - 1, $halamanAktif + $range);
+                        if ($start > 2) {
+                            $pages[] = '...';
+                        }
+                        for ($i = $start; $i <= $end; $i++) {
+                            $pages[] = $i;
+                        }
+                        if ($end < $totalHalaman - 1) {
+                            $pages[] = '...';
+                        }
+                        if ($totalHalaman > 1) {
+                            $pages[] = $totalHalaman;
+                        }
                     @endphp
 
                     <button
@@ -294,13 +311,17 @@
                         Prev
                     </button>
 
-                    @for ($p = 1; $p <= $totalHalaman; $p++)
-                        <button
-                            class="px-3 py-1 rounded-lg border text-sm {{ $p === $halamanAktif ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
-                            wire:click="gantiHalaman({{ $p }})">
-                            {{ $p }}
-                        </button>
-                    @endfor
+                    @foreach ($pages as $p)
+                        @if ($p === '...')
+                            <span class="px-3 py-1 text-gray-500">...</span>
+                        @else
+                            <button
+                                class="px-3 py-1 rounded-lg border text-sm {{ $p === $halamanAktif ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-700 hover:bg-gray-50' }}"
+                                wire:click="gantiHalaman({{ $p }})">
+                                {{ $p }}
+                            </button>
+                        @endif
+                    @endforeach
 
                     <button
                         class="px-3 py-1 rounded-lg border text-gray-700 bg-white hover:bg-gray-50 {{ $halamanAktif >= $totalHalaman ? 'opacity-50 cursor-not-allowed' : '' }}"
@@ -336,13 +357,16 @@
                             ? 'text-green-600 bg-green-100'
                             : ($statusRekap === 'Ditolak'
                                 ? 'text-red-600 bg-red-100'
-                                : 'text-yellow-600 bg-yellow-100');
+                                : ($statusRekap === 'Belum Diajukan'
+                                    ? 'text-gray-500 bg-gray-100 border border-gray-300'
+                                    : 'text-yellow-600 bg-yellow-100'));
                     @endphp
                     {{ $statusClass }}">
                     <i class="fas fa-hourglass-half"></i> {{ $statusRekap }}
                 </span>
             </div>
 
+            @if ($statusRekap === 'Menunggu Persetujuan')
             <div class="flex gap-3 w-full md:w-auto" x-data="{ open: null }">
                 {{-- Tolak --}}
                 <button type="button" @click="open='tolak'"
@@ -411,6 +435,7 @@
                     </div>
                 </div>
             </div>
+            @endif
         </div>
 
         {{-- Flash message --}}

@@ -108,6 +108,7 @@ class RekapanDetail extends Component
 
         $this->users       = $formatted;
         $this->sudahFilter = true;
+        $this->loadRekapRecord();
     }
 
     /**
@@ -184,18 +185,80 @@ class RekapanDetail extends Component
         $this->periodeAwal       = null;
         $this->periodeAkhir      = null;
         $this->labelPeriode      = '';
+        $this->rekapRecord       = null;
+        $this->statusRekap       = 'Belum Diajukan';
+    }
+
+    public ?\App\Models\RekapKehadiran $rekapRecord = null;
+
+    public function loadRekapRecord(): void
+    {
+        if (!$this->vendorId || !$this->periodeAwal || !$this->periodeAkhir) {
+            $this->rekapRecord = null;
+            $this->statusRekap = 'Belum Diajukan';
+            return;
+        }
+
+        $karyawanIds = User::where('outsourcing_id', $this->vendorId)
+            ->where('role', UserRole::Karyawan->value)
+            ->pluck('id_user')
+            ->toArray();
+
+        $firstKehadiranWithRekapan = \App\Models\Kehadiran::whereIn('karyawan_id', $karyawanIds)
+            ->whereBetween('tanggal', [$this->periodeAwal, $this->periodeAkhir])
+            ->whereNotNull('rekapan_kehadiran_id')
+            ->first();
+
+        if ($firstKehadiranWithRekapan) {
+            $this->rekapRecord = \App\Models\RekapKehadiran::find($firstKehadiranWithRekapan->rekapan_kehadiran_id);
+            if ($this->rekapRecord) {
+                $statusVal = $this->rekapRecord->status_validasi;
+                if ($statusVal === \App\Enums\Validasi::Valid->value) {
+                    $this->statusRekap = 'Disetujui';
+                } elseif ($statusVal === \App\Enums\Validasi::Invalid->value) {
+                    $this->statusRekap = 'Ditolak';
+                } else {
+                    $this->statusRekap = 'Menunggu Persetujuan';
+                }
+            } else {
+                $this->statusRekap = 'Belum Diajukan';
+            }
+        } else {
+            $this->rekapRecord = null;
+            $this->statusRekap = 'Belum Diajukan';
+        }
     }
 
     public function setujuiRekap(): void
     {
-        $this->statusRekap = 'Disetujui';
-        session()->flash('success', 'Rekap berhasil disetujui.');
+        $this->loadRekapRecord();
+        if ($this->rekapRecord) {
+            $this->rekapRecord->update([
+                'status_validasi' => \App\Enums\Validasi::Valid->value,
+                'pevalidasi' => auth()->id(),
+                'tanggal_validasi' => now(),
+            ]);
+            $this->statusRekap = 'Disetujui';
+            session()->flash('success', 'Rekap berhasil disetujui.');
+        } else {
+            session()->flash('error', 'Data rekapan tidak ditemukan.');
+        }
     }
 
     public function tolakRekap(): void
     {
-        $this->statusRekap = 'Ditolak';
-        session()->flash('success', 'Rekap telah ditolak.');
+        $this->loadRekapRecord();
+        if ($this->rekapRecord) {
+            $this->rekapRecord->update([
+                'status_validasi' => \App\Enums\Validasi::Invalid->value,
+                'pevalidasi' => auth()->id(),
+                'tanggal_validasi' => now(),
+            ]);
+            $this->statusRekap = 'Ditolak';
+            session()->flash('success', 'Rekap telah ditolak.');
+        } else {
+            session()->flash('error', 'Data rekapan tidak ditemukan.');
+        }
     }
 
     public function render()
