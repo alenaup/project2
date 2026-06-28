@@ -18,11 +18,11 @@ class UserSeeder extends Seeder
         /* KEPALA DEPARTEMEN START */
         DB::table('user')->insert([
             'nama_lengkap' => 'Muhammad Rangga',
-            'email' => 'Rangga@gmail.com',
+            'email' => 'kepala_dept@test.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::KepalaDepartemen->value,
-            'password' => Hash::make('userRangga'),
+            'password' => Hash::make('password123'),
             'departemen_id' => 1, // IT
             'created_at' => now(),
             'updated_at' => now(),
@@ -49,11 +49,11 @@ class UserSeeder extends Seeder
         /* HR START */
         DB::table('user')->insert([
             'nama_lengkap' => 'Jason Devito',
-            'email' => 'jason@gmail.com',
+            'email' => 'hr@test.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::Hr->value,
-            'password' => Hash::make('userJason'),
+            'password' => Hash::make('password123'),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -84,11 +84,11 @@ class UserSeeder extends Seeder
         /* ADMIN VENDOR START */
         DB::table('user')->insert([
             'nama_lengkap' => 'Zahrah Faradila',
-            'email' => 'zahrah@gmail.com',
+            'email' => 'admin@test.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::AdminVendor->value,
-            'password' => Hash::make('userZahrah'),
+            'password' => Hash::make('password123'),
             'outsourcing_id' => 1,
             'created_at' => now(),
             'updated_at' => now(),
@@ -103,11 +103,11 @@ class UserSeeder extends Seeder
         /* KARYAWAN START */
         DB::table('user')->insert([
             'nama_lengkap' => 'Atma Karyawan',
-            'email' => '2atma@gmail.com',
+            'email' => 'karyawan@test.com',
             'nomor_tlp' => '081275796452',
             'status' => 'active',
             'role' => UserRole::Karyawan->value,
-            'password' => Hash::make('userAtma'),
+            'password' => Hash::make('password123'),
             'nip' => 'NIP-' . rand(100000, 999999),
             'outsourcing_id' => 1,
             'departemen_id' => 1,

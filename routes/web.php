@@ -37,7 +37,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kepala-departement/pengajuan', function () {
         return view('kepala-departement.pengajuanKaryawan');
     });
+
+    
+Route::get('/kepala-departement/atur-lokasi', function () {
+    return view('kepala-departement.atur-lokasi');
 });
+});
+
+
 /* Kepala departement seelesai */
 
 /* ============================================================== */

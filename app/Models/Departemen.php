@@ -14,6 +14,7 @@ class Departemen extends Model
     protected $fillable =  [
         'nama_departemen',
         'status',
+        'lokasi_id',
     ];
 
     public function lokasi() 
