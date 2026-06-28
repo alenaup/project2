@@ -79,6 +79,7 @@ class User extends Authenticatable
         'nomor_tlp',
         'alamat',
         'nip',
+        'nama_departemen',
         'departemen_id',
         'tanggal_keluar',
         'tanggal_masuk',

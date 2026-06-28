@@ -12,27 +12,32 @@ use Illuminate\Support\Facades\Route;
 /* mengembalikan data ke controller Auth dan mengeksekusi  method atau fungsi login */
 Route::get('/', [AuthController::class, 'login'])->/* ini adalah nama rute */ name('login');
 
+use App\Http\Controllers\KepalaDepartemenController;
+
 /* Route Kepala departement */
-Route::get('/kepala-departement/dashboard', function () {
-    return view('kepala-departement.dashboard');
-})->name('kepala_departemen.dashboard');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/kepala-departement/dashboard', [KepalaDepartemenController::class, 'dashboard'])->name('kepala_departemen.dashboard');
+    Route::get('/kepala-departement/api/jadwal', [KepalaDepartemenController::class, 'getJadwalKaryawan'])->name('kepala_departemen.api.jadwal');
+    Route::post('/kepala-departement/api/jadwal', [KepalaDepartemenController::class, 'storeJadwalKaryawan'])->name('kepala_departemen.api.jadwal.store');
+    Route::get('/kepala-departement/api/summary', [KepalaDepartemenController::class, 'getDashboardSummary'])->name('kepala_departemen.api.summary');
+    Route::get('/kepala-departement/api/karyawan-all', [KepalaDepartemenController::class, 'getAllKaryawan'])->name('kepala_departemen.api.karyawan_all');
 
-Route::get('/kepala-departement/karyawan', function () {
-    return view('kepala-departement.karyawan');
+    Route::get('/kepala-departement/karyawan', function () {
+        return view('kepala-departement.karyawan');
+    });
+
+    Route::get('/kepala-departement/shift', function () {
+        return view('kepala-departement.shift');
+    });
+
+    Route::get('/kepala-departement/laporan', function () {
+        return view('kepala-departement.cutiizin');
+    });
+
+    Route::get('/kepala-departement/pengajuan', function () {
+        return view('kepala-departement.pengajuanKaryawan');
+    });
 });
-
-Route::get('/kepala-departement/shift', function () {
-    return view('kepala-departement.shift');
-});
-
-Route::get('/kepala-departement/laporan', function () {
-    return view('kepala-departement.cutiizin');
-});
-
-Route::get('/kepala-departement/pengajuan', function () {
-    return view('kepala-departement.pengajuanKaryawan');
-});
-
 /* Kepala departement seelesai */
 
 /* ============================================================== */
