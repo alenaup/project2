@@ -14,6 +14,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_lembur')->autoIncrement();
             $table->timestamp('mulai_lembur')->nullable();
             $table->timestamp('selesai_lembur')->nullable();
+            $table->timestamp('tanggal_dibuat')->nullable();
             $table->timestamp('tanggal_divalidasi')->nullable();
             $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
             $table->enum('status_validasi', [Validasi::Valid->value, Validasi::Invalid->value, Validasi::Pending->value])->nullable();
