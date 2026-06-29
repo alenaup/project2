@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+    RewriteCond %{REQUEST_URI} !^public
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Block direct access to sensitive files
+<FilesMatch "^\.env|composer\.json|package\.json|composer\.lock|package-lock\.json">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
