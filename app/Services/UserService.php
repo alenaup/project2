@@ -6,9 +6,27 @@ use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
+    // CREATE user baru untuk user Super Admin, Kepala Departemen, Admin Vendor, dan HR
+    public function generateUser($nama_lengkap, $email, $nomor_tlp, $role, $password)
+    {
+        $query = User::create([
+            'nama_lengkap' => $nama_lengkap,
+            'email'        => $email,
+            'nomor_tlp'    => $nomor_tlp,
+            'role'         => $role,
+            'password'     => Hash::make($password),
+            'status'       => Status::Active->value,
+            'user_id'      => Auth::id(),
+        ]);
+
+        return $query;
+    }
+
+    // 
     public function getUserById()
     {
         return Auth::user()->id_user;
@@ -85,4 +103,34 @@ class UserService
 
         return $query;
     }
+
+    public function updateUser(int $userId, array $data): bool
+    {
+        $user = User::findOrFail($userId);
+        return $user->update($data);
+    }
+
+    public function toggleUserStatus(int $userId): array
+    {
+        $user = User::findOrFail($userId);
+        $newStatus = $user->status === Status::Active->value
+            ? Status::Inactive->value
+            : Status::Active->value;
+
+        $user->update(['status' => $newStatus]);
+
+        $label = $newStatus === Status::Active->value ? 'diaktifkan' : 'dinonaktifkan';
+
+        return [
+            'user' => $user,
+            'label' => $label
+        ];
+    }
+
+    public function deleteUser(int $userId): bool
+    {
+        $user = User::findOrFail($userId);
+        return $user->delete();
+    }
 }
+

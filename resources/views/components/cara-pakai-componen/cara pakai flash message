@@ -1,0 +1,116 @@
+Komponen <x-flash-message> dirancang untuk menampilkan pesan pemberitahuan melayang (toast notification) secara elegan di pojok kanan atas layar menggunakan kombinasi Laravel Blade, TailwindCSS, dan Alpine.js.
+
+Berikut adalah penjelasan rinci mengenai properti (parameters) dan cara penggunaannya:
+
+---
+
+## 📋 PENJELASAN ATRIBUT / PROPERTI
+
+1. **`on`** (default: `null`)
+   - **Fungsi**: Nama event Livewire yang didengarkan secara global (`.window`). Jika Livewire mendispatch event dengan nama ini, flash message akan langsung muncul.
+   - **Tipe Data**: `String`
+   - **Contoh**: `on="flash-success"`
+
+2. **`sessionKey`** (default: `null`)
+   - **Fungsi**: Mendeteksi session flash bawaan Laravel (`session()->flash('key', 'pesan')`). Jika session dengan key ini ada saat halaman dimuat (setelah redirect), flash message akan langsung tampil.
+   - **Tipe Data**: `String`
+   - **Contoh**: `sessionKey="success"`
+
+3. **`type`** (default: `'success'`)
+   - **Fungsi**: Menentukan skema warna, gaya visual (styling), dan ikon bawaan.
+   - **Tipe Data**: `String` (`success` | `error` | `warning` | `info`)
+   - **Detail Visual**:
+     - `success`: Latar hijau (`bg-emerald-50`), border hijau (`border-emerald-200`), teks hijau (`text-emerald-700`), ikon centang (Checkmark).
+     - `error`: Latar merah (`bg-red-50`), border merah (`border-red-200`), teks merah (`text-red-700`), ikon tanda seru (Exclamation).
+     - `warning`: Latar kuning (`bg-amber-50`), border kuning (`border-amber-200`), teks kuning (`text-amber-700`), ikon peringatan segitiga.
+     - `info`: Latar biru (`bg-blue-50`), border biru (`border-blue-200`), teks biru (`text-blue-700`), ikon informasi bundar.
+
+4. **`duration`** (default: `3000`)
+   - **Fungsi**: Durasi waktu tampil dalam milidetik (ms) sebelum notifikasi menghilang sendiri.
+   - **Tipe Data**: `Integer`
+   - **Catatan**: Jika diatur ke `0` (nol), pesan tidak akan otomatis menghilang. Pengguna harus menutupnya secara manual dengan mengeklik tombol silang (X).
+
+5. **`icon`** (default: `null`)
+   - **Fungsi**: Mengganti ikon bawaan dengan ikon SVG kustom Anda sendiri (melalui slot khusus).
+
+---
+
+## 🛠️ CARA PEMASANGAN DI LAYOUT UTAMA (GLOBAL)
+
+Agar flash message bisa dipanggil dari mana saja di aplikasi Anda, pastikan komponen ini sudah diletakkan di bagian paling bawah layout utama Anda (sebelum tag `</body>`), misalnya di layouts/kepala-departement.blade.php atau layouts/karyawanOutsourcing.blade.php:
+
+```html
+<!-- Diletakkan di file layout utama sebelum </body> -->
+    
+<x-flash-message type="error" on="flash-error" sessionKey="error" />
+<x-flash-message type="warning" on="flash-warning" sessionKey="warning" />
+<x-flash-message type="info" on="flash-info" sessionKey="info" />
+```
+
+---
+
+## ⚡ CARA PENGGUNAAN
+
+Ada 2 skenario utama dalam memicu/menampilkan pesan ini:
+
+### 1. Metode Event-Driven (Melalui Livewire PHP - Tanpa Reload Halaman)
+Gunakan ini di dalam fungsi backend Livewire Anda (misalnya setelah proses simpan data selesai secara AJAX).
+
+**Di Backend Component Livewire (PHP):**
+```php
+// Menampilkan pesan sukses
+$this->dispatch('flash-success', message: 'Kehadiran berhasil dicatat!');
+
+// Menampilkan pesan error
+$this->dispatch('flash-error', message: 'Anda sudah melakukan absen keluar hari ini!');
+```
+
+**Bagaimana ini bekerja di background?**
+1. Livewire mengirimkan event browser bernama `flash-success` beserta data `message`.
+2. Komponen `<x-flash-message>` yang memiliki properti `on="flash-success"` menangkap event tersebut menggunakan Alpine.js (`x-on:flash-success.window`).
+3. Alpine.js mengubah status `show` menjadi `true`, memperbarui teks pesan, dan memulai hitung mundur (default 3 detik) untuk menyembunyikannya kembali.
+
+---
+
+### 2. Metode Session-Driven (Melalui Redirect Laravel / Livewire)
+Gunakan ini jika proses backend Anda melakukan pengalihan halaman (*redirect*).
+
+**Di Controller atau Component Livewire (PHP):**
+```php
+session()->flash('success', 'Profil Anda berhasil diperbarui!');
+
+return redirect()->route('profil.index');
+```
+
+**Bagaimana ini bekerja di background?**
+1. Saat halaman baru dimuat, kode Laravel memeriksa apakah session `'success'` aktif.
+2. Karena session dengan key `'success'` ada, Alpine.js menginisialisasi status `show: true` langsung sejak awal pemuatan halaman.
+3. Pesan langsung muncul begitu halaman selesai dimuat dan menghilang setelah 3 detik.
+
+---
+
+### 3. Kustomisasi Lanjutan
+
+#### A. Mengatur Durasi Kustom
+Jika Anda ingin notifikasi peringatan bertahan lebih lama (misal: 10 detik) karena teks pesannya panjang:
+```html
+<x-flash-message type="warning" sessionKey="warning" duration="10000" />
+```
+
+#### B. Notifikasi Permanen (Tidak Hilang Otomatis)
+Jika Anda memiliki info penting atau error kritis yang wajib dibaca oleh user dan tidak boleh menutup otomatis:
+```html
+<x-flash-message type="error" sessionKey="error" duration="0" />
+```
+
+#### C. Custom Icon (Ikon SVG Sendiri)
+Jika Anda tidak menyukai ikon bawaan dan ingin menggantinya dengan ikon kustom Anda (menggunakan named slot `icon`):
+```html
+<x-flash-message type="success" sessionKey="success">
+    <x-slot name="icon">
+        <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4" />
+        </svg>
+    </x-slot>
+</x-flash-message>
+```

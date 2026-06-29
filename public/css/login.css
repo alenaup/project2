@@ -81,24 +81,25 @@
         }
 
         .anim-logo {
-            width: 140px;
+            
             filter: drop-shadow(0 10px 25px rgba(0,0,0,0.5));
             /* Remove the old rollLeft animation completely */
         }
 
         .anim-text {
-            font-size: 2.8rem;
+            font-size: 2.3rem;
             font-weight: 800;
             color: #ffffff;
             opacity: 0;
             position: absolute;
             z-index: 10;
-            margin-left: 150px; /* Position to the right of the glided logo */
+            margin-left: 100px; /* Position to the right of the glided logo */
             animation: textRevealModern 2.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
             white-space: nowrap;
             text-shadow: 0 4px 15px rgba(0,0,0,0.3);
             letter-spacing: -0.03em;
         }
+
 
         /* Loading Bar untuk memberikan kesan progres / sistem sedang loading */
         .anim-loader {

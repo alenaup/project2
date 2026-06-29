@@ -264,9 +264,11 @@ function dashboard() {
             }
 
             this.isSaving = true;
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             try {
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const token = csrfMeta ? csrfMeta.getAttribute('content') : '';
+                
                 const response = await fetch('/kepala-departement/api/jadwal', {
                     method: 'POST',
                     headers: {

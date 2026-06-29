@@ -5,12 +5,11 @@ namespace App\Livewire\SuperAdmin;
 use App\Enums\Status;
 use App\Enums\UserRole;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Services\UserService;
 
 class UserManagement extends Component
 {
@@ -24,6 +23,7 @@ class UserManagement extends Component
     public string $activeTab = 'admin_outsourcing';
 
     public string $search = '';
+    public string $filterStatus = 'semua';
 
     // =========================================================
     // Form Properties (shared Create / Edit)
@@ -51,13 +51,26 @@ class UserManagement extends Component
     public bool   $showDeleteConfirm = false;
     public ?int   $deletingUserId    = null;
     public string $deletingUserName  = '';
+    public string $deleteActionType  = 'delete'; // 'deactivate' | 'delete'
 
+
+    protected UserService $userService;
 
     // =========================================================
     // Pagination reset
     // =========================================================
 
+    public function boot(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
+
     public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterStatus(): void
     {
         $this->resetPage();
     }
@@ -123,18 +136,10 @@ class UserManagement extends Component
             'password.confirmed'    => 'Konfirmasi password tidak cocok.',
         ]);
 
-        User::create([
-            'nama_lengkap' => $this->nama_lengkap,
-            'email'        => $this->email,
-            'nomor_tlp'    => $this->nomor_tlp,
-            'role'         => $this->role,
-            'password'     => Hash::make($this->password),
-            'status'       => Status::Active->value,
-            'user_id'      => Auth::id(),
-        ]);
+        $this->userService->generateUser($this->nama_lengkap, $this->email, $this->nomor_tlp, $this->role, $this->password);
 
         $this->closeModal();
-        session()->flash('success', 'Akun berhasil ditambahkan!');
+        $this->dispatch('flash-success', message: 'Akun berhasil ditambahkan!');
         $this->dispatch('userAdded');
         $this->resetPage();
     }
@@ -181,8 +186,7 @@ class UserManagement extends Component
             'role.required'         => 'Role tidak boleh kosong.',
         ]);
 
-        $user = User::findOrFail($this->editingUserId);
-        $user->update([
+        $this->userService->updateUser($this->editingUserId, [
             'nama_lengkap' => $this->nama_lengkap,
             'email'        => $this->email,
             'nomor_tlp'    => $this->nomor_tlp,
@@ -190,7 +194,7 @@ class UserManagement extends Component
         ]);
 
         $this->closeModal();
-        session()->flash('success', 'Akun berhasil diperbarui!');
+        $this->dispatch('flash-success', message: 'Akun berhasil diperbarui!');
     }
 
     // =========================================================
@@ -199,16 +203,11 @@ class UserManagement extends Component
 
     public function toggleStatus(int $id): void
     {
-        $user = User::findOrFail($id);
+        $result = $this->userService->toggleUserStatus($id);
+        $user = $result['user'];
+        $label = $result['label'];
 
-        $newStatus = $user->status === Status::Active->value
-            ? Status::Inactive->value
-            : Status::Active->value;
-
-        $user->update(['status' => $newStatus]);
-
-        $label = $newStatus === Status::Active->value ? 'diaktifkan' : 'dinonaktifkan';
-        session()->flash('success', "Akun {$user->nama_lengkap} berhasil {$label}.");
+        $this->dispatch('flash-success', message: "Akun {$user->nama_lengkap} berhasil {$label}.");
     }
 
     // =========================================================
@@ -220,23 +219,46 @@ class UserManagement extends Component
         $user                    = User::findOrFail($id);
         $this->deletingUserId    = $id;
         $this->deletingUserName  = $user->nama_lengkap;
+
+        if ($user->status === Status::Active->value) {
+            $this->deleteActionType = 'deactivate';
+        } else {
+            $this->deleteActionType = 'delete';
+        }
+
         $this->showDeleteConfirm = true;
     }
 
-    public function hapusAkun(): void
+    public function prosesAksiHapus(): void
     {
         if (! $this->deletingUserId) {
             return;
         }
 
-        User::findOrFail($this->deletingUserId)->delete();
+        if ($this->deleteActionType === 'deactivate') {
+            $result = $this->userService->toggleUserStatus($this->deletingUserId);
+            $user = $result['user'];
+            $label = $result['label'];
+            $this->dispatch('flash-success', message: "Akun {$user->nama_lengkap} berhasil {$label}.");
+        } else {
+            $this->userService->deleteUser($this->deletingUserId);
+            $this->dispatch('flash-success', message: 'Akun berhasil dihapus.');
+        }
 
         $this->showDeleteConfirm = false;
         $this->deletingUserId    = null;
         $this->deletingUserName  = '';
 
-        session()->flash('success', 'Akun berhasil dihapus.');
         $this->resetPage();
+    }
+
+    public function aktifkanUser(int $id): void
+    {
+        $result = $this->userService->toggleUserStatus($id);
+        $user = $result['user'];
+        $label = $result['label'];
+
+        $this->dispatch('flash-success', message: "Akun {$user->nama_lengkap} berhasil {$label}.");
     }
 
     public function cancelHapus(): void
@@ -272,6 +294,11 @@ class UserManagement extends Component
                 $q->where('nama_lengkap', 'like', '%' . $this->search . '%')
                     ->orWhere('email', 'like', '%' . $this->search . '%');
             });
+        }
+
+        // Filter berdasarkan status aktif/nonaktif
+        if ($this->filterStatus !== 'semua') {
+            $query->where('status', $this->filterStatus);
         }
 
         $users = $query->latest('id_user')->paginate(10);

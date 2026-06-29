@@ -22,25 +22,26 @@
 
     <!-- TOPBAR -->
     <div
-        class="bg-linear-to-r from-green-900 to-green-700 px-10 h-16 flex items-center justify-between text-white shadow">
+        class="bg-linear-to-r from-green-900 to-green-700 px-4 md:px-10 h-16 flex items-center justify-between text-white shadow">
         <div class="flex items-center gap-3">
-            <div class="w-9 h-9  rounded-lg flex items-center justify-center overflow-hidden">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center overflow-hidden">
                 <img src="/images/logo (2).webp" alt="Logo" class="w-full h-full object-contain">
             </div>
             <div>
-                <h1 class="text-sm font-extrabold">Ecogreen e-Outsourcing</h1>
-                <p class="text-[11px] text-green-200">Sistem Manajemen Karyawan Outsourcing</p>
+                <h1 class="text-sm font-extrabold hidden md:block">Ecogreen e-Outsourcing</h1>
+                <h1 class="text-sm font-extrabold md:hidden">Ecogreen</h1>
+                <h1 class="text-sm font-extrabold md:hidden">e-Outsourcing</h1>
+                <p class="text-[11px] text-green-200 md:block hidden">Sistem Manajemen Karyawan Outsourcing</p>
             </div>
         </div>
         <div class="relative">
             <div onclick="toggleDropdown()"
                 class="bg-white/10 px-4 py-1.5 rounded-lg flex items-center gap-2 border border-white/20 cursor-pointer">
                 <div
-                    class="w-7 h-7 bg-green-400 rounded-full flex items-center justify-center text-green-900 font-bold text-xs">
+                    class="w-7 h-7 hidden md:flex bg-green-400 rounded-full items-center justify-center text-green-900 font-bold text-xs">
                     SA
                 </div>
-                <span class="text-sm font-semibold flex items-center gap-2">
-
+                <span class="md:text-sm text-xs font-semibold flex items-center gap-2">
                     Super Admin
                 </span>
                 <i class="fas fa-chevron-down text-xs"></i>
@@ -60,19 +61,24 @@
 
     <div class="p-4 md:p-8 lg:p-10 ">
         <h1 class="text-2xl font-semibold animate-item">Kelola Akun Pengguna</h1>
-        <p class="text-sm text-gray-500 mb-4 animate-item">Tambah, ubah, dan hapus akun Admin Outsourcing, HR, dan Kepala
+        <p class="text-sm text-gray-500 mb-4 animate-item">Tambah, ubah, dan hapus akun Admin Outsourcing, HR, dan
+            Kepala
             Departemen
         </p>
 
         {{-- melakukan request kepada bagian service folder app/livewire/superAdmin/dashboardAdmin --}}
-        @livewire('super-admin.dashboard-stats')
+        <livewire:super-admin.dashboard-stats />
 
         {{-- melakukan request kepada bagian service folder app/livewire/superAdmin/user-management --}}
-        @livewire('super-admin.user-management')
+        <livewire:super-admin.user-management />
     </div>
 
     {{-- ✅ Loading Modal diletakkan di root body agar fixed inset-0 bisa menutupi seluruh halaman --}}
     <x-loading-modal target="logout" message="Sedang keluar dari sistem..." keepAlive="true" />
+
+    {{-- bagian untuk komponen error dan succes pesan di pojok kanan atas --}}
+    <x-flash-message type="success" sessionKey="success" on="flash-success" />
+    <x-flash-message type="error" sessionKey="error" on="flash-error" />
 
     <script>
         function toggleDropdown() {

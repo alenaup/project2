@@ -7,7 +7,7 @@
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 ">
 
     <!-- Admin Outsourcing -->
-    <div class="animate-item bg-white rounded-xl p-4 shadow flex items-center gap-4 border border-gray-200">
+    <div class="animate-bitem bg-white rounded-xl p-4 shadow flex items-center gap-4 border border-gray-200">
         <div class="w-12 h-12 bg-pink-100 flex items-center justify-center rounded-xl">
             <svg class="w-6 h-6 text-pink-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M20 21a8 8 0 0 0-16 0" />
@@ -21,7 +21,7 @@
     </div>
 
     <!-- HR -->
-    <div class="animate-item bg-white rounded-xl p-4 shadow flex items-center gap-4 border border-gray-200">
+    <div class="animate-bitem bg-white rounded-xl p-4 shadow flex items-center gap-4 border border-gray-200">
         <div class="w-12 h-12 bg-yellow-100 flex items-center justify-center rounded-xl">
             <svg class="w-6 h-6 text-yellow-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2">
@@ -36,7 +36,7 @@
     </div>
 
     <!-- Kepala Departemen -->
-    <div class="animate-item bg-white rounded-xl p-4 shadow flex items-center gap-4 border border-gray-200">
+    <div class="animate-bitem bg-white rounded-xl p-4 shadow flex items-center gap-4 border border-gray-200">
         <div class="w-12 h-12 bg-gray-100 flex items-center justify-center rounded-xl">
             <svg class="w-6 h-6 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2">
@@ -52,7 +52,7 @@
     </div>
 
     <!-- Total -->
-    <div class="animate-item bg-green-50 rounded-xl p-4 shadow flex items-center gap-4 border border-green-200">
+    <div class="animate-bitem bg-green-50 rounded-xl p-4 shadow flex items-center gap-4 border border-green-200">
         <div class="w-12 h-12 bg-green-200 flex items-center justify-center rounded-xl p-2">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <g id="SVGRepo_bgCarrier" stroke-width="0"></g>

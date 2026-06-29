@@ -23,7 +23,7 @@
             <!-- OVERLAY ANIMASI -->
             <div id="animationOverlay">
                 <div class="anim-logo-wrapper">
-                    <img src="/images/logo (2).webp" class="anim-logo" alt="Logo">
+                    <img src="/images/logo (2).webp" class="anim-logo w-25 md:w-35" alt="Logo">
                 </div>
                 <div class="anim-text lg:text-6xl">Eco Green</div>
             </div>
@@ -53,12 +53,12 @@
                 <div
                     class="w-full p-4 mx-[8%] my-[20%] md:w-5/12 md:my-0 md:mx-0 flex rounded-2xl md:rounded-0 items-center justify-center bg-white/10 " style="backdrop-filter: blur(5px);">
                     <div class="w-full max-w-md md:p-10 p-4">
-                        <img src="/images/logo (2).webp" style="max-width: 135px; max-height: 135px;"
+                        <img src="/images/logo (2).webp" style="max-width: 100px; max-height: 100px;"
                             class="block md:hidden mx-auto mb-6 transition duration-300 transform animate-[spin_16s_linear_infinite]"
                             alt="Logo">
 
                         <h1
-                            class="flex items-center justify-center w-full md:hidden text-center text-emerald-700 text-3xl font-bold mb-4">
+                            class="flex items-center justify-center w-full md:hidden text-center text-green-700 text-3xl font-bold mb-4">
                             Eco Green
                         </h1>
                         <h2 class=" hidden md:block text-5xl font-bold md:p-16 text-center text-brand">

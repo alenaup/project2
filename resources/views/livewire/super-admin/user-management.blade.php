@@ -1,27 +1,6 @@
-<div x-data="{
-    showModal: @entangle('showModal'),
-    showDeleteConfirm: @entangle('showDeleteConfirm')
-}">
-    {{-- =========================================================== --}}
-    {{-- Flash Message --}}
-    {{-- =========================================================== --}}
-    @if (session()->has('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-4 shadow-sm flex items-center gap-2"
-            role="alert">
-            <svg class="w-5 h-5 text-green-600" viewBox="0 0 24 24" fill="none">
-                <path
-                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                    fill="currentColor" />
-                <path d="M8 12.5L10.5 15L16 9.5" stroke="white" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
+<div x-data="{ showModal: @entangle('showModal'), showDeleteConfirm: @entangle('showDeleteConfirm') }">
 
-    {{-- =========================================================== --}}
-    {{-- TABS --}}
-    {{-- =========================================================== --}}
+    {{-- tabs untukk memilih role --}}
     <div class="bg-white px-4 md:px-10 py-3 border-gray-200 border-b border-t flex gap-2 text-sm overflow-x-auto">
         <button type="button"
             @click="$dispatch('show-loading', { message: 'Memuat data...' }); $wire.switchTab('admin_outsourcing')"
@@ -58,7 +37,13 @@
         <div class="flex flex-col md:flex-row md:justify-between gap-3 mb-4">
             <div class="flex flex-col sm:flex-row gap-2">
                 <input wire:model.live.debounce.300ms="search" type="text" placeholder="Cari nama atau email"
-                    class="border border-gray-500 rounded-lg px-3 py-2 text-sm w-64 focus:ring-2 focus:ring-green-500 outline-none">
+                    class="border border-gray-500 rounded-lg px-3 py-2 text-sm w-full md:w-64 focus:ring-2 focus:ring-green-500 outline-none">
+                <select wire:model.live="filterStatus"
+                    class="border border-gray-500 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 outline-none bg-white">
+                    <option value="semua">Semua Status</option>
+                    <option value="active">Aktif</option>
+                    <option value="inactive">Nonaktif</option>
+                </select>
             </div>
             <button @click="showModal = true; $wire.openModal()" type="button"
                 class="bg-green-600 shadow-lg flex items-center gap-2 text-white px-4 py-2 rounded-lg text-sm transition-all hover:bg-green-700">
@@ -83,48 +68,59 @@
                         <th class="p-2 md:p-3 text-left text-xs md:text-sm">EMAIL</th>
                         <th class="p-2 md:p-3 text-left text-xs md:text-sm">STATUS</th>
                         <th class="p-2 md:p-3 text-left text-xs md:text-sm">NO TELP</th>
-                        <th class="p-2 md:p-3 text-left text-xs md:text-sm">DIBUAT</th>
-                        <th class="p-2 md:p-3 text-center text-xs md:text-sm rounded-r-lg">AKSI</th>
+                        <th class="p-2 px-8 md:p-3 text-left text-xs md:text-sm">DIBUAT</th>
+                        <th class="p-2 px-8 md:p-3 text-center text-xs md:text-sm rounded-r-lg">AKSI</th>
                     </tr>
                 </thead>
 
                 <tbody class="relative">
                     @forelse($users as $index => $user)
                         <tr
-                            class="animate-bitem bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition cursor-pointer border border-gray-100 mt-2">
+                            class="animate-bitem py-2 bg-white shadow-sm hover:shadow-md hover:-translate-y-0.5 transition cursor-pointer border border-gray-100 mt-2">
                             <td class="p-3">{{ $users->firstItem() + $index }}</td>
                             <td class="p-3 font-medium text-gray-800">{{ $user->nama_lengkap }}</td>
                             <td class="p-3 text-gray-600">{{ $user->email }}</td>
                             <td class="p-3">
-
-                                <button wire:click="toggleStatus({{ $user->id_user }})" title="Klik untuk ubah status"
-                                    class="{{ $user->status === 'active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }} px-2 py-1 rounded text-xs font-semibold hover:opacity-80 transition">
+                                <span class="{{ $user->status === 'active' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600' }} px-2 py-1 rounded text-xs font-semibold">
                                     {{ $user->status === 'active' ? 'Active' : 'Inactive' }}
-                                </button>
-
+                                </span>
                             </td>
                             <td class="p-3 text-gray-600">{{ $user->nomor_tlp ?? '-' }}</td>
                             <td class="p-3 text-gray-600">
                                 {{ $user->created_at ? $user->created_at->format('d M Y') : '-' }}</td>
                             <td class="p-3 text-center">
-
-                                <button @click="showModal = true; $wire.editAkun({{ $user->id_user }})" title="Edit"
-                                    type="button"
-                                    class="bg-yellow-400 text-white px-2 py-1 rounded hover:bg-yellow-500">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                        <path d="M4 20H8L19 9C20.1 7.9 20.1 6.1 19 5C17.9 3.9 16.1 3.9 15 5L4 16V20Z"
-                                            fill="currentColor" />
-                                    </svg>
-                                </button>
-                                <button @click="showDeleteConfirm = true; $wire.confirmHapus({{ $user->id_user }})"
-                                    title="Hapus" type="button"
-                                    class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600">
-                                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                                        <path
-                                            d="M6 7H18M10 11V17M14 11V17M8 7V4H16V7M9 20H15C16.1 20 17 19.1 17 18V7H7V18C7 19.1 7.9 20 9 20Z"
-                                            fill="currentColor" />
-                                    </svg>
-                                </button>
+                                <div class="flex items-center justify-center gap-1.5">
+                                    @if ($user->status === 'active')
+                                        <button @click="showModal = true; $wire.editAkun({{ $user->id_user }})" title="Edit"
+                                            type="button"
+                                            class="bg-yellow-400 text-white px-2 py-1.5 rounded hover:bg-yellow-500 transition">
+                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 20H8L19 9C20.1 7.9 20.1 6.1 19 5C17.9 3.9 16.1 3.9 15 5L4 16V20Z"
+                                                    fill="currentColor" />
+                                            </svg>
+                                        </button>
+                                        <button @click="showDeleteConfirm = true; $wire.confirmHapus({{ $user->id_user }})"
+                                            title="Nonaktifkan" type="button"
+                                            class="bg-red-500 text-white px-2.5 py-1.5 rounded hover:bg-red-600 transition">
+                                            <i class="fas fa-ban w-4 h-4"></i>
+                                        </button>
+                                    @else
+                                        <button wire:click="aktifkanUser({{ $user->id_user }})" title="Aktifkan"
+                                            type="button"
+                                            class="bg-green-600 text-white px-2.5 py-1.5 rounded hover:bg-green-700 transition">
+                                            <i class="fas fa-check w-4 h-4"></i>
+                                        </button>
+                                        <button @click="showDeleteConfirm = true; $wire.confirmHapus({{ $user->id_user }})"
+                                            title="Hapus Permanen" type="button"
+                                            class="bg-red-500 text-white px-2 py-1.5 rounded hover:bg-red-600 transition">
+                                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none">
+                                                <path
+                                                    d="M6 7H18M10 11V17M14 11V17M8 7V4H16V7M9 20H15C16.1 20 17 19.1 17 18V7H7V18C7 19.1 7.9 20 9 20Z"
+                                                    fill="currentColor" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -159,9 +155,8 @@
             x-transition:leave-end="opacity-0 scale-95"
             class="bg-white w-full max-w-xl rounded-xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]"
             @click.outside="$wire.closeModal()">
-            {{-- LOADING OVERLAY MODAL --}}
-            <div wire:loading wire:target="openModal, editAkun, simpanAkun, updateAkun"
-                class="absolute inset-0 bg-white/80 z-50 flex items-center justify-center backdrop-blur-sm rounded-xl">
+            <div wire:loading.flex wire:target="openModal, editAkun, simpanAkun, updateAkun"
+                class="absolute inset-0 w-full h-full bg-white/80 z-[100] flex items-center justify-center backdrop-blur-sm rounded-xl">
                 <div class="flex flex-col items-center">
                     <svg class="animate-spin h-10 w-10 text-green-600 mb-3" xmlns="http://www.w3.org/2000/svg"
                         fill="none" viewBox="0 0 24 24">
@@ -249,8 +244,8 @@
                         <input type="password" wire:model="password_confirmation" placeholder="Ulangi Password"
                             class="w-full border border-gray-300 rounded-lg px-3 py-2 mt-1 focus:ring-2 focus:ring-green-500 outline-none transition">
                     </div>
-            </div>
             @endif
+        </div>
 
             {{-- FOOTER --}}
             <div
@@ -287,9 +282,8 @@
             x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100"
             x-transition:leave-end="opacity-0 scale-95"
             class="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden relative">
-            {{-- LOADING OVERLAY DELETE MODAL --}}
-            <div wire:loading wire:target="confirmHapus, hapusAkun"
-                class="absolute inset-0 bg-white/80 z-50 flex items-center justify-center backdrop-blur-sm rounded-2xl">
+            <div wire:loading.flex wire:target="confirmHapus, prosesAksiHapus"
+                class="absolute inset-0 w-full h-full bg-white/80 z-[100] flex items-center justify-center backdrop-blur-sm rounded-2xl">
                 <div class="flex flex-col items-center">
                     <svg class="animate-spin h-8 w-8 text-red-500 mb-2" xmlns="http://www.w3.org/2000/svg"
                         fill="none" viewBox="0 0 24 24">
@@ -304,23 +298,30 @@
             </div>
 
             <div class="p-6 text-center">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-trash-alt text-red-500 text-2xl"></i>
+                <div class="w-16 h-16 {{ $deleteActionType === 'deactivate' ? 'bg-amber-100' : 'bg-red-100' }} rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="{{ $deleteActionType === 'deactivate' ? 'fas fa-ban text-amber-600' : 'fas fa-trash-alt text-red-500' }} text-2xl"></i>
                 </div>
-                <h3 class="font-bold text-lg text-gray-800 mb-2">Hapus Akun?</h3>
+                <h3 class="font-bold text-lg text-gray-800 mb-2">
+                    {{ $deleteActionType === 'deactivate' ? 'Nonaktifkan Akun?' : 'Hapus Akun Permanen?' }}
+                </h3>
                 <p class="text-gray-500 text-sm mb-6">
-                    Yakin ingin menghapus akun
+                    {{ $deleteActionType === 'deactivate' ? 'Yakin ingin menonaktifkan akun' : 'Yakin ingin menghapus akun' }}
                     <span class="font-semibold text-gray-800">{{ $deletingUserName }}</span>?
-                    <br><span class="text-red-500 text-xs">Tindakan ini tidak dapat dibatalkan.</span>
+                    @if($deleteActionType === 'delete')
+                        <br><span class="text-red-500 text-xs font-semibold">Tindakan ini tidak dapat dibatalkan.</span>
+                    @else
+                        <br><span class="text-amber-600 text-xs font-semibold">Status akun akan diubah menjadi Inactive.</span>
+                    @endif
                 </p>
                 <div class="flex gap-3 justify-center">
                     <button type="button" @click="showDeleteConfirm = false; $wire.cancelHapus()"
                         class="px-5 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition font-medium text-sm">
                         Batal
                     </button>
-                    <button wire:click="hapusAkun"
-                        class="px-5 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium text-sm flex items-center gap-2">
-                        <i class="fas fa-trash"></i> Ya, Hapus
+                    <button wire:click="prosesAksiHapus"
+                        class="px-5 py-2 {{ $deleteActionType === 'deactivate' ? 'bg-amber-500 hover:bg-amber-600' : 'bg-red-500 hover:bg-red-600' }} text-white rounded-lg transition font-medium text-sm flex items-center gap-2">
+                        <i class="{{ $deleteActionType === 'deactivate' ? 'fas fa-ban' : 'fas fa-trash' }}"></i>
+                        {{ $deleteActionType === 'deactivate' ? 'Ya, Nonaktifkan' : 'Ya, Hapus' }}
                     </button>
                 </div>
             </div>
