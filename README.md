@@ -1,85 +1,6 @@
 <!-- Animated SVG Header Banner -->
 <div align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 260" width="100%" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); max-width: 100%;">
-    <defs>
-      <!-- Gradients -->
-      <linearGradient id="titleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#38ef7d" />
-        <stop offset="50%" stop-color="#11998e" />
-        <stop offset="100%" stop-color="#38ef7d" />
-      </linearGradient>
-      <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#0f2027" />
-        <stop offset="40%" stop-color="#203a43" />
-        <stop offset="100%" stop-color="#2c5364" />
-      </linearGradient>
-      <!-- Keyframe Animations -->
-      <style>
-        @keyframes rotateLeaf {
-          0% { transform: translate(0px, 0px) rotate(0deg) scale(1); }
-          50% { transform: translate(25px, 15px) rotate(180deg) scale(1.1); }
-          100% { transform: translate(0px, 0px) rotate(360deg) scale(1); }
-        }
-        @keyframes floatY {
-          0% { transform: translateY(0px); }
-          50% { transform: translateY(-8px); }
-          100% { transform: translateY(0px); }
-        }
-        @keyframes glowText {
-          0%, 100% { text-shadow: 0 0 10px rgba(56, 239, 125, 0.4), 0 0 20px rgba(56, 239, 125, 0.2); }
-          50% { text-shadow: 0 0 20px rgba(56, 239, 125, 0.8), 0 0 30px rgba(17, 153, 142, 0.6); }
-        }
-        @keyframes dash {
-          to { stroke-dashoffset: -40; }
-        }
-        .anim-leaf-1 { animation: rotateLeaf 10s infinite ease-in-out; transform-origin: 100px 80px; }
-        .anim-leaf-2 { animation: rotateLeaf 14s infinite ease-in-out; transform-origin: 750px 180px; }
-        .anim-float { animation: floatY 4s infinite ease-in-out; }
-        .anim-text { animation: glowText 3s infinite ease-in-out; }
-        .border-glow { stroke-dasharray: 8; animation: dash 6s linear infinite; }
-      </style>
-    </defs>
-    <!-- Background Card -->
-    <rect width="850" height="260" rx="12" fill="url(#bgGrad)" />
-    
-    <!-- Neon Border -->
-    <rect x="5" y="5" width="840" height="250" rx="10" fill="none" stroke="url(#titleGrad)" stroke-width="2.5" opacity="0.85" />
-    <rect x="9" y="9" width="832" height="242" rx="8" fill="none" stroke="#ffffff" stroke-width="1" class="border-glow" opacity="0.15" />
-    
-    <!-- Tech Grid Effect -->
-    <path d="M 0,65 L 850,65 M 0,130 L 850,130 M 0,195 L 850,195" stroke="rgba(255,255,255,0.04)" stroke-width="1" />
-    <path d="M 170,0 L 170,260 M 340,0 L 340,260 M 510,0 L 510,260 M 680,0 L 680,260" stroke="rgba(255,255,255,0.04)" stroke-width="1" />
-    
-    <!-- Anime Sakura Petals & Eco Leaves -->
-    <g class="anim-leaf-1">
-      <path d="M 90 70 C 85 55, 65 65, 80 85 C 95 65, 95 85, 90 70 Z" fill="#38ef7d" opacity="0.75" />
-      <circle cx="85" cy="73" r="1.5" fill="#fff" opacity="0.5"/>
-    </g>
-    
-    <g class="anim-leaf-2">
-      <path d="M 740 170 C 730 160, 725 175, 740 190 C 755 175, 750 160, 740 170 Z" fill="#ff7eb3" opacity="0.8" />
-    </g>
-    
-    <!-- Floating Logo Mascot -->
-    <g class="anim-float" transform="translate(10, 0)">
-      <circle cx="120" cy="130" r="45" fill="none" stroke="rgba(56, 239, 125, 0.2)" stroke-width="8" stroke-dasharray="10 5" />
-      <path d="M 120 110 L 135 120 L 135 138 L 120 150 L 105 138 L 105 120 Z" fill="none" stroke="#38ef7d" stroke-width="3" />
-      <path d="M 120 110 L 120 148" stroke="#38ef7d" stroke-width="2" />
-      <path d="M 120 120 C 126 118, 129 123, 120 130 Z" fill="#38ef7d" />
-      <path d="M 120 128 C 114 126, 111 131, 120 138 Z" fill="#ff7eb3" />
-    </g>
-
-    <!-- Main Title -->
-    <text x="495" y="125" font-family="'Outfit', 'Segoe UI', sans-serif" font-weight="900" font-size="52" fill="url(#titleGrad)" text-anchor="middle" class="anim-text" letter-spacing="4">EcoStaff</text>
-    
-    <!-- Subtitle -->
-    <text x="495" y="165" font-family="'Segoe UI', sans-serif" font-weight="600" font-size="14" fill="#a0aec0" text-anchor="middle" letter-spacing="3">E - O U T S O U R C I N G   S Y S T E M</text>
-    
-    <!-- Status Pill -->
-    <rect x="425" y="188" width="140" height="26" rx="13" fill="rgba(56, 239, 125, 0.1)" stroke="rgba(56, 239, 125, 0.3)" stroke-width="1" />
-    <circle cx="440" cy="201" r="4" fill="#38ef7d" />
-    <text x="498" y="206" font-family="'Segoe UI', sans-serif" font-weight="700" font-size="11" fill="#38ef7d" text-anchor="middle">DEPLOYED STATUS</text>
-  </svg>
+  <img src="public/images/readme_banner.svg" width="100%" alt="EcoStaff Banner" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.35); max-width: 100%;" />
 </div>
 
 <br>
@@ -95,28 +16,7 @@
 
 <!-- Animated SVG Divider -->
 <div align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
-    <defs>
-      <linearGradient id="divGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" stop-color="#38ef7d" />
-        <stop offset="50%" stop-color="#ff7eb3" />
-        <stop offset="100%" stop-color="#38ef7d" />
-      </linearGradient>
-      <style>
-        @keyframes slide {
-          0% { stroke-dashoffset: 0; }
-          100% { stroke-dashoffset: -40; }
-        }
-        .line {
-          stroke: url(#divGrad);
-          stroke-width: 2;
-          stroke-dasharray: 20 10;
-          animation: slide 4s linear infinite;
-        }
-      </style>
-    </defs>
-    <line x1="0" y1="10" x2="800" y2="10" class="line" />
-  </svg>
+  <img src="public/images/readme_divider.svg" width="100%" alt="Divider" />
 </div>
 
 <br>
@@ -139,9 +39,7 @@
 
 <!-- Animated SVG Divider -->
 <div align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
-    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
-  </svg>
+  <img src="public/images/readme_divider.svg" width="100%" alt="Divider" />
 </div>
 
 <br>
@@ -157,9 +55,7 @@ Aplikasi ini telah berhasil dideploy dan dapat diakses secara publik melalui lin
 
 <!-- Animated SVG Divider -->
 <div align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
-    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
-  </svg>
+  <img src="public/images/readme_divider.svg" width="100%" alt="Divider" />
 </div>
 
 <br>
@@ -240,9 +136,7 @@ Gunakan menu di bawah ini untuk melihat fitur-fitur seru dari setiap faksi:
 
 <!-- Animated SVG Divider -->
 <div align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
-    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
-  </svg>
+  <img src="public/images/readme_divider.svg" width="100%" alt="Divider" />
 </div>
 
 <br>
@@ -261,9 +155,7 @@ Proyek ini dibangun menggunakan teknologi mutakhir untuk memastikan performa yan
 
 <!-- Animated SVG Divider -->
 <div align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
-    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
-  </svg>
+  <img src="public/images/readme_divider.svg" width="100%" alt="Divider" />
 </div>
 
 <br>
@@ -292,9 +184,7 @@ Proyek ini dibangun menggunakan teknologi mutakhir untuk memastikan performa yan
 
 <!-- Animated SVG Divider -->
 <div align="center">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
-    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
-  </svg>
+  <img src="public/images/readme_divider.svg" width="100%" alt="Divider" />
 </div>
 
 <br>

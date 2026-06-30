@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
+  <defs>
+    <linearGradient id="divGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38ef7d" />
+      <stop offset="50%" stop-color="#ff7eb3" />
+      <stop offset="100%" stop-color="#38ef7d" />
+    </linearGradient>
+    <style>
+      @keyframes slide {
+        0% { stroke-dashoffset: 0; }
+        100% { stroke-dashoffset: -40; }
+      }
+      .line {
+        stroke: url(#divGrad);
+        stroke-width: 2;
+        stroke-dasharray: 20 10;
+        animation: slide 4s linear infinite;
+      }
+    </style>
+  </defs>
+  <line x1="0" y1="10" x2="800" y2="10" class="line" />
+</svg>
