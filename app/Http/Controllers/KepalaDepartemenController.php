@@ -205,5 +205,57 @@ class KepalaDepartemenController extends Controller
             'count' => $createdCount
         ]);
     }
+
+    /**
+     * Mengunduh berkas template jadwal Excel yang otomatis terisi
+     * dengan nama dan email karyawan aktif di departemen terkait.
+     */
+    public function downloadTemplateJadwal()
+    {
+        $templateFile = public_path('templates/tamplate_jadwal_ecogreen.xlsx');
+
+        if (!file_exists($templateFile)) {
+            return redirect()->back()->with('error', 'Berkas template excel tidak ditemukan.');
+        }
+
+        try {
+            // Load berkas template menggunakan PhpSpreadsheet
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templateFile);
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Ambil daftar karyawan aktif yang berada di departemen yang sama
+            $deptId = Auth::check() ? Auth::user()->departemen_id : null;
+            $query = User::where('role', UserRole::Karyawan->value)->where('status', Status::Active->value);
+            
+            if ($deptId) {
+                $query->where('departemen_id', $deptId);
+            }
+            
+            $karyawans = $query->orderBy('nama_lengkap', 'asc')->get();
+
+            // Isi nomor urut di kolom A dan nama_lengkap di kolom B mulai baris 15
+            $startRow = 15;
+            foreach ($karyawans as $index => $karyawan) {
+                $currentRow = $startRow + $index;
+                $sheet->setCellValue('A' . $currentRow, $index + 1);
+                $sheet->setCellValue('B' . $currentRow, $karyawan->nama_lengkap);
+            }
+
+            // Unduh file secara dinamis
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+
+            $fileName = 'template_jadwal_karyawan_' . strtolower(str_replace(' ', '_', Auth::user()->nama_lengkap ?? 'departemen')) . '.xlsx';
+
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, $fileName, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'max-age=0',
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memproses template Excel.');
+        }
+    }
 }
 

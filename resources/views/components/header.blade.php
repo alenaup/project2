@@ -1,4 +1,4 @@
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6 ">
     <button @click="open = !open"
         class="top-4 left-4 md:hidden bg-white p-2 rounded-lg shadow
                transition hover:scale-110 active:scale-95 ">

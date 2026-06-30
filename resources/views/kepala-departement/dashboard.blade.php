@@ -7,7 +7,7 @@
 
 @section('content')
     {{-- TITLE & ACTIONS --}}
-    <div class='flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200/60 pb-5 mb-6 gap-4'>
+    <div class='flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200/60 pb-5 mb-6 gap-4 bg-gradient-to-r from-emerald-100 p-6 rounded-xl'>
         <div>
             <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent flex items-center gap-2">
                 <i class="fa-solid fa-calendar-week text-emerald-600"></i> Penjadwalan Mingguan Karyawan
@@ -26,6 +26,15 @@
             </button>
         </div>
     </div>
+
+    <div @jadwal-imported.window="fetchData(currentPage); fetchSummary();" class="hidden"></div>
+
+    <livewire:components.excel-importer 
+        templatePath="kepala-departement/download-template-jadwal"
+        importClass="App\Imports\JadwalsImport"
+        buttonLabel="Impor Jadwal"
+        onSuccessEvent="jadwal-imported" 
+    />
 
     {{-- CARDS SUMMARY --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">

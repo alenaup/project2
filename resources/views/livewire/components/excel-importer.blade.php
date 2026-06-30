@@ -4,8 +4,8 @@
         <p class="text-xs text-gray-500">Unduh berkas template terlebih dahulu untuk menginput data secara masal.</p>
 
         @if($templatePath)
-            <a href="{{ asset($templatePath) }}" download class="text-xs text-green-700 hover:text-green-800 font-semibold flex items-center gap-1.5 mt-1.5 transition">
-                <i class="fas fa-download text-green-600"></i> Unduh Template Excel (.csv)
+            <a href="{{ url($templatePath) }}" download class="text-xs text-green-700 hover:text-green-800 font-semibold flex items-center gap-1.5 mt-1.5 transition">
+                <i class="fas fa-download text-green-600"></i> Unduh Template Excel (.xlsx)
             </a>
         @endif
     </div>
