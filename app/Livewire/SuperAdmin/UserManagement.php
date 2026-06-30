@@ -10,6 +10,7 @@ use Illuminate\Validation\Rules\Enum;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Services\UserService;
+use Livewire\Attributes\On;
 
 class UserManagement extends Component
 {
@@ -266,6 +267,12 @@ class UserManagement extends Component
         $this->showDeleteConfirm = false;
         $this->deletingUserId    = null;
         $this->deletingUserName  = '';
+    }
+
+    #[On('userImported')]
+    public function handleUserImported(): void
+    {
+        $this->resetPage();
     }
 
     // =========================================================

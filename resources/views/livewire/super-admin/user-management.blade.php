@@ -1,7 +1,7 @@
 <div x-data="{ showModal: @entangle('showModal'), showDeleteConfirm: @entangle('showDeleteConfirm') }">
 
     {{-- tabs untukk memilih role --}}
-    <div class="bg-white px-4 md:px-10 py-3 border-gray-200 border-b border-t flex gap-2 text-sm overflow-x-auto">
+    <div class="animate-bitem bg-white px-4 md:px-10 py-3 border-gray-200 border-b border-t flex gap-2 text-sm overflow-x-auto">
         <button type="button"
             @click="$dispatch('show-loading', { message: 'Memuat data...' }); $wire.switchTab('admin_outsourcing')"
             wire:key="tab-admin-outsourcing"
@@ -58,6 +58,8 @@
                 </svg>Tambah Akun
             </button>
         </div>
+
+        
 
         <div class="overflow-x-auto">
             <table class="w-full text-sm border-separate border-spacing-y-0">

@@ -69,6 +69,13 @@
         {{-- melakukan request kepada bagian service folder app/livewire/superAdmin/dashboardAdmin --}}
         <livewire:super-admin.dashboard-stats />
 
+        <livewire:components.excel-importer 
+            templatePath="templates/tamplate_ecogreen.xlsx"
+            importClass="App\Imports\UsersImport"
+            buttonLabel="Impor User"
+            onSuccessEvent="userImported" 
+        />
+
         {{-- melakukan request kepada bagian service folder app/livewire/superAdmin/user-management --}}
         <livewire:super-admin.user-management />
     </div>

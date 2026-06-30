@@ -1,0 +1,111 @@
+Komponen `<livewire:components.excel-importer>` dirancang agar dapat digunakan kembali (reusable) untuk berbagai kebutuhan impor data massal di proyek Anda (seperti User, Karyawan, Jadwal, dll.). 
+
+Berikut adalah panduan lengkap cara menggunakan dan mengustomisasi komponen ini untuk kebutuhan modul lainnya:
+
+---
+
+## 📋 PENJELASAN PROPERTI (PARAMETERS)
+
+Saat memanggil komponen ini di file Blade, Anda wajib mengirimkan beberapa parameter berikut:
+
+1. **`templatePath`** (Wajib)
+   - **Deskripsi**: Path lokasi berkas template Excel/CSV yang dapat diunduh pengguna. Berkas diletakkan di dalam folder `public/`.
+   - **Contoh**: `templatePath="templates/tamplate_ecogreen.xlsx"` (artinya file berada di `public/templates/tamplate_ecogreen.xlsx`).
+
+2. **`importClass`** (Wajib)
+   - **Deskripsi**: Nama class lengkap (namespace) dari file Laravel Excel Import yang memproses data ke database.
+   - **Contoh**: `importClass="App\Imports\UsersImport"`
+
+3. **`buttonLabel`** (Opsional)
+   - **Deskripsi**: Teks yang akan ditampilkan pada tombol unggah.
+   - **Default**: `'Impor Berkas'`
+   - **Contoh**: `buttonLabel="Impor Jadwal"`
+
+4. **`onSuccessEvent`** (Opsional)
+   - **Deskripsi**: Nama event Livewire yang akan dikirim (di-dispatch) ke halaman utama (parent component) setelah proses impor berhasil. Digunakan untuk memicu penyegaran (*refresh*) data tabel secara real-time.
+   - **Contoh**: `onSuccessEvent="userImported"`
+
+---
+
+## 🛠️ CARA PEMAKAIAN (CONTOH KASUS)
+
+### Skenario: Menambahkan Fitur Impor Jadwal Karyawan dengan Kop Header Desain Kustom
+
+Jika Anda ingin membuat fitur impor baru untuk **Jadwal Karyawan** yang memiliki Kop perusahaan di bagian atas template berkasnya, ikuti 4 langkah mudah berikut:
+
+#### Langkah 1: Siapkan File Template (.xlsx)
+Buat file template Excel atau CSV baru (misal: `template_jadwal.xlsx`).
+* Desain kop perusahaan (baris 1 s/d 8).
+* Letakkan baris heading kolom di **Baris 9**: (`hari`, `jam_masuk`, `jam_pulang`, `nama_shift`).
+* Data pengisian dari pengguna akan diisi di **Baris 10** ke bawah.
+* Simpan berkas tersebut ke folder: `public/templates/template_jadwal.xlsx`
+
+#### Langkah 2: Buat Class Import Baru
+Jalankan perintah berikut di terminal proyek Anda untuk membuat file parser baru:
+```bash
+php artisan make:import JadwalImport --model=Jadwal
+```
+Buka file `app/Imports/JadwalImport.php`, tambahkan implementasi `WithHeadingRow` dan set baris heading ke `9`:
+```php
+namespace App\Imports;
+
+use App\Models\Jadwal;
+use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithHeadingRow;
+
+class JadwalImport implements ToModel, WithHeadingRow
+{
+    public function model(array $row)
+    {
+        return new Jadwal([
+            'hari'       => $row['hari'],
+            'jam_masuk'  => $row['jam_masuk'],
+            'jam_pulang' => $row['jam_pulang'],
+            'nama_shift' => $row['nama_shift'],
+        ]);
+    }
+
+    /**
+     * 🌟 Tentukan baris heading tabel di template.
+     * Karena baris 1-8 adalah Kop dekorasi, judul tabel berada di baris 9.
+     * Sistem otomatis akan membaca data sesungguhnya mulai baris 10.
+     */
+    public function headingRow(): int
+    {
+        return 9;
+    }
+}
+```
+
+#### Langkah 3: Panggil Komponen di File Blade Anda
+Buka file Blade tempat Anda ingin meletakkan fitur impor (misalnya halaman kelola jadwal), lalu panggil komponen `<livewire:components.excel-importer>` dengan path template Excel `.xlsx`:
+```html
+<livewire:components.excel-importer 
+    templatePath="templates/template_jadwal.xlsx"
+    importClass="App\Imports\JadwalImport"
+    buttonLabel="Impor Jadwal"
+    onSuccessEvent="jadwalImported" 
+/>
+```
+
+#### Langkah 4: Tangkap Event Sukses di Halaman Utama (Parent Component)
+Buka file PHP backend Livewire Anda (misalnya `KelolaJadwal.php`). Impor decorator `On` dan tambahkan method listener berikut agar tabel otomatis ter-refresh saat data baru berhasil masuk:
+```php
+use Livewire\Attributes\On;
+
+class KelolaJadwal extends Component
+{
+    #[On('jadwalImported')]
+    public function handleJadwalImported()
+    {
+        $this->resetPage(); // Menyegarkan data tabel ke halaman pertama
+    }
+}
+```
+
+---
+
+## ⚡ PENANGANAN ERROR VALIDASI (AUTOMATIC)
+
+Komponen ini sudah dilengkapi dengan penangkap error otomatis (`ValidationException`). Jika pengguna mengunggah berkas dengan data yang salah (misalnya kolom email kosong, duplikat, atau format salah), komponen akan langsung mendeteksi baris dan kolom yang bermasalah, lalu memunculkan pesan error secara rinci:
+> *"Gagal Impor: Baris 12 (Kolom email): Email sudah terdaftar."*
