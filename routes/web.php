@@ -22,6 +22,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/kepala-departement/api/summary', [KepalaDepartemenController::class, 'getDashboardSummary'])->name('kepala_departemen.api.summary');
     Route::get('/kepala-departement/api/karyawan-all', [KepalaDepartemenController::class, 'getAllKaryawan'])->name('kepala_departemen.api.karyawan_all');
     Route::get('/kepala-departement/download-template-jadwal', [KepalaDepartemenController::class, 'downloadTemplateJadwal'])->name('kepala_departemen.download_template_jadwal');
+    Route::get('/kepala-departement/export-jadwal', [KepalaDepartemenController::class, 'exportJadwal'])->name('kepala_departemen.export_jadwal');
 
     Route::get('/kepala-departement/karyawan', function () {
         return view('kepala-departement.karyawan');

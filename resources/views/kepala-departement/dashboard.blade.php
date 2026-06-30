@@ -7,23 +7,89 @@
 
 @section('content')
     {{-- TITLE & ACTIONS --}}
-    <div class='flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200/60 pb-5 mb-6 gap-4 bg-gradient-to-r from-emerald-100 p-6 rounded-xl'>
+    <div class='animate-item flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200/60 pb-5 mb-6 gap-4 bg-gradient-to-r from-emerald-100 p-6 rounded-xl'>
         <div>
             <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent flex items-center gap-2">
                 <i class="fa-solid fa-calendar-week text-emerald-600"></i> Penjadwalan Mingguan Karyawan
             </h1>
             <p class="text-xs text-slate-500 mt-1">Kelola pembagian shift kerja karyawan secara efisien dalam kurun waktu tertentu.</p>
         </div>
-        <div class='flex items-center gap-3 w-full md:w-auto'>
-            <button
-                class="flex items-center justify-center w-11 h-11 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl shadow-xs hover:shadow-sm active:scale-95 transition-all duration-200 cursor-pointer">
-                <i class="fa-solid fa-print text-sm"></i>
+        <div class='flex items-center gap-3 w-full md:w-auto' x-data="{ isExportOpen: false, exportMonth: new Date().getMonth() + 1, exportYear: new Date().getFullYear() }">
+            <!-- Ekspor Jadwal Button -->
+            <button @click="isExportOpen = true"
+                class="flex-1 md:flex-none px-5 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold border border-slate-200 rounded-xl shadow-xs active:scale-95 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
+                <i class="fa-solid fa-print text-sm"></i> Ekspor Jadwal
             </button>
+
             <!-- Tambah Jadwal Button -->
             <button @click="openModal()"
                 class="flex-1 md:flex-none px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-md shadow-emerald-500/10 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95 transition-all duration-200 cursor-pointer flex items-center justify-center gap-2">
                 <i class="fa-solid fa-plus text-xs"></i> Tambah Jadwal
             </button>
+
+            <!-- MODAL PILIH BULAN EKSPOR -->
+            <div x-show="isExportOpen" style="display: none;"
+                class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+                
+                <div @click.outside="isExportOpen = false"
+                    class="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 border border-slate-100 overflow-hidden text-left">
+                    
+                    <div class="flex justify-between items-center mb-5 pb-2 border-b border-slate-100">
+                        <h3 class="text-sm font-extrabold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel text-emerald-500 text-base"></i>
+                            Ekspor Jadwal Bulanan
+                        </h3>
+                        <button @click="isExportOpen = false" class="text-slate-400 hover:text-slate-650 transition text-sm">✕</button>
+                    </div>
+
+                    <div class="space-y-4">
+                        <!-- Pilih Bulan -->
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Pilih Bulan</label>
+                            <select x-model="exportMonth" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl outline-none text-xs font-semibold text-slate-700 bg-white">
+                                <option value="1">Januari</option>
+                                <option value="2">Februari</option>
+                                <option value="3">Maret</option>
+                                <option value="4">April</option>
+                                <option value="5">Mei</option>
+                                <option value="6">Juni</option>
+                                <option value="7">Juli</option>
+                                <option value="8">Agustus</option>
+                                <option value="9">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+
+                        <!-- Pilih Tahun -->
+                        <div class="space-y-1">
+                            <label class="text-[10px] font-bold text-slate-450 uppercase tracking-wide">Pilih Tahun</label>
+                            <select x-model="exportYear" class="w-full mt-1 px-3 py-2 border border-slate-200 rounded-xl outline-none text-xs font-semibold text-slate-700 bg-white">
+                                @php
+                                    $currentYear = date('Y');
+                                @endphp
+                                @for($y = $currentYear - 2; $y <= $currentYear + 2; $y++)
+                                    <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Footer / Aksi -->
+                    <div class="flex justify-end gap-2 mt-6 pt-4 border-t border-slate-150">
+                        <button type="button" @click="isExportOpen = false"
+                            class="px-4 py-2 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-250 transition text-xs font-bold">
+                            Batal
+                        </button>
+                        <a :href="'/kepala-departement/export-jadwal?month=' + exportMonth + '&year=' + exportYear"
+                            @click="isExportOpen = false"
+                            class="px-4 py-2 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition text-xs font-bold flex items-center gap-1.5 shadow-xs shadow-emerald-500/10">
+                            <i class="fa-solid fa-download"></i> Unduh Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -39,7 +105,7 @@
     {{-- CARDS SUMMARY --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <!-- Card 1: Karyawan -->
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 shadow-lg shadow-slate-100/50 p-5 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 relative overflow-hidden group">
+        <div class="animate-bitem bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 shadow-lg shadow-slate-100/50 p-5 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 relative overflow-hidden group">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-indigo-500"></div>
             <div class="flex justify-between items-start">
                 <div>
@@ -57,7 +123,7 @@
         </div>
 
         <!-- Card 2: Hadir -->
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 shadow-lg shadow-slate-100/50 p-5 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300 relative overflow-hidden group">
+        <div class="animate-bitem bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 shadow-lg shadow-slate-100/50 p-5 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5 transition-all duration-300 relative overflow-hidden group">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500"></div>
             <div class="flex justify-between items-start">
                 <div>
@@ -75,7 +141,7 @@
         </div>
 
         <!-- Card 3: Terlambat -->
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 shadow-lg shadow-slate-100/50 p-5 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 relative overflow-hidden group">
+        <div class="animate-bitem bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 shadow-lg shadow-slate-100/50 p-5 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/5 transition-all duration-300 relative overflow-hidden group">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
             <div class="flex justify-between items-start">
                 <div>
@@ -93,7 +159,7 @@
         </div>
 
         <!-- Card 4: Izin/Cuti -->
-        <div class="bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 shadow-lg shadow-slate-100/50 p-5 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-300 relative overflow-hidden group">
+        <div class="animate-bitem bg-white/80 backdrop-blur-md rounded-2xl border border-slate-100 shadow-lg shadow-slate-100/50 p-5 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-300 relative overflow-hidden group">
             <div class="absolute top-0 left-0 w-1.5 h-full bg-rose-500"></div>
             <div class="flex justify-between items-start">
                 <div>
@@ -135,76 +201,89 @@
             </div>
         </div>
 
-        <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-inner bg-slate-50/20 text-sm overflow-x-auto min-w-[900px] mb-4">
-            <div class="grid grid-cols-8">
-                <div class="bg-slate-50/80 p-4 font-bold text-slate-500 border-b border-slate-100 flex items-center justify-center">KARYAWAN</div>
-                <template x-for="d in days">
-                    <div class="bg-slate-50/80 p-3 text-center border-b border-slate-100 border-l border-slate-100/60 relative"
-                        :class="d.active ? 'bg-emerald-50/40' : ''">
-                        <span class="text-xs font-semibold text-slate-400 uppercase" x-text="d.day"></span><br>
-                        <span class="inline-block mt-1 w-7 h-7 line-height-[28px] rounded-full text-sm font-bold transition duration-300"
-                            :class="d.active ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'text-slate-700'"
-                            x-text="d.date"></span>
-                        <template x-if="d.active">
-                            <span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                        </template>
-                    </div>
-                </template>
+        <div class="relative">
+            {{-- LOADING OVERLAY FOR TABLE --}}
+            <div x-show="isLoading" class="absolute inset-0 bg-white/70 z-30 flex flex-col items-center justify-center backdrop-blur-xs transition-opacity duration-200">
+                <div class="flex flex-col items-center">
+                    <svg class="animate-spin h-10 w-10 text-emerald-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span class="text-sm font-semibold text-emerald-700 animate-pulse font-bold">Memuat Jadwal Kerja...</span>
+                </div>
+            </div>
 
-                <template x-for="emp in employees">
-                    <div class="contents">
-
-                        <!-- Karyawan Column -->
-                        <div @click="openModal(emp.id, days[0].date_full, days[6].date_full)"
-                            class="p-3.5 flex items-center gap-3 border-t border-slate-100 hover:bg-slate-50/70 transition cursor-pointer font-medium text-slate-800">
-                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
-                                x-text="emp.initials"></div>
-
-                            <div class="truncate">
-                                <div class="font-semibold text-slate-700 text-sm" x-text="emp.name"></div>
-                                <div class="text-[10px] text-slate-400 font-normal uppercase tracking-wider" x-text="emp.role"></div>
-                            </div>
+            <div class="border border-slate-100 rounded-2xl overflow-hidden shadow-inner bg-slate-50/20 text-sm overflow-x-auto w-full mb-4">
+                <div class="grid grid-cols-8 min-w-[900px]">
+                    <div class="bg-slate-50/80 p-4 font-bold text-slate-500 border-b border-slate-100 flex items-center justify-center">KARYAWAN</div>
+                    <template x-for="d in days">
+                        <div class="bg-slate-50/80 p-3 text-center border-b border-slate-100 border-l border-slate-100/60 relative"
+                            :class="d.active ? 'bg-emerald-50/40' : ''">
+                            <span class="text-xs font-semibold text-slate-400 uppercase" x-text="d.day"></span><br>
+                            <span class="inline-block mt-1 w-7 h-7 line-height-[28px] rounded-full text-sm font-bold transition duration-300"
+                                :class="d.active ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'text-slate-700'"
+                                x-text="d.date"></span>
+                            <template x-if="d.active">
+                                <span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                            </template>
                         </div>
+                    </template>
 
-                        <!-- Shift Days Column -->
-                        <template x-for="(shift, index) in emp.shifts">
-                            <div @click="isPastDate(days[index].date_full) ? window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: 'Tidak dapat mengubah atau membuat jadwal untuk hari yang sudah lewat.' } })) : openModal(emp.id, days[index].date_full, days[index].date_full)"
-                                class="p-3 border-t border-l border-slate-100 flex items-center justify-center min-h-[70px] transition-all duration-200"
-                                :class="isPastDate(days[index].date_full) ? 'bg-slate-50/40 cursor-not-allowed opacity-50' : 'hover:bg-slate-50/30 cursor-pointer'">
-                                
-                                <!-- Kalau tidak ada shift -->
-                                <template x-if="!shift">
-                                    <div class="text-slate-350 text-sm hover:text-emerald-500 transition font-bold w-full h-full flex items-center justify-center">
-                                        <template x-if="!isPastDate(days[index].date_full)">
-                                            <span class="w-7 h-7 flex items-center justify-center rounded-lg border border-dashed border-slate-200 text-slate-400 hover:border-emerald-350 hover:bg-emerald-50/50 hover:text-emerald-500 transition-all duration-205">+</span>
-                                        </template>
-                                        <template x-if="isPastDate(days[index].date_full)">
-                                            <span class="text-slate-300">-</span>
-                                        </template>
-                                    </div>
-                                </template>
+                    <template x-for="emp in employees">
+                        <div class="contents">
 
-                                <!-- Kalau ada -->
-                                <template x-if="shift">
-                                    <div class="px-2.5 py-1.5 rounded-xl text-xs text-center w-full shadow-xs transition duration-200"
-                                        :class="shiftClass(shift)">
+                            <!-- Karyawan Column -->
+                            <div @click="openModal(emp.id, days[0].date_full, days[6].date_full)"
+                                class="p-3.5 flex items-center gap-3 border-t border-slate-100 hover:bg-slate-50/70 transition cursor-pointer font-medium text-slate-800">
+                                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center text-xs font-bold shadow-xs"
+                                    x-text="emp.initials"></div>
 
-                                        <div class="font-bold capitalize text-[10px]" x-text="shift"></div>
-                                        <div class="text-[9px] font-medium opacity-85 mt-1">
-                                            <template x-if="shift === 'pagi'"><span>06.00</span></template>
-                                            <template x-if="shift === 'siang'"><span>14.00</span></template>
-                                            <template x-if="shift === 'sore'"><span>15.00</span></template>
-                                            <template x-if="shift === 'malam'"><span>22.00</span></template>
-                                            <template x-if="shift === 'libur'"><span>Libur</span></template>
-                                        </div>
-
-                                    </div>
-                                </template>
-
+                                <div class="truncate">
+                                    <div class="font-semibold text-slate-700 text-sm" x-text="emp.name"></div>
+                                    <div class="text-[10px] text-slate-400 font-normal uppercase tracking-wider" x-text="emp.role"></div>
+                                </div>
                             </div>
-                        </template>
-                    </div>
-                </template>
+
+                            <!-- Shift Days Column -->
+                            <template x-for="(shift, index) in emp.shifts">
+                                <div @click="isPastDate(days[index].date_full) ? window.dispatchEvent(new CustomEvent('flash-error', { detail: { message: 'Tidak dapat mengubah atau membuat jadwal untuk hari yang sudah lewat.' } })) : openModal(emp.id, days[index].date_full, days[index].date_full)"
+                                    class="p-3 border-t border-l border-slate-100 flex items-center justify-center min-h-[70px] transition-all duration-200"
+                                    :class="isPastDate(days[index].date_full) ? 'bg-slate-50/40 cursor-not-allowed opacity-50' : 'hover:bg-slate-50/30 cursor-pointer'">
+                                    
+                                    <!-- Kalau tidak ada shift -->
+                                    <template x-if="!shift">
+                                        <div class="text-slate-350 text-sm hover:text-emerald-500 transition font-bold w-full h-full flex items-center justify-center">
+                                            <template x-if="!isPastDate(days[index].date_full)">
+                                                <span class="w-7 h-7 flex items-center justify-center rounded-lg border border-dashed border-slate-200 text-slate-400 hover:border-emerald-350 hover:bg-emerald-50/50 hover:text-emerald-500 transition-all duration-205">+</span>
+                                            </template>
+                                            <template x-if="isPastDate(days[index].date_full)">
+                                                <span class="text-slate-300">-</span>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Kalau ada -->
+                                    <template x-if="shift">
+                                        <div class="px-2.5 py-1.5 rounded-xl text-xs text-center w-full shadow-xs transition duration-200"
+                                            :class="shiftClass(shift)">
+
+                                            <div class="font-bold capitalize text-[10px]" x-text="shift"></div>
+                                            <div class="text-[9px] font-medium opacity-85 mt-1">
+                                                <template x-if="shift === 'pagi'"><span>06.00</span></template>
+                                                <template x-if="shift === 'siang'"><span>14.00</span></template>
+                                                <template x-if="shift === 'sore'"><span>15.00</span></template>
+                                                <template x-if="shift === 'malam'"><span>22.00</span></template>
+                                                <template x-if="shift === 'libur'"><span>Libur</span></template>
+                                            </div>
+
+                                        </div>
+                                    </template>
+
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
             </div>
         </div>
 

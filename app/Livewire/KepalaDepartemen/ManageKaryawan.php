@@ -4,10 +4,7 @@ namespace App\Livewire\KepalaDepartemen;
 
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Models\User;
-use App\Models\Departemen;
-use App\Enums\UserRole;
-use App\Enums\Status;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 
 class ManageKaryawan extends Component
@@ -20,6 +17,18 @@ class ManageKaryawan extends Component
     public bool $isDetailOpen = false;
     public ?int $selectedUserId = null;
     public ?array $selectedUser = null;
+
+    protected UserService $userService;
+
+    /**
+     * Bootstrapping dependency injection untuk UserService.
+     *
+     * @param UserService $userService
+     */
+    public function boot(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -37,21 +46,10 @@ class ManageKaryawan extends Component
      */
     public function showDetail(int $userId)
     {
-        $user = User::with(['departemen', 'outsourcing'])->find($userId);
-
-        if ($user) {
+        $detail = $this->userService->getUserDetail($userId);
+        if ($detail) {
             $this->selectedUserId = $userId;
-            $this->selectedUser = [
-                'nama_lengkap'    => $user->nama_lengkap,
-                'email'           => $user->email,
-                'nomor_tlp'       => $user->nomor_tlp ?? '-',
-                'nip'             => $user->nip ?? '-',
-                'alamat'          => $user->alamat ?? '-',
-                'status'          => $user->status,
-                'tanggal_masuk'   => $user->tanggal_masuk ? date('d F Y', strtotime($user->tanggal_masuk)) : '-',
-                'departemen_nama' => $user->departemen->nama_departemen ?? '-',
-                'vendor_nama'     => $user->outsourcing->nama_outsourcing ?? '-',
-            ];
+            $this->selectedUser = $detail;
             $this->isDetailOpen = true;
         }
     }
@@ -68,28 +66,10 @@ class ManageKaryawan extends Component
     public function render()
     {
         $deptId = Auth::check() ? Auth::user()->departemen_id : null;
-        $departemen = $deptId ? Departemen::find($deptId) : null;
         
-        $query = User::where('role', UserRole::Karyawan->value);
-
-        // Hanya tampilkan karyawan yang berada di departemen Kepala Departemen yang login
-        if ($deptId) {
-            $query->where('departemen_id', $deptId);
-        } else {
-            // Jika departemen tidak di-set, filter agar kosong
-            $query->whereNull('id_user');
-        }
-
-        // Pencarian berdasarkan Nama Lengkap, NIP, atau Email
-        if (!empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('nama_lengkap', 'like', '%' . $this->search . '%')
-                  ->orWhere('nip', 'like', '%' . $this->search . '%')
-                  ->orWhere('email', 'like', '%' . $this->search . '%');
-            });
-        }
-
-        $karyawans = $query->orderBy('nama_lengkap', 'asc')->paginate(10);
+        // Panggil data via service (tidak ada models yang digunakan pada livewire)
+        $departemen = $this->userService->getDepartemenById($deptId);
+        $karyawans = $this->userService->getKaryawanByDepartemenPaginated($deptId, $this->search, 10);
 
         return view('livewire.kepala-departemen.manage-karyawan', [
             'karyawans'  => $karyawans,

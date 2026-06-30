@@ -1,6 +1,6 @@
-<div>
+<div x-data="{ isOpen: false }">
     <!-- TITLE & DEPARTEMENT INFO -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200/60 pb-5 mb-6 gap-4 bg-gradient-to-r from-emerald-100 p-6 rounded-xl">
+    <div class="animate-bitem flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200/60 pb-5 mb-6 gap-4 bg-gradient-to-r from-emerald-100 p-6 rounded-xl">
         <div>
             <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent flex items-center gap-2">
                 <i class="fa-solid fa-users text-emerald-600"></i> Daftar Karyawan
@@ -19,7 +19,7 @@
     </div>
 
     <!-- SEARCH & FILTER -->
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-6 bg-white/80 p-4 rounded-xl border border-slate-200/60 shadow-xs">
+    <div class="animate-bitem flex flex-col md:flex-row items-center justify-between gap-4 mb-6 bg-white/80 p-4 rounded-xl border border-slate-200/60 shadow-xs">
         <!-- Search -->
         <div class="relative w-full md:w-80 group">
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Cari berdasarkan nama, email, NIP..."
@@ -48,7 +48,7 @@
                 </thead>
                 <tbody class="divide-y divide-slate-150">
                     @forelse($karyawans as $index => $karyawan)
-                        <tr class="hover:bg-slate-50/50 transition group">
+                        <tr class="animate-bitem hover:bg-slate-50/50 transition group">
                             <!-- No -->
                             <td class="px-6 py-4 text-center text-xs font-semibold text-slate-500">
                                 {{ ($karyawans->currentPage() - 1) * $karyawans->perPage() + $index + 1 }}
@@ -108,7 +108,7 @@
                             </td>
                             <!-- Aksi -->
                             <td class="px-6 py-4 text-center">
-                                <button wire:click="showDetail({{ $karyawan->id_user }})"
+                                <button @click="isOpen = true; $wire.showDetail({{ $karyawan->id_user }})"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50/30 transition text-xs font-bold active:scale-95">
                                     <i class="fa-solid fa-eye text-[11px]"></i> Detail
                                 </button>
@@ -134,10 +134,10 @@
     </div>
 
     <!-- MODAL DETAIL KARYAWAN -->
-    <div x-data="{ isOpen: @entangle('isDetailOpen') }" x-show="isOpen" style="display: none;"
+    <div x-show="isOpen" style="display: none;"
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
         
-        <div @click.outside="$wire.closeDetail()" x-show="isOpen"
+        <div @click.outside="isOpen = false; $wire.closeDetail()" x-show="isOpen"
             class="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl p-6 border border-slate-100 overflow-hidden"
             x-transition:enter="transition ease-out duration-300"
             x-transition:enter-start="opacity-0 scale-95 translate-y-4"
@@ -162,7 +162,7 @@
                 <h2 class="text-lg font-extrabold text-slate-800 flex items-center gap-2">
                     <i class="fa-solid fa-address-card text-emerald-500"></i> Detail Profil Karyawan
                 </h2>
-                <button wire:click="closeDetail"
+                <button @click="isOpen = false; $wire.closeDetail()"
                     class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition border border-slate-200">
                     ✕
                 </button>
@@ -255,7 +255,7 @@
 
             <!-- Footer Modal -->
             <div class="flex justify-end pt-4 border-t border-slate-100 mt-6">
-                <button type="button" wire:click="closeDetail"
+                <button type="button" @click="isOpen = false; $wire.closeDetail()"
                     class="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition text-xs font-bold">
                     Tutup Profil
                 </button>

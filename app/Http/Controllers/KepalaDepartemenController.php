@@ -257,5 +257,153 @@ class KepalaDepartemenController extends Controller
             return redirect()->back()->with('error', 'Gagal memproses template Excel.');
         }
     }
+
+    /**
+     * Mengekspor jadwal bulanan seluruh karyawan dalam bentuk file Excel.
+     */
+    public function exportJadwal(Request $request)
+    {
+        $month = (int) $request->query('month', Carbon::now()->month);
+        $year = (int) $request->query('year', Carbon::now()->year);
+
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+        $daysInMonth = $startDate->daysInMonth;
+
+        $deptId = Auth::check() ? Auth::user()->departemen_id : null;
+        $deptNama = Auth::user()->departemen->nama_departemen ?? 'Semua Departemen';
+
+        $query = User::where('role', UserRole::Karyawan->value)->where('status', Status::Active->value);
+        if ($deptId) {
+            $query->where('departemen_id', $deptId);
+        }
+        $karyawans = $query->orderBy('nama_lengkap', 'asc')->get();
+
+        try {
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
+
+            // Set judul
+            $sheet->setCellValue('A1', 'JADWAL KERJA KARYAWAN ECOGREEN');
+            $lastColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($daysInMonth + 2);
+            $sheet->mergeCells('A1:' . $lastColLetter . '1');
+            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+            $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            $bulanIndo = match($month) {
+                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
+                default => 'Periode'
+            };
+
+            $sheet->setCellValue('A2', 'Departemen: ' . $deptNama . ' | Periode: ' . $bulanIndo . ' ' . $year);
+            $sheet->mergeCells('A2:' . $lastColLetter . '2');
+            $sheet->getStyle('A2')->getFont()->setItalic(true)->setSize(11);
+            $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+            // Row 4: Header Tabel
+            $sheet->setCellValue('A4', 'No');
+            $sheet->setCellValue('B4', 'Nama Karyawan');
+
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2);
+                $sheet->setCellValue($colStr . '4', $day);
+                $sheet->getStyle($colStr . '4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            }
+
+            // Styling Header Row
+            $headerRange = 'A4:' . $lastColLetter . '4';
+            $sheet->getStyle($headerRange)->getFont()->setBold(true);
+            $sheet->getStyle($headerRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                ->getStartColor()->setARGB('FFE2EFDA'); // Hijau muda
+
+            // Isi Data Baris Karyawan
+            $rowStart = 5;
+            foreach ($karyawans as $index => $karyawan) {
+                $currentRow = $rowStart + $index;
+                $sheet->setCellValue('A' . $currentRow, $index + 1);
+                $sheet->setCellValue('B' . $currentRow, $karyawan->nama_lengkap);
+
+                // Ambil jadwal karyawan bulan ini
+                $jadwals = $karyawan->jadwal()
+                    ->where(function ($q) use ($startDate, $endDate) {
+                        $q->where('tanggal_mulai', '<=', $endDate->format('Y-m-d'))
+                          ->where('tanggal_akhir', '>=', $startDate->format('Y-m-d'));
+                    })
+                    ->with('shift')
+                    ->get();
+
+                // Ambil perizinan cuti & sakit bulan ini
+                $perizinans = \App\Models\PerizinanSakit::where('karyawan_id', $karyawan->id_user)
+                    ->where('status', 'disetujui')
+                    ->where(function ($q) use ($startDate, $endDate) {
+                        $q->where('tanggal_mulai', '<=', $endDate->format('Y-m-d'))
+                          ->where('tanggal_selesai', '>=', $startDate->format('Y-m-d'));
+                    })
+                    ->get();
+
+                for ($day = 1; $day <= $daysInMonth; $day++) {
+                    $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2);
+                    $targetDateStr = Carbon::create($year, $month, $day)->format('Y-m-d');
+                    
+                    $statusVal = '';
+
+                    // 1. Cek Shift Kerja
+                    $matchingJadwal = $jadwals->first(function ($j) use ($targetDateStr) {
+                        return $targetDateStr >= $j->tanggal_mulai && $targetDateStr <= $j->tanggal_akhir;
+                    });
+
+                    if ($matchingJadwal && $matchingJadwal->shift) {
+                        $statusVal = match(strtolower($matchingJadwal->shift->nama_shift)) {
+                            'pagi' => 'P',
+                            'sore' => 'S',
+                            'malam' => 'M',
+                            default => ''
+                        };
+                    }
+
+                    // 2. Cek Cuti / Izin (Cuti & Izin menimpa shift kerja)
+                    $matchingIzin = $perizinans->first(function ($p) use ($targetDateStr) {
+                        return $targetDateStr >= $p->tanggal_mulai && $targetDateStr <= $p->tanggal_selesai;
+                    });
+
+                    if ($matchingIzin) {
+                        $statusVal = str_contains(strtolower($matchingIzin->keterangan), 'cuti') ? 'C' : 'I';
+                    }
+
+                    $sheet->setCellValue($colStr . $currentRow, $statusVal);
+                    $sheet->getStyle($colStr . $currentRow)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                }
+            }
+
+            // Set Lebar Kolom
+            $sheet->getColumnDimension('A')->setWidth(5);
+            $sheet->getColumnDimension('B')->setWidth(25);
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2);
+                $sheet->getColumnDimension($colStr)->setWidth(4);
+            }
+
+            // Border seluruh tabel
+            $lastRow = $rowStart + $karyawans->count() - 1;
+            $tableRange = 'A4:' . $lastColLetter . $lastRow;
+            $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
+                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+            $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
+            $fileName = 'Jadwal_Kerja_' . str_replace(' ', '_', $deptNama) . '_' . $bulanIndo . '_' . $year . '.xlsx';
+
+            return response()->streamDownload(function () use ($writer) {
+                $writer->save('php://output');
+            }, $fileName, [
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Cache-Control' => 'max-age=0',
+            ]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengekspor jadwal bulanan.');
+        }
+    }
 }
 

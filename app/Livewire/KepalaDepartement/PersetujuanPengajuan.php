@@ -2,119 +2,53 @@
 
 namespace App\Livewire\KepalaDepartement;
 
-use App\Enums\Validasi;
-use App\Models\Lembur;
+use App\Services\LemburService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 class PersetujuanPengajuan extends Component
 {
-    /**
-     * ID pengajuan lembur yang sedang dipilih untuk detail modal.
-     */
-    public ?int $selectedLemburId = null;
+    use WithPagination;
+
+    protected LemburService $lemburService;
 
     /**
-     * Memilih pengajuan lembur untuk ditampilkan pada modal.
+     * Bootstrapping dependency injection untuk LemburService.
      *
-     * @param int $id
-     * @return void
+     * @param LemburService $lemburService
      */
-    public function selectLembur(int $id)
+    public function boot(LemburService $lemburService)
     {
-        $this->selectedLemburId = $id;
-    }
-
-    /**
-     * Menutup modal detail dan mereset pilihan lembur.
-     *
-     * @return void
-     */
-    public function closeModal()
-    {
-        $this->selectedLemburId = null;
-    }
-
-    /**
-     * Mendapatkan daftar pengajuan lembur untuk karyawan di departemen yang sama.
-     *
-     * @return \Illuminate\Support\Collection
-     */
-    public function getLemburListProperty()
-    {
-        $user = Auth::user();
-        if (!$user || !$user->departemen_id) {
-            return collect();
-        }
-
-        return Lembur::with('karyawan')
-            ->whereHas('karyawan', function ($query) use ($user) {
-                $query->where('departemen_id', $user->departemen_id);
-            })
-            ->latest('created_at')
-            ->get();
-    }
-
-    /**
-     * Mendapatkan data pengajuan lembur yang saat ini dipilih.
-     *
-     * @return Lembur|null
-     */
-    public function getSelectedLemburProperty()
-    {
-        if (!$this->selectedLemburId) {
-            return null;
-        }
-
-        return Lembur::with('karyawan')->find($this->selectedLemburId);
+        $this->lemburService = $lemburService;
     }
 
     /**
      * Menyetujui pengajuan lembur yang dipilih.
      *
+     * @param int $id
      * @return void
      */
-    public function approve()
+    public function approve(int $id)
     {
-        if (!$this->selectedLemburId) {
-            return;
-        }
-
-        $lembur = Lembur::find($this->selectedLemburId);
-        if ($lembur && $lembur->status_validasi === Validasi::Pending->value) {
-            $lembur->update([
-                'status_validasi' => Validasi::Valid->value,
-                'pemvalidasi_id' => Auth::id(),
-            ]);
-
+        $user = Auth::user();
+        if ($user && $this->lemburService->approveLembur($id, $user->id_user)) {
             session()->flash('success', 'Pengajuan lembur berhasil disetujui.');
         }
-
-        $this->closeModal();
     }
 
     /**
      * Menolak pengajuan lembur yang dipilih.
      *
+     * @param int $id
      * @return void
      */
-    public function reject()
+    public function reject(int $id)
     {
-        if (!$this->selectedLemburId) {
-            return;
-        }
-
-        $lembur = Lembur::find($this->selectedLemburId);
-        if ($lembur && $lembur->status_validasi === Validasi::Pending->value) {
-            $lembur->update([
-                'status_validasi' => Validasi::Invalid->value,
-                'pemvalidasi_id' => Auth::id(),
-            ]);
-
+        $user = Auth::user();
+        if ($user && $this->lemburService->rejectLembur($id, $user->id_user)) {
             session()->flash('success', 'Pengajuan lembur berhasil ditolak.');
         }
-
-        $this->closeModal();
     }
 
     /**
@@ -129,27 +63,13 @@ class PersetujuanPengajuan extends Component
             return;
         }
 
-        $pendingLemburs = Lembur::whereHas('karyawan', function ($query) use ($user) {
-                $query->where('departemen_id', $user->departemen_id);
-            })
-            ->where('status_validasi', Validasi::Pending->value)
-            ->get();
+        $count = $this->lemburService->approveAllPendingLembur($user->departemen_id, $user->id_user);
 
-        if ($pendingLemburs->isEmpty()) {
+        if ($count > 0) {
+            session()->flash('success', $count . ' pengajuan lembur berhasil disetujui.');
+        } else {
             session()->flash('success', 'Tidak ada pengajuan yang berstatus pending.');
-            return;
         }
-
-        $count = 0;
-        foreach ($pendingLemburs as $lembur) {
-            $lembur->update([
-                'status_validasi' => Validasi::Valid->value,
-                'pemvalidasi_id' => Auth::id(),
-            ]);
-            $count++;
-        }
-
-        session()->flash('success', $count . ' pengajuan lembur berhasil disetujui.');
     }
 
     /**
@@ -159,9 +79,15 @@ class PersetujuanPengajuan extends Component
      */
     public function render()
     {
+        $user = Auth::user();
+        $deptId = $user ? $user->departemen_id : null;
+
+        $lemburList = $this->lemburService->getLemburListByDepartemenPaginated($deptId, 20);
+        $hasPending = $this->lemburService->hasPendingLembur($deptId);
+
         return view('livewire.kepala-departement.persetujuan-pengajuan', [
-            'lemburList' => $this->lemburList
+            'lemburList' => $lemburList,
+            'hasPending' => $hasPending,
         ]);
     }
 }
-
