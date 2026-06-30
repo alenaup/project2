@@ -3,7 +3,7 @@
 <link rel="stylesheet" href="{{ asset('css/karyawan/pengajuan.css') }}">
 
 @section('content')
-    <!-- PAGE CONTENT -->
+    <!-- PAGE CONTENT -->   
     <div class="space-y-6">
 
 
