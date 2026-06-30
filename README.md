@@ -93,39 +93,96 @@
   <img src="https://img.shields.io/badge/TailwindCSS-3.x-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind Version">
 </p>
 
-<hr>
-
-<h3 align="center">🌸 Konnichiwa! Selamat Datang di EcoStaff 🌸</h3>
-
-<p align="center">
-  <b>EcoStaff</b> adalah sistem manajemen <i>E-Outsourcing</i> modern yang dirancang untuk mengelola penjadwalan, perizinan, lembur, dan absensi karyawan secara real-time. Dengan antarmuka yang bersih, responsif, dan alur kerja yang terstruktur berdasarkan peran pengguna.
-</p>
-
+<!-- Animated SVG Divider -->
 <div align="center">
-  <p><i>"Managing employees has never been this aesthetic and efficient! Let's build a productive team together! ~ 💫"</i></p>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
+    <defs>
+      <linearGradient id="divGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#38ef7d" />
+        <stop offset="50%" stop-color="#ff7eb3" />
+        <stop offset="100%" stop-color="#38ef7d" />
+      </linearGradient>
+      <style>
+        @keyframes slide {
+          0% { stroke-dashoffset: 0; }
+          100% { stroke-dashoffset: -40; }
+        }
+        .line {
+          stroke: url(#divGrad);
+          stroke-width: 2;
+          stroke-dasharray: 20 10;
+          animation: slide 4s linear infinite;
+        }
+      </style>
+    </defs>
+    <line x1="0" y1="10" x2="800" y2="10" class="line" />
+  </svg>
 </div>
 
----
+<br>
+
+<!-- Section: Welcome with Cute Anime Welcome Sticker -->
+<table border="0" width="100%" cellspacing="0" cellpadding="10">
+  <tr style="border: none;">
+    <td width="70%" style="border: none; vertical-align: middle;">
+      <h2>🌸 Konnichiwa! Selamat Datang di EcoStaff 🌸</h2>
+      <p>
+        <b>EcoStaff</b> adalah sistem manajemen <i>E-Outsourcing</i> modern yang dirancang untuk mengelola penjadwalan, perizinan, lembur, dan absensi karyawan secara real-time. Dengan antarmuka yang bersih, responsif, dan alur kerja yang terstruktur berdasarkan peran pengguna.
+      </p>
+      <p><i>"Mengelola staf kini menjadi jauh lebih estetis dan efisien! Mari kita bangun tim yang solid bersama-sama! ~ 💫"</i></p>
+    </td>
+    <td width="30%" align="center" style="border: none; vertical-align: middle;">
+      <img src="public/images/ecostaff_welcome_sticker.png" width="200" alt="Welcome Sticker" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+    </td>
+  </tr>
+</table>
+
+<!-- Animated SVG Divider -->
+<div align="center">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
+    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
+  </svg>
+</div>
+
+<br>
 
 ### 🚀 Link Deploys Aplikasi
 Aplikasi ini telah berhasil dideploy dan dapat diakses secara publik melalui link berikut:
 👉 **[https://ecostaff.ct.ws](https://ecostaff.ct.ws)**
 
 > [!NOTE]
-> Anda dapat mencoba login dengan role yang diinginkan untuk melihat fitur-fitur interaktif di dalamnya.
+> Anda dapat mencoba login dengan role yang diinginkan untuk melihat fitur-fitur interaktif di dalamnya secara langsung!
 
----
+<br>
 
-### 🛡️ Guild Ranks (Peran Sistem / Users)
-Sistem ini menggunakan pembagian peran (roles) layaknya sistem faksi pada anime untuk menjaga keamanan dan efisiensi koordinasi:
+<!-- Animated SVG Divider -->
+<div align="center">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
+    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
+  </svg>
+</div>
 
-| Ranks | Emoji | Role Name | Keterangan / Deskripsi Tugas |
-| :--- | :---: | :--- | :--- |
-| **Rank SS** | 👑 | **Super Admin** | Memegang kontrol tertinggi atas seluruh konfigurasi sistem, parameter global, dan hak akses. |
-| **Rank S** | 🛠️ | **Admin Outsourcing** | Mengelola onboarding karyawan baru, validasi pengajuan akun, dan koordinasi dengan vendor luar. |
-| **Rank A** | 👔 | **Kepala Departemen** | Mengatur plotting jadwal shift mingguan, menyetujui lembur (overtime), dan melacak laporan performa divisi. |
-| **Rank B** | 📊 | **HR User** | Memverifikasi ajuan data karyawan, mengunduh rekap detail kehadiran, dan memantau kesehatan operasional. |
-| **Rank C** | 🏃‍♂️ | **Karyawan Outsourcing** | Mengisi absensi harian, mengajukan izin/cuti, melihat jadwal shift pribadi, dan mengunduh jadwal dalam format PDF. |
+<br>
+
+<!-- Section: Roles with Mascot Sticker -->
+<table border="0" width="100%" cellspacing="0" cellpadding="10">
+  <tr style="border: none;">
+    <td width="30%" align="center" style="border: none; vertical-align: middle;">
+      <img src="public/images/ecostaff_mascot.png" width="200" alt="EcoStaff Mascot" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+    </td>
+    <td width="70%" style="border: none; vertical-align: middle;">
+      <h3>🛡️ Guild Ranks (Peran Sistem / Users)</h3>
+      <p>Sistem ini menggunakan pembagian peran (roles) layaknya sistem faksi pada anime untuk menjaga keamanan dan efisiensi koordinasi:</p>
+      <ul>
+        <li>👑 <b>Rank SS - Super Admin:</b> Memegang kontrol tertinggi atas seluruh konfigurasi sistem, parameter global, dan hak akses penuh.</li>
+        <li>🛠️ <b>Rank S - Admin Outsourcing:</b> Mengelola onboarding karyawan baru, validasi pengajuan akun, dan koordinasi dengan vendor luar.</li>
+        <li>👔 <b>Rank A - Kepala Departemen:</b> Mengatur plotting jadwal shift mingguan, menyetujui lembur (overtime), dan melacak laporan performa divisi.</li>
+        <li>📊 <b>Rank B - HR User:</b> Memverifikasi ajuan data karyawan, mengunduh rekap detail kehadiran, dan memantau kesehatan operasional.</li>
+        <li>🏃‍♂️ <b>Rank C - Karyawan Outsourcing:</b> Mengisi absensi harian, mengajukan izin/cuti, melihat jadwal shift pribadi, dan mengunduh jadwal dalam format PDF.</li>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -179,7 +236,16 @@ Gunakan menu di bawah ini untuk melihat fitur-fitur seru dari setiap faksi:
 - **Download Jadwal PDF:** Fitur unduh kalender shift kerja pribadi dalam format PDF siap cetak.
 </details>
 
----
+<br>
+
+<!-- Animated SVG Divider -->
+<div align="center">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
+    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
+  </svg>
+</div>
+
+<br>
 
 ### 🎨 Tech Stack & Tools
 Proyek ini dibangun menggunakan teknologi mutakhir untuk memastikan performa yang cepat dan pengalaman pengguna yang luar biasa:
@@ -191,54 +257,50 @@ Proyek ini dibangun menggunakan teknologi mutakhir untuk memastikan performa yan
 * **Bundler & Server:** [Vite](https://vitejs.dev) - *Super-fast frontend tooling* 🚀
 * **PDF Generator:** [DomPDF](https://github.com/barryvdh/laravel-dompdf) - *Convert HTML views to neat PDF files* 📄
 
----
+<br>
 
-### ⚙️ Cara Menjalankan Proyek Secara Lokal
+<!-- Animated SVG Divider -->
+<div align="center">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
+    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
+  </svg>
+</div>
 
-Ingin mencoba menjalankan di komputer Anda? Ikuti langkah-langkah mudah berikut:
+<br>
 
-1. **Clone Repositori**
-   ```bash
-   git clone https://github.com/username/E-outsourcing-trpl210.git
-   cd E-outsourcing-trpl210
-   ```
+<!-- Section: Local Setup with Dev Sticker -->
+<table border="0" width="100%" cellspacing="0" cellpadding="10">
+  <tr style="border: none;">
+    <td width="70%" style="border: none; vertical-align: middle;">
+      <h3>⚙️ Cara Menjalankan Proyek Secara Lokal</h3>
+      <p>Ingin mencoba menjalankan di komputer Anda? Ikuti langkah-langkah mudah berikut:</p>
+      <ol>
+        <li><b>Clone Repositori:</b><br/><code>git clone https://github.com/username/E-outsourcing-trpl210.git</code></li>
+        <li><b>Instal Dependensi PHP & Node:</b><br/><code>composer install</code> dan <code>npm install</code></li>
+        <li><b>Konfigurasi Environment:</b><br/>Salin berkas <code>.env.example</code> ke <code>.env</code> dan generate key dengan <code>php artisan key:generate</code></li>
+        <li><b>Migrasi Database &amp; Seeder:</b><br/><code>php artisan migrate:fresh --seed</code></li>
+        <li><b>Jalankan Server:</b><br/>Buka server lokal dengan <code>php artisan serve</code> dan compiler dengan <code>npm run dev</code></li>
+      </ol>
+    </td>
+    <td width="30%" align="center" style="border: none; vertical-align: middle;">
+      <img src="public/images/ecostaff_dev_sticker.png" width="200" alt="Developer Sticker" style="border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" />
+    </td>
+  </tr>
+</table>
 
-2. **Instal Dependensi PHP (Composer)**
-   ```bash
-   composer install
-   ```
+<br>
 
-3. **Instal Dependensi Node (NPM)**
-   ```bash
-   npm install
-   ```
+<!-- Animated SVG Divider -->
+<div align="center">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 20" width="100%">
+    <line x1="0" y1="10" x2="800" y2="10" stroke="url(#divGrad)" stroke-width="2" stroke-dasharray="20 10" style="stroke: url(#divGrad); stroke-width: 2; stroke-dasharray: 20 10; animation: slide 4s linear infinite;" />
+  </svg>
+</div>
 
-4. **Konfigurasi Environment**
-   Salin berkas `.env.example` menjadi `.env` lalu sesuaikan kredensial database Anda.
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-
-5. **Migrasi Database & Seeder**
-   ```bash
-   php artisan migrate:fresh --seed
-   ```
-
-6. **Jalankan Aplikasi**
-   Buka terminal terpisah untuk menjalankan server Laravel dan kompilasi aset Vite secara bersamaan:
-   ```bash
-   # Terminal 1: Laravel Server
-   php artisan serve
-
-   # Terminal 2: Vite Compiler
-   npm run dev
-   ```
-
----
+<br>
 
 <div align="center">
   <p>Dibuat dengan penuh dedikasi dan cinta 💚 oleh Tim EcoStaff.</p>
   <p><i>~ Arigatou Gozaimasu! ~</i></p>
-  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Writing%20Hand.png" alt="Writing" width="40" />
+  <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Writing%20Hand.png" alt="Writing" width="45" />
 </div>
