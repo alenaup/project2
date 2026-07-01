@@ -73,6 +73,8 @@ Route::get('/hr/dashboard', function () {
     return view('hr.dashboard');
 })->name('hr.dashboard');
 
+Route::get('/hr/export-lembur', [\App\Http\Controllers\HRController::class, 'exportLembur'])->name('hr.export_lembur');
+
 Route::get('/hr/rekapan-detail', function () {
     return view('hr.rekapanDetail');
 });
