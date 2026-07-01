@@ -2,5 +2,5 @@
 
 @section('content')
     <!-- Validasi Lembur Component -->
-    <livewire:kepala-departement.persetujuan-pengajuan />
+    <livewire:kepala-departemen.persetujuan-pengajuan />
 @endsection

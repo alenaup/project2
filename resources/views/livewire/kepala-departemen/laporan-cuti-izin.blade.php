@@ -1,14 +1,6 @@
 <div class="max-w-6xl mx-auto p-6 bg-white/70 rounded-2xl shadow space-y-8 mt-4">
-
     <!-- TITLE & FILTERS -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <i class="fas fa-calendar-check text-blue-500"></i>
-                Cuti & Izin
-            </h1>
-            <p class="text-sm text-gray-500">Riwayat pengajuan cuti, izin, dan sakit karyawan di departemen Anda</p>
-        </div>
 
         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <!-- SEARCH USER -->
@@ -90,10 +82,10 @@
             Daftar Pengajuan Karyawan
         </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm">
+        <div class="overflow-x-auto w-full">
+            <table class="w-full min-w-max text-left border-collapse text-sm">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 font-semibold">
+                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-500 font-semibold whitespace-nowrap">
                         <th class="p-4">Karyawan</th>
                         <th class="p-4">Tanggal Pengajuan</th>
                         <th class="p-4">Tanggal Mulai</th>
@@ -111,7 +103,7 @@
                             $initials = strtoupper(substr($item->karyawan->nama_lengkap ?? 'K', 0, 2));
                         @endphp
                         <tr class="hover:bg-slate-50/40 transition duration-150">
-                            <td class="p-4">
+                            <td class="p-4 whitespace-nowrap">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold shadow-xs">
                                         {{ $initials }}
@@ -122,16 +114,16 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="p-4 text-slate-600 text-xs">
+                            <td class="p-4 text-slate-600 text-xs whitespace-nowrap">
                                 {{ \Carbon\Carbon::parse($item->tanggal_pengajuan)->translatedFormat('d M Y H:i') }}
                             </td>
-                            <td class="p-4 text-slate-600 text-xs">
+                            <td class="p-4 text-slate-600 text-xs whitespace-nowrap">
                                 {{ \Carbon\Carbon::parse($item->tanggal_mulai)->translatedFormat('d M Y') }}
                             </td>
-                            <td class="p-4 text-slate-600 text-xs">
+                            <td class="p-4 text-slate-600 text-xs whitespace-nowrap">
                                 {{ \Carbon\Carbon::parse($item->tanggal_selesai)->translatedFormat('d M Y') }}
                             </td>
-                            <td class="p-4">
+                            <td class="p-4 whitespace-nowrap">
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold
                                     {{ $jenis === 'Sakit' ? 'bg-red-50 text-red-700' : '' }}
                                     {{ $jenis === 'Cuti' ? 'bg-blue-50 text-blue-700' : '' }}
@@ -150,7 +142,7 @@
                             <td class="p-4 text-slate-600 max-w-xs truncate" title="{{ $item->keterangan }}">
                                 {{ $item->keterangan }}
                             </td>
-                            <td class="p-4">
+                            <td class="p-4 whitespace-nowrap">
                                 @if($item->file_surat)
                                     <a href="{{ Storage::url($item->file_surat) }}" target="_blank" 
                                         class="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-semibold hover:underline">
@@ -161,7 +153,7 @@
                                     <span class="text-xs text-slate-350">-</span>
                                 @endif
                             </td>
-                            <td class="p-4">
+                            <td class="p-4 whitespace-nowrap">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider
                                     {{ $item->status === 'menunggu' ? 'bg-yellow-50 text-yellow-700' : '' }}
                                     {{ $item->status === 'disetujui' ? 'bg-emerald-50 text-emerald-700' : '' }}

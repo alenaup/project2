@@ -10,17 +10,22 @@ class LemburService
     /**
      * Mendapatkan daftar pengajuan lembur per departemen dengan paginasi.
      */
-    public function getLemburListByDepartemenPaginated(?int $deptId, int $perPage = 20)
+    public function getLemburListByDepartemenPaginated(?int $deptId, int $perPage = 20, ?string $date = null)
     {
         if (!$deptId) {
             return collect();
         }
 
-        return Lembur::with('karyawan')
+        $query = Lembur::with('karyawan')
             ->whereHas('karyawan', function ($query) use ($deptId) {
                 $query->where('departemen_id', $deptId);
-            })
-            ->latest('created_at')
+            });
+
+        if ($date) {
+            $query->whereDate('mulai_lembur', $date);
+        }
+
+        return $query->latest('created_at')
             ->paginate($perPage);
     }
 
@@ -38,6 +43,21 @@ class LemburService
             })
             ->where('status_validasi', Validasi::Pending->value)
             ->exists();
+    }
+
+    public function listTanggalPendingLembur(?int $deptId)
+    {
+        if (!$deptId) {
+            return collect();
+        }
+
+        return Lembur::with('karyawan')
+                ->whereHas('karyawan', function ($query) use ($deptId) {
+                    $query->where('departemen_id', $deptId);
+                })
+                ->where('status_validasi', \App\Enums\Validasi::Pending->value)
+                ->orderBy('created_at', 'asc')
+                ->get();
     }
 
     /**
@@ -81,17 +101,22 @@ class LemburService
     /**
      * Menyetujui semua pengajuan lembur berstatus pending di departemen tertentu.
      */
-    public function approveAllPendingLembur(?int $deptId, int $validatorId): int
+    public function approveAllPendingLembur(?int $deptId, int $validatorId, ?string $date = null): int
     {
         if (!$deptId) {
             return 0;
         }
 
-        $pendingLemburs = Lembur::whereHas('karyawan', function ($query) use ($deptId) {
+        $query = Lembur::whereHas('karyawan', function ($query) use ($deptId) {
                 $query->where('departemen_id', $deptId);
             })
-            ->where('status_validasi', Validasi::Pending->value)
-            ->get();
+            ->where('status_validasi', Validasi::Pending->value);
+
+        if ($date) {
+            $query->whereDate('mulai_lembur', $date);
+        }
+
+        $pendingLemburs = $query->get();
 
         if ($pendingLemburs->isEmpty()) {
             return 0;

@@ -34,10 +34,10 @@
 
     <!-- TABLE CARD -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full border-collapse text-left">
+        <div class="overflow-x-auto w-full">
+            <table class="w-full min-w-max border-collapse text-left">
                 <thead>
-                    <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">
+                    <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider whitespace-nowrap">
                         <th class="px-6 py-4 w-16 text-center">No</th>
                         <th class="px-6 py-4">Karyawan</th>
                         <th class="px-6 py-4">NIP / Kode</th>
@@ -50,11 +50,11 @@
                     @forelse($karyawans as $index => $karyawan)
                         <tr class="animate-bitem hover:bg-slate-50/50 transition group">
                             <!-- No -->
-                            <td class="px-6 py-4 text-center text-xs font-semibold text-slate-500">
+                            <td class="px-6 py-4 text-center text-xs font-semibold text-slate-500 whitespace-nowrap">
                                 {{ ($karyawans->currentPage() - 1) * $karyawans->perPage() + $index + 1 }}
                             </td>
                             <!-- Nama & Email -->
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-3">
                                     @php
                                         // Singkatan nama
@@ -87,15 +87,15 @@
                                 </div>
                             </td>
                             <!-- NIP -->
-                            <td class="px-6 py-4 text-xs font-semibold text-slate-650">
+                            <td class="px-6 py-4 text-xs font-semibold text-slate-650 whitespace-nowrap">
                                 {{ $karyawan->nip ?? '-' }}
                             </td>
                             <!-- Nomor Telepon -->
-                            <td class="px-6 py-4 text-xs font-semibold text-slate-650">
+                            <td class="px-6 py-4 text-xs font-semibold text-slate-650 whitespace-nowrap">
                                 {{ $karyawan->nomor_tlp ?? '-' }}
                             </td>
                             <!-- Status -->
-                            <td class="px-6 py-4">
+                            <td class="px-6 py-4 whitespace-nowrap">
                                 @if($karyawan->status === 'active')
                                     <span class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase tracking-wide">
                                         Aktif
@@ -107,7 +107,7 @@
                                 @endif
                             </td>
                             <!-- Aksi -->
-                            <td class="px-6 py-4 text-center">
+                            <td class="px-6 py-4 text-center whitespace-nowrap">
                                 <button @click="isOpen = true; $wire.showDetail({{ $karyawan->id_user }})"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-emerald-700 hover:border-emerald-200 hover:bg-emerald-50/30 transition text-xs font-bold active:scale-95">
                                     <i class="fa-solid fa-eye text-[11px]"></i> Detail
