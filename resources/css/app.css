@@ -35,15 +35,20 @@
     }
 }
 
-.animate-item {
+/* Base styles: default to fully visible. This prevents components from disappearing on Livewire dynamic updates (morphing) when the 'show' class is stripped by Livewire's DOM update. */
+.animate-item,
+.animate-bitem {
+    opacity: 1;
+}
+
+/* Initial page load states: elements start as invisible only if html has the 'is-loading' class. */
+html.is-loading .animate-item,
+html.is-loading .animate-bitem {
     opacity: 0;
 }
 
-.animate-item.show {
-    animation: fadeUp 0.7s ease-out forwards;
-}
-
-
-.animate-bitem.show {
+/* Trigger animation only during the initial page load */
+html.is-loading .animate-item.show,
+html.is-loading .animate-bitem.show {
     animation: fadeUp 0.7s ease-out forwards;
 }

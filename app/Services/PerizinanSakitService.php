@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\PerizinanSakit;
+use App\Enums\Status;
+use App\Enums\UserRole;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -59,7 +61,7 @@ class PerizinanSakitService
 
     public function __construct()
     {
-        $this->id = Auth::user()->id_user;
+        $this->id = Auth::check() ? Auth::user()->id_user : null;
     }
 
     public function ambilStatus($id_perizinan)
@@ -83,5 +85,47 @@ class PerizinanSakitService
             'tanggal_pengajuan' => now(),
         ]);
         return $query;
+    }
+
+    public function ambilPerizinanSakitSemuaKaryawan($deptId)
+    {
+        return PerizinanSakit::query()
+            ->whereHas('karyawan', function ($q) use ($deptId) {
+                $q->where('role', UserRole::Karyawan->value)
+                    ->where('status', Status::Active->value);
+                if ($deptId) {
+                    $q->where('departemen_id', $deptId);
+                }
+        });
+    }
+
+    /**
+     * Mengambil laporan perizinan karyawan yang difilter berdasarkan pencarian nama dan tanggal.
+     *
+     * @param int|null $deptId
+     * @param string|null $search
+     * @param string|null $filterDate
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function ambilLaporanPerizinanFiltered($deptId, ?string $search = null, ?string $filterDate = null)
+    {
+        $query = PerizinanSakit::query()
+            ->with('karyawan.departemen')
+            ->whereHas('karyawan', function ($q) use ($deptId, $search) {
+                $q->where('role', UserRole::Karyawan->value)
+                  ->where('status', Status::Active->value);
+                if ($deptId) {
+                    $q->where('departemen_id', $deptId);
+                }
+                if ($search) {
+                    $q->where('nama_lengkap', 'like', '%' . $search . '%');
+                }
+            });
+
+        if ($filterDate) {
+            $query->whereDate('tanggal_pengajuan', $filterDate);
+        }
+
+        return $query->orderBy('tanggal_pengajuan', 'desc')->get();
     }
 }

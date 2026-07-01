@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\Status;
 use App\Enums\UserRole;
+use App\Models\Departemen;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -72,6 +73,13 @@ class UserService
             ->get();
     }
 
+    public function getLokasiDepartemenUser()
+    {
+        $user = Auth::user();
+        if ($user && $user->departemen_id) {
+            return Departemen::with('lokasi')->find($user->departemen_id);
+        }
+    }
     public function getUserAdmin()
     {
         return User::where('role', UserRole::AdminVendor->value)

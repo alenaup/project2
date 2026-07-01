@@ -6,7 +6,7 @@
         <div class="lg:col-span-1 flex flex-col gap-6">
             
             <!-- Card Profil Singkat -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center text-center">
+            <div class="animate-bitem bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col items-center text-center">
                 
                 @php
                     $profilPath = 'profiles/profil_' . Auth::id() . '.jpg';
@@ -15,30 +15,30 @@
                 @endphp
 
                 <div class="relative w-32 h-32 rounded-full mb-4 group">
-                    <div class="w-full h-full rounded-full bg-gray-100 overflow-hidden border-4 border-gray-50 shadow-inner">
+                    <div class="animate-bitem w-full h-full rounded-full bg-gray-100 overflow-hidden border-4 border-gray-50 shadow-inner">
                         <img src="{{ $fotoUrl ?? '/images/profile.jpg' }}" alt="Profile" onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($nama_lengkap) }}&background=10b981&color=fff&size=128'" class="w-full h-full object-cover">
                     </div>
                     
                     <!-- Tombol Ubah Foto -->
                     <button type="button" @click="openFotoModal = true"
-                        class="absolute bottom-0 right-0 bg-emerald-600 text-white w-9 h-9 rounded-full flex items-center justify-center border-2 border-white shadow-md hover:bg-emerald-700 transition-colors opacity-80 group-hover:opacity-100">
+                        class="animate-bitem absolute bottom-0 right-0 bg-emerald-600 text-white w-9 h-9 rounded-full flex items-center justify-center border-2 border-white shadow-md hover:bg-emerald-700 transition-colors opacity-80 group-hover:opacity-100">
                         <i class="fa-solid fa-camera text-sm"></i>
                     </button>
                 </div>
                 
-                <h3 class="text-xl font-bold text-gray-900">{{ $nama_lengkap }}</h3>
-                <p class="text-emerald-600 font-semibold text-xs mt-1 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full">
+                <h3 class="animate-bitem text-xl font-bold text-gray-900">{{ $nama_lengkap }}</h3>
+                <p class="animate-bitem text-emerald-600 font-semibold text-xs mt-1 uppercase tracking-wider bg-emerald-50 px-3 py-1 rounded-full">
                     {{ str_replace('_', ' ', Auth::user()->role->value) }}
                 </p>
 
                 <div class="w-full h-px bg-gray-100 my-5"></div>
 
-                <div class="w-full space-y-3">
-                    <div class="flex items-center justify-between text-sm">
+                <div class="animate-bitem w-full space-y-3">
+                    <div class="animate-bitem flex items-center justify-between text-sm">
                         <span class="text-gray-500"><i class="fa-solid fa-id-badge w-5 text-left"></i> NIP</span>
                         <span class="font-semibold text-gray-800">{{ $nip ?? '-' }}</span>
                     </div>
-                    <div class="flex items-center justify-between text-sm">
+                    <div class="animate-bitem flex items-center justify-between text-sm">
                         <span class="text-gray-500"><i class="fa-solid fa-building w-5 text-left"></i> Dept.</span>
                         <span class="font-semibold text-gray-800">{{ Auth::user()->departemen->nama_departemen ?? '-' }}</span>
                     </div>
@@ -46,12 +46,12 @@
             </div>
 
             <!-- Card Keamanan -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h4 class="text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">Keamanan Akun</h4>
-                <p class="text-xs text-gray-500 mb-4 leading-relaxed">Ganti password secara berkala untuk menjaga keamanan data Anda.</p>
+            <div class="animate-bitem bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h4 class="animate-bitem text-sm font-bold text-gray-900 mb-2 uppercase tracking-wide">Keamanan Akun</h4>
+                <p class="animate-bitem text-xs text-gray-500 mb-4 leading-relaxed">Ganti password secara berkala untuk menjaga keamanan data Anda.</p>
                 
                 <button type="button" @click="openPasswordModal = true"
-                    class="w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
+                    class="animate-bitem w-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 hover:text-gray-900 px-4 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-sm flex items-center justify-center gap-2">
                     <i class="fa-solid fa-lock"></i> Ubah Password
                 </button>
             </div>
@@ -60,7 +60,7 @@
 
         <!-- Kanan: Form Biodata (2 Kolom) -->
         <div class="lg:col-span-2">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 h-full">
+            <div class="animate-bitem bg-white rounded-2xl shadow-sm border border-gray-100 p-8 h-full">
                 
                 <div class="mb-6 pb-4 border-b border-gray-100">
                     <h3 class="text-lg font-bold text-gray-900">Pengaturan Profil</h3>
@@ -81,21 +81,21 @@
                         <div class="space-y-1.5">
                             <label class="block text-sm font-semibold text-gray-700">Nama Lengkap</label>
                             <input type="text" wire:model="nama_lengkap" disabled
-                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-500 cursor-not-allowed shadow-sm">
+                                class="animate-bitem w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-500 cursor-not-allowed shadow-sm">
                         </div>
 
                         <!-- Email (Disabled) -->
                         <div class="space-y-1.5">
                             <label class="block text-sm font-semibold text-gray-700">Alamat Email</label>
                             <input type="email" wire:model="email" disabled
-                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-500 cursor-not-allowed">
+                                class="animate-bitem w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-500 cursor-not-allowed">
                         </div>
 
                         <!-- Nomor Telepon -->
                         <div class="space-y-1.5">
                             <label class="block text-sm font-semibold text-gray-700">Nomor HP / WhatsApp</label>
                             <input type="text" wire:model="nomor_tlp" 
-                                class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors shadow-sm @error('nomor_tlp') border-red-500 @enderror">
+                                class="animate-bitem w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors shadow-sm @error('nomor_tlp') border-red-500 @enderror">
                             @error('nomor_tlp') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
                         </div>
                         
@@ -103,11 +103,11 @@
                         <div class="space-y-1.5">
                             <label class="block text-sm font-semibold text-gray-700">NIP Pegawai</label>
                             <input type="text" wire:model="nip" disabled
-                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-500 cursor-not-allowed">
+                                class="animate-bitem w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-500 cursor-not-allowed">
                         </div>
                     </div>
 
-                    <div class="pt-4 border-t border-gray-100 flex justify-end">
+                    <div class="animate-bitem pt-4 border-t border-gray-100 flex justify-end">
                         <button type="submit" wire:loading.attr="disabled"
                             class="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-colors shadow-md active:scale-95 flex items-center gap-2">
                             <span wire:loading.remove wire:target="updateProfil">Simpan Perubahan</span>
@@ -167,7 +167,7 @@
                         <label class="block text-sm font-semibold text-gray-700">Password Saat Ini</label>
                         <div class="relative">
                             <input :type="show ? 'text' : 'password'" wire:model="password_lama" 
-                                class="w-full px-4 pr-10 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors shadow-sm @error('password_lama') border-red-500 @enderror">
+                                class="animate-bitem w-full px-4 pr-10 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors shadow-sm @error('password_lama') border-red-500 @enderror">
                             <button type="button" @click="show = !show" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
                                 <i class="fa-solid" :class="show ? 'fa-eye-slash' : 'fa-eye'"></i>
                             </button>

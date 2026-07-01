@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\Status;
 use App\Models\Jadwal;
+use App\Models\Shift;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,5 +29,32 @@ class JadwalService
             ->whereDate('tanggal_akhir', '>=', now())
             ->where('status', Status::Active->value)
             ->first();
+    }
+
+    public function ambilShift()
+    {
+        return Shift::whereIn('id_shift', [1, 2, 3])
+            ->orderBy('id_shift', 'asc')
+            ->get()
+            ->toArray();
+    }
+
+    public function updateShift($editingShiftId, $jam_masuk, $jam_keluar)
+    {
+        $shift = Shift::find($editingShiftId);
+
+        if ($shift) {
+            $shift->update([
+                'jam_masuk'  => $jam_masuk . ':00', // tambahkan :00 detik agar cocok dengan database time
+                'jam_keluar' => $jam_keluar . ':00',
+            ]);
+            return true;
+        }  
+    }
+
+
+    public function getShiftData($shift)
+    {
+        return Shift::find($shift);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Livewire\Profil;
 
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
@@ -43,7 +44,7 @@ class ProfilIndex extends Component
             'nomor_tlp.max' => 'Nomor telepon maksimal 20 karakter.',
         ]);
 
-        $user = User::find(Auth::id());
+        $user = (new UserService())->getUserById();
         $user->nomor_tlp = $this->nomor_tlp;
         $user->save();
 
@@ -62,7 +63,7 @@ class ProfilIndex extends Component
             'password_baru.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
-        $user = User::find(Auth::id());
+        $user = (new UserService())->getUserById();
 
         if (!Hash::check($this->password_lama, $user->password)) {
             $this->addError('password_lama', 'Password lama tidak sesuai.');

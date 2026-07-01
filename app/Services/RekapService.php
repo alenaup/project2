@@ -8,6 +8,6 @@ class RekapService
     public function ambilRekapDetail()
     {
         return RekapKehadiran::where('status', 'active')->first()
-               ?? RekapKehadiran::first();
+                ?? RekapKehadiran::first();
     }
 }

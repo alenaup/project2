@@ -120,7 +120,7 @@
 </script>
 @endpush
 
-<div>
+<div >
     {{-- Success Message --}}
     @if (session()->has('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)" x-transition.duration.500ms
@@ -137,7 +137,7 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden fade-in-up" style="animation-delay:.05s">
+    <div class="animate-bitem bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden fade-in-up" style="animation-delay:.05s">
         <div style="background: linear-gradient(to right, #2d6e4a, #3C8B5E);" class="px-5 py-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -149,7 +149,7 @@
             </div>
         </div>
 
-        <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6" x-data="mapLokasi()" x-init="initMap()">
+        <div class="animate-bitem p-6 grid grid-cols-1 lg:grid-cols-3 gap-6" x-data="mapLokasi()" x-init="initMap()">
             
             <!-- Map Area -->
             <div class="lg:col-span-2 space-y-3">
@@ -160,7 +160,7 @@
                 
                 <!-- Search Bar -->
                 <div class="relative mb-3 z-50">
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 animate-bitem">
                         <input type="text" x-model="searchQuery" @keydown.enter.prevent="searchLocation()" placeholder="Cari alamat atau nama tempat..." class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
                         <button type="button" @click="searchLocation()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-sm transition flex-shrink-0 flex items-center justify-center min-w-[50px]">
                             <i class="fa-solid fa-magnifying-glass" x-show="!isSearching"></i>
@@ -168,7 +168,7 @@
                         </button>
                     </div>
                     <!-- Search Results Dropdown -->
-                    <ul x-show="searchResults.length > 0" @click.away="searchResults = []" style="display: none;" class="absolute w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto z-[9999]">
+                    <ul x-show="searchResults.length > 0" @click.away="searchResults = []" style="animate-bitem display: none;" class="absolute w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-xl max-h-60 overflow-y-auto z-[9999]">
                         <template x-for="result in searchResults" :key="result.place_id">
                             <li @click="selectLocation(result)" class="px-4 py-2.5 hover:bg-emerald-50 cursor-pointer text-sm border-b border-gray-100 last:border-0">
                                 <i class="fa-solid fa-location-dot text-gray-400 mr-2"></i>
@@ -184,13 +184,13 @@
 
             <!-- Form Area -->
             <form wire:submit.prevent="simpan" class="space-y-5">
-                <div>
+                <div class="animate-bitem">
                     <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lokasi <span class="text-red-500">*</span></label>
                     <input type="text" wire:model="nama_lokasi" placeholder="Misal: Kantor Batam" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
                     @error('nama_lokasi') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
+                <div class="animate-bitem grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-1">Latitude</label>
                         <input type="text" wire:model="latitude" readonly class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-500 cursor-not-allowed">
@@ -201,7 +201,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div class="animate-bitem">
                     <div class="flex justify-between mb-1">
                         <label class="block text-sm font-semibold text-gray-700">Radius Absensi <span class="text-red-500">*</span></label>
                         <span class="text-sm font-bold text-emerald-600" x-text="radius + ' Meter'"></span>
@@ -214,7 +214,7 @@
                     @error('radius') <span class="text-red-500 text-xs mt-1 block font-medium">{{ $message }}</span> @enderror
                 </div>
 
-                <div class="pt-4 border-t border-gray-100">
+                <div class="pt-4 border-t border-gray-100 animate-bitem">
                     <button type="submit" wire:loading.attr="disabled" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
                         <span wire:loading.remove wire:target="simpan"><i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan Lokasi</span>
                         <span wire:loading wire:target="simpan"><i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...</span>

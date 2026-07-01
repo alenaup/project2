@@ -1,6 +1,6 @@
 <div>
     <!-- TITLE & ACTION -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200/60 pb-5 mb-6 gap-4 bg-gradient-to-r from-emerald-100 p-6 rounded-xl">
+    <div class="animate-bitem flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-200/60 pb-5 mb-6 gap-4 bg-gradient-to-r from-emerald-100 p-6 rounded-xl">
         <div>
             <h1 class="text-2xl font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent flex items-center gap-2">
                 <i class="fa-solid fa-user-clock text-emerald-600"></i> Pengaturan Shift Kerja
@@ -21,7 +21,7 @@
                     3 => 'Malam',
                     default => $shift['nama_shift']
                 };
-                
+
                 $themeClass = match($shiftId) {
                     1 => [
                         'card' => 'hover:shadow-emerald-500/5 border-emerald-100/60 bg-emerald-50/5',
@@ -50,13 +50,13 @@
                 };
             @endphp
 
-            <div class="bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden group {{ $themeClass['card'] }}">
+            <div class="animate-bitem bg-white rounded-2xl border shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden group {{ $themeClass['card'] }}">
                 <!-- Garis Accent Samping -->
                 <div class="absolute top-0 left-0 w-1.5 h-full {{ $themeClass['accent'] }}"></div>
-                
+
                 <div class="p-6">
                     <!-- Header Card -->
-                    <div class="flex justify-between items-center mb-6">
+                    <div class="animate-bitem flex justify-between items-center mb-6">
                         <span class="text-sm font-bold px-3 py-1 rounded-full border {{ $themeClass['title'] }}">
                             {{ $themeClass['icon'] }} Shift {{ $namaDisplay }}
                         </span>
@@ -98,7 +98,7 @@
     <!-- MODAL EDIT SHIFT -->
     <div x-data="{ isOpen: @entangle('isModalOpen') }" x-show="isOpen" style="display: none;"
         class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-        
+
         <div @click.outside="$wire.closeModal()" x-show="isOpen"
             class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 border border-slate-100 overflow-hidden"
             x-transition:enter="transition ease-out duration-300"
@@ -144,8 +144,8 @@
                     <label class="text-xs font-semibold text-slate-450 uppercase tracking-wider">Jam Masuk</label>
                     <input type="time" wire:model="jam_masuk"
                         class="w-full mt-1 p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none text-sm text-slate-700 font-semibold bg-white">
-                    @error('jam_masuk') 
-                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> 
+                    @error('jam_masuk')
+                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -154,8 +154,8 @@
                     <label class="text-xs font-semibold text-slate-450 uppercase tracking-wider">Jam Keluar</label>
                     <input type="time" wire:model="jam_keluar"
                         class="w-full mt-1 p-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none text-sm text-slate-700 font-semibold bg-white">
-                    @error('jam_keluar') 
-                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> 
+                    @error('jam_keluar')
+                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
 

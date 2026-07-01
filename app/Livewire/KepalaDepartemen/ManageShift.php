@@ -2,13 +2,13 @@
 
 namespace App\Livewire\KepalaDepartemen;
 
+use App\Services\JadwalService;
 use Livewire\Component;
-use App\Models\Shift;
 
 class ManageShift extends Component
 {
     public array $shifts = [];
-    
+
     // State Modal & Edit
     public bool $isModalOpen = false;
     public $editingShiftId = null;
@@ -27,10 +27,7 @@ class ManageShift extends Component
     public function loadShifts()
     {
         // Ambil shift dengan ID 1, 2, 3 sesuai seed data default
-        $this->shifts = Shift::whereIn('id_shift', [1, 2, 3])
-            ->orderBy('id_shift', 'asc')
-            ->get()
-            ->toArray();
+        $this->shifts = (new JadwalService())->ambilShift();
     }
 
     /**
@@ -40,11 +37,11 @@ class ManageShift extends Component
      */
     public function editShift($id)
     {
-        $shift = Shift::find($id);
-        
+        $shift = (new JadwalService())->getShiftData($id);
+
         if ($shift) {
             $this->editingShiftId = $id;
-            
+
             // Tampilkan nama shift Pagi/Siang/Malam secara statik
             $this->editingNama = match((int) $id) {
                 1 => 'Pagi',
@@ -56,7 +53,7 @@ class ManageShift extends Component
             // Format jam kerja agar pas dengan input type="time" (HH:MM)
             $this->jam_masuk = date('H:i', strtotime($shift->jam_masuk));
             $this->jam_keluar = date('H:i', strtotime($shift->jam_keluar));
-            
+
             $this->isModalOpen = true;
         }
     }
@@ -74,14 +71,9 @@ class ManageShift extends Component
             'jam_keluar.required' => 'Jam keluar harus diisi.',
         ]);
 
-        $shift = Shift::find($this->editingShiftId);
+        $shift = (new JadwalService())->updateShift($this->editingShiftId, $this->jam_masuk, $this->jam_keluar);
 
-        if ($shift) {
-            $shift->update([
-                'jam_masuk'  => $this->jam_masuk . ':00', // tambahkan :00 detik agar cocok dengan database time
-                'jam_keluar' => $this->jam_keluar . ':00',
-            ]);
-
+        if ($shift ) {
             $this->closeModal();
             $this->loadShifts();
 
@@ -89,7 +81,7 @@ class ManageShift extends Component
             $this->dispatch('flash-success', message: 'Waktu kerja Shift ' . $this->editingNama . ' berhasil diperbarui!');
         } else {
             $this->dispatch('flash-error', message: 'Shift tidak ditemukan di database.');
-        }
+        }       
     }
 
     /**

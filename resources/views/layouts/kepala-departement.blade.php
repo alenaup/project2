@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="is-loading">
 
 <head>
     <meta charset="UTF-8">

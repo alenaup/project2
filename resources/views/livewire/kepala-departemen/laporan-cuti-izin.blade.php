@@ -1,4 +1,4 @@
-<div class="max-w-6xl mx-auto p-6 bg-white/70 rounded-2xl shadow space-y-8 mt-4">
+<div class="max-w-6xl mx-auto p-6 bg-white/70 rounded-2xl shadow space-y-8 mt-4 animate-bitem ">
     <!-- TITLE & FILTERS -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
@@ -10,6 +10,7 @@
                 </div>
                 <input
                     type="text"
+                    name="search"
                     wire:model.live="search"
                     placeholder="Cari karyawan..."
                     class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-xl text-sm shadow-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition bg-white"
@@ -23,6 +24,7 @@
                 </div>
                 <input
                     type="date"
+                    name="date"
                     wire:model.live="filterDate"
                     class="w-full pl-9 pr-8 py-2 border border-gray-300 rounded-xl text-sm shadow-xs focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition cursor-pointer bg-white"
                 >
@@ -42,7 +44,7 @@
     <!-- CARD STATS -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- SAKIT -->
-        <div class="bg-white/90 border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs transition duration-300">
+        <div class="animate-bitem bg-white/90 border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs transition duration-300">
             <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-xl text-red-500">
                 <i class="fas fa-notes-medical"></i>
             </div>
@@ -53,7 +55,7 @@
         </div>
 
         <!-- IZIN -->
-        <div class="bg-white/90 border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs transition duration-300">
+        <div class="animate-bitem bg-white/90 border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs transition duration-300">
             <div class="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-xl text-amber-500">
                 <i class="fas fa-file-alt"></i>
             </div>
@@ -64,7 +66,7 @@
         </div>
 
         <!-- CUTI -->
-        <div class="bg-white/90 border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs transition duration-300">
+        <div class="animate-bitem bg-white/90 border border-slate-100 rounded-2xl p-5 flex items-center justify-between shadow-xs transition duration-300">
             <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-xl text-blue-500">
                 <i class="fas fa-calendar"></i>
             </div>
@@ -102,7 +104,7 @@
                             $jenis = $this->getJenis($item);
                             $initials = strtoupper(substr($item->karyawan->nama_lengkap ?? 'K', 0, 2));
                         @endphp
-                        <tr class="hover:bg-slate-50/40 transition duration-150">
+                        <tr class="animate-bitem hover:bg-slate-50/40 transition duration-150">
                             <td class="p-4 whitespace-nowrap">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xs font-bold shadow-xs">
@@ -144,7 +146,7 @@
                             </td>
                             <td class="p-4 whitespace-nowrap">
                                 @if($item->file_surat)
-                                    <a href="{{ Storage::url($item->file_surat) }}" target="_blank" 
+                                    <a href="{{ Storage::url($item->file_surat) }}" target="_blank"
                                         class="inline-flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-semibold hover:underline">
                                         <i class="fa-solid fa-file-pdf"></i>
                                         <span>Lihat File</span>

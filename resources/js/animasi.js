@@ -14,4 +14,11 @@ document.addEventListener('DOMContentLoaded', () => {
             b_element.classList.add('show');
         }, index * 150);
     });
+
+    // Remove 'is-loading' class from html tag once initial animations have run/finished
+    const maxItems = Math.max(elements.length, b_elements.length);
+    const duration = maxItems * 150 + 800; // Calculate duration based on number of items + animation length
+    setTimeout(() => {
+        document.documentElement.classList.remove('is-loading');
+    }, duration);
 });

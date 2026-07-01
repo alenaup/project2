@@ -2,18 +2,27 @@
 
 namespace App\Livewire\KepalaDepartemen;
 
-use Livewire\Component;
-use App\Models\PerizinanSakit;
-use App\Models\User;
-use App\Enums\Status;
-use App\Enums\UserRole;
+use App\Services\PerizinanSakitService;
 use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
+use Livewire\Component;
 
 class LaporanCutiIzin extends Component
 {
     public $search = '';
+
     public $filterDate = '';
+
+    protected PerizinanSakitService $perizinanSakitService;
+
+    /**
+     * Bootstraps the component with dependency injection.
+     *
+     * @return void
+     */
+    public function boot(PerizinanSakitService $perizinanSakitService)
+    {
+        $this->perizinanSakitService = $perizinanSakitService;
+    }
 
     public function getJenis($item)
     {
@@ -24,6 +33,7 @@ class LaporanCutiIzin extends Component
         if (str_contains($ket, 'cuti') || str_contains($ket, 'tahunan') || str_contains($ket, 'melahirkan') || str_contains($ket, 'nikah')) {
             return 'Cuti';
         }
+
         return 'Izin';
     }
 
@@ -31,15 +41,8 @@ class LaporanCutiIzin extends Component
     {
         $deptId = Auth::check() ? Auth::user()->departemen_id : null;
 
-        // Base query for totals (unfiltered by date/search, restricted to active karyawan in same department)
-        $allReportsQuery = PerizinanSakit::query()
-            ->whereHas('karyawan', function ($q) use ($deptId) {
-                $q->where('role', UserRole::Karyawan->value)
-                  ->where('status', Status::Active->value);
-                if ($deptId) {
-                    $q->where('departemen_id', $deptId);
-                }
-            });
+        // Ambil perizinan sakit semua karyawan via service
+        $allReportsQuery = $this->perizinanSakitService->ambilPerizinanSakitSemuaKaryawan($deptId);
 
         $allReports = $allReportsQuery->get();
 
@@ -58,25 +61,12 @@ class LaporanCutiIzin extends Component
             }
         }
 
-        // Filtered query for the list
-        $query = PerizinanSakit::query()
-            ->with('karyawan.departemen')
-            ->whereHas('karyawan', function ($q) use ($deptId) {
-                $q->where('role', UserRole::Karyawan->value)
-                  ->where('status', Status::Active->value);
-                if ($deptId) {
-                    $q->where('departemen_id', $deptId);
-                }
-                if ($this->search) {
-                    $q->where('nama_lengkap', 'like', '%' . $this->search . '%');
-                }
-            });
-
-        if ($this->filterDate) {
-            $query->whereDate('tanggal_pengajuan', $this->filterDate);
-        }
-
-        $reports = $query->orderBy('tanggal_pengajuan', 'desc')->get();
+        // Ambil laporan perizinan terfilter via service
+        $reports = $this->perizinanSakitService->ambilLaporanPerizinanFiltered(
+            $deptId,
+            $this->search,
+            $this->filterDate
+        );
 
         return view('livewire.kepala-departemen.laporan-cuti-izin', [
             'reports' => $reports,
