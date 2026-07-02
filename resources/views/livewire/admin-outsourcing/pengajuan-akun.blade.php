@@ -1,47 +1,18 @@
 <div x-data="{ 
     showAddModal: false, 
     showEditModal: false, 
-    showCancelModal: false 
+    showCancelModal: false,
+    showImportModal: false
 }"
 x-on:close-add-modal.window="showAddModal = false"
 x-on:close-edit-modal.window="showEditModal = false"
 x-on:close-cancel-modal.window="showCancelModal = false"
+x-on:close-import-modal.window="showImportModal = false"
 class="space-y-6">
 
     {{-- ─── Flash Messages ───────────────────────────────────── --}}
-    @if (session()->has('success'))
-        <div
-            x-data="{ show: true }"
-            x-init="setTimeout(() => show = false, 4000)"
-            x-show="show"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-2"
-            class="px-4 py-3 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-medium flex items-center gap-2 shadow-sm">
-            <i class="fas fa-check-circle text-green-500"></i>
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session()->has('error'))
-        <div
-            x-data="{ show: true }"
-            x-init="setTimeout(() => show = false, 4000)"
-            x-show="show"
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-2"
-            class="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2 shadow-sm">
-            <i class="fas fa-exclamation-circle text-red-500"></i>
-            {{ session('error') }}
-        </div>
-    @endif
+    <x-flash-message sessionKey="success" type="success" on="flash-success" />
+    <x-flash-message sessionKey="error" type="error" on="flash-error" />
 
     {{-- ─── Control Section: Search & Add Button ──────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
@@ -58,13 +29,23 @@ class="space-y-6">
                 class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 focus:outline-none text-sm bg-white transition-all">
         </div>
 
-        {{-- Add Button --}}
-        <button
-            @click="showAddModal = true"
-            class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl shadow-md shadow-green-150 transition-all flex items-center justify-center gap-2 text-sm">
-            <i class="fa-solid fa-user-plus text-xs"></i>
-            Ajukan Akun Karyawan
-        </button>
+        <div class="flex flex-wrap items-center gap-2">
+            {{-- Import Button --}}
+            <button
+                @click="showImportModal = true"
+                class="px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
+                <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                Import Excel
+            </button>
+
+            {{-- Add Button --}}
+            <button
+                @click="showAddModal = true"
+                class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl shadow-md shadow-green-150 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer">
+                <i class="fa-solid fa-user-plus text-xs"></i>
+                Ajukan Akun Karyawan
+            </button>
+        </div>
 
     </div>
 
@@ -172,17 +153,17 @@ class="space-y-6">
     {{-- MODAL: Ajukan Akun Baru (Add Modal)                       --}}
     {{-- ══════════════════════════════════════════════════════════ --}}
     <div x-show="showAddModal" x-transition.opacity
-         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"
+         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center overflow-y-auto py-8"
          @click.self="showAddModal = false">
         
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" 
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 flex flex-col max-h-[calc(100vh-4rem)] overflow-hidden" 
              x-show="showAddModal" 
              x-transition:enter="transition ease-out duration-300" 
              x-transition:enter-start="opacity-0 scale-95" 
              x-transition:enter-end="opacity-100 scale-100">
 
             {{-- Header --}}
-            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 flex-shrink-0">
                 <h3 class="text-lg font-bold text-gray-800">Form Pengajuan Akun Karyawan</h3>
                 <button @click="showAddModal = false" class="text-gray-400 hover:text-gray-600 transition">
                     <i class="fa-solid fa-xmark"></i>
@@ -190,7 +171,7 @@ class="space-y-6">
             </div>
 
             {{-- Body --}}
-            <div class="p-5 space-y-4">
+            <div class="p-5 space-y-4 overflow-y-auto flex-1">
                 
                 {{-- NIP --}}
                 <div>
@@ -293,17 +274,17 @@ class="space-y-6">
 
     {{-- ─── MODAL: Edit & Kirim Kembali (Edit Modal) ─────────── --}}
     <div x-show="showEditModal" x-transition.opacity
-         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"
+         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-start sm:items-center justify-center overflow-y-auto py-8"
          @click.self="showEditModal = false; $wire.closeEdit()">
         
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" 
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 flex flex-col max-h-[calc(100vh-4rem)] overflow-hidden" 
              x-show="showEditModal" 
              x-transition:enter="transition ease-out duration-300" 
              x-transition:enter-start="opacity-0 scale-95" 
              x-transition:enter-end="opacity-100 scale-100">
 
             {{-- Header --}}
-            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50 flex-shrink-0">
                 <div class="flex items-center gap-2">
                     <h3 class="text-lg font-bold text-gray-800">Edit & Kirim Kembali Pengajuan</h3>
                     <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase bg-red-50 text-red-700 border border-red-100">Ditolak</span>
@@ -314,7 +295,7 @@ class="space-y-6">
             </div>
 
             {{-- Body --}}
-            <div class="p-5 space-y-4">
+            <div class="p-5 space-y-4 overflow-y-auto flex-1">
                 
                 {{-- NIP --}}
                 <div>
@@ -441,6 +422,72 @@ class="space-y-6">
                 <button wire:click="cancelSubmission"
                     class="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-xl text-sm font-bold shadow-md shadow-red-200 transition">
                     Ya, Batalkan
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+
+    {{-- ─── MODAL: Import Excel ─────────────────────────────── --}}
+    <div x-show="showImportModal" x-transition.opacity
+         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"
+         @click.self="showImportModal = false">
+        
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden relative" 
+             x-show="showImportModal" 
+             x-transition:enter="transition ease-out duration-300" 
+             x-transition:enter-start="opacity-0 scale-95" 
+             x-transition:enter-end="opacity-100 scale-100">
+
+            {{-- Header --}}
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-800">Import Karyawan via Excel</h3>
+                <button @click="showImportModal = false" class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            {{-- Body --}}
+            <div class="p-5 space-y-5 text-sm">
+                
+                {{-- Download Template Section --}}
+                <div class="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-4 flex items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-emerald-950">Template Excel</h4>
+                        <p class="text-xs text-emerald-800">Unduh template Excel dengan judul Ecogreen Outsourcing dan aturan pengisian data.</p>
+                    </div>
+                    <button type="button" 
+                            @click="$dispatch('show-loading', { message: 'Mengunduh template...' }); $wire.downloadTemplate()"
+                            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs whitespace-nowrap cursor-pointer">
+                        <i class="fa-solid fa-download"></i> Unduh
+                    </button>
+                </div>
+
+                {{-- File Upload Section --}}
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Pilih Berkas Excel (.xlsx, .xls)</label>
+                    <input type="file" 
+                           wire:model="fileExcel"
+                           accept=".xlsx,.xls"
+                           class="w-full text-xs text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 border border-gray-200 rounded-xl p-1 bg-white">
+                    @error('fileExcel')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+            </div>
+
+            {{-- Footer --}}
+            <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-2">
+                <button @click="showImportModal = false"
+                    class="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded-xl transition text-gray-700 font-semibold cursor-pointer">
+                    Batal
+                </button>
+                <button type="button" 
+                    @click="$dispatch('show-loading', { message: 'Mengimpor berkas Excel...' }); $wire.importExcel()"
+                    class="px-5 py-2 text-sm bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl shadow-md transition font-semibold cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-up mr-1 text-xs"></i> Impor Data
                 </button>
             </div>
 

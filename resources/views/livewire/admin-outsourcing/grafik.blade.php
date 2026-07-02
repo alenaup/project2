@@ -1,57 +1,39 @@
-<div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mt-6">
-    <div class="flex justify-between items-center mb-4 gap-3">
-        <h2 class="font-semibold text-gray-800">
-            Rekap Kehadiran
+<div class="animate-bitem bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mt-6">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4 border-b border-slate-100 pb-4">
+        <h2 class="font-bold text-gray-800 text-base flex items-center gap-2">
+            <i class="fa-solid fa-chart-simple text-emerald-600"></i> Rekap Kehadiran
         </h2>
-        <div class="flex gap-2">
+        <div class="flex flex-wrap gap-2 w-full sm:w-auto">
 
             {{-- Pilih Mode --}}
             <select wire:model.live="mode" x-data 
-    @change="$dispatch('show-loading', { message: 'Menyiapkan data...' })" class="border rounded-lg px-3 py-1 text-sm">
- class="border rounded-lg px-3 py-1 text-sm">
-
-                <option value="tahunan">
-                    Tahunan
-                </option>
-
-                <option value="bulanan">
-                    Bulanan
-                </option>
+                @change="$dispatch('show-loading', { message: 'Menyiapkan data...' })" 
+                class="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white cursor-pointer w-full sm:w-auto focus:ring-2 focus:ring-green-500 outline-none">
+                <option value="tahunan">Tahunan</option>
+                <option value="bulanan">Bulanan</option>
             </select>
 
             {{-- Pilih Tahun --}}
-            <select wire:model.live="tahun" 
-            x-data 
-    @change="$dispatch('show-loading', { message: 'Menyiapkan data dalam tahun...' })" class="border rounded-lg px-3 py-1 text-sm">
-                 class="border rounded-lg px-3 py-1 text-sm">
+            <select wire:model.live="tahun" x-data 
+                @change="$dispatch('show-loading', { message: 'Menyiapkan data dalam tahun...' })" 
+                class="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white cursor-pointer w-full sm:w-auto focus:ring-2 focus:ring-green-500 outline-none">
                 @foreach ($listTahun as $t)
-                    <option value="{{ $t }}">
-                        {{ $t }}
-                    </option>
+                    <option value="{{ $t }}">{{ $t }}</option>
                 @endforeach
-
             </select>
 
             {{-- Pilih Bulan --}}
             @if ($mode === 'bulanan')
-                <select wire:model.live="bulan" 
-                x-data 
-    @change="$dispatch('show-loading', { message: 'Menyiapkan data dalam bulan...' })" class="border rounded-lg px-3 py-1 text-sm">
-
+                <select wire:model.live="bulan" x-data 
+                    @change="$dispatch('show-loading', { message: 'Menyiapkan data dalam bulan...' })" 
+                    class="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white cursor-pointer w-full sm:w-auto focus:ring-2 focus:ring-green-500 outline-none">
                     @foreach ($listBulan as $key => $nama)
-                        <option value="{{ $key }}">
-                            {{ $nama }}
-                        </option>
+                        <option value="{{ $key }}">{{ $nama }}</option>
                     @endforeach
-
-
                 </select>
-
             @endif
 
-
         </div>
-
     </div>
 
     <div class="w-full overflow-x-auto">

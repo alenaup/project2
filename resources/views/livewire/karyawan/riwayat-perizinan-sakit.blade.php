@@ -159,7 +159,7 @@
                         </div>
                         <div>
                             <label class="text-sm font-semibold text-gray-700 block mb-1">Tanggal Selesai</label>
-                            <input type="date" x-model="edit_tanggal_selesai"
+                            <input type="date" x-model="edit_tanggal_selesai" :min="edit_tanggal_mulai"
                                 class="w-full border @error('edit_tanggal_selesai') border-red-500 @else border-gray-200 @enderror rounded-lg p-2.5 text-sm">
                             @error('edit_tanggal_selesai')
                                 <span class="text-xs text-red-500">{{ $message }}</span>
@@ -244,21 +244,19 @@
                 </button>
             </div>
 
-            <div class="p-5 flex justify-center bg-gray-100 max-h-[70vh] overflow-auto">
-                <template x-if="previewType === 'image'">
-                    <img :src="previewUrl" alt="Preview Surat" class="rounded-lg shadow max-w-full">
-                </template>
-                <template x-if="previewType === 'pdf'">
-                    <div class="text-center py-10 text-gray-500 w-full">
-                        <i class="fa-solid fa-file-pdf text-red-400 text-6xl mb-4 block"></i>
-                        <p class="font-medium text-lg">File PDF</p>
-                        <p class="text-sm mt-1 mb-6">Silakan unduh untuk melihat isinya secara penuh.</p>
-                        <a :href="previewUrl" download target="_blank"
-                            class="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition shadow-sm">
-                            <i class="fa-solid fa-download mr-1"></i> Unduh File PDF
-                        </a>
-                    </div>
-                </template>
+            <div class="p-5 flex justify-center bg-gray-100 max-h-[70vh] overflow-auto w-full">
+                <div x-show="previewType === 'image'" class="w-full flex justify-center">
+                    <img :src="previewUrl" alt="Preview Surat" class="rounded-lg shadow max-w-full object-contain">
+                </div>
+                <div x-show="previewType === 'pdf'" class="text-center py-10 text-gray-500 w-full">
+                    <i class="fa-solid fa-file-pdf text-red-400 text-6xl mb-4 block"></i>
+                    <p class="font-medium text-lg">File PDF</p>
+                    <p class="text-sm mt-1 mb-6">Silakan unduh untuk melihat isinya secara penuh.</p>
+                    <a :href="previewUrl" download target="_blank"
+                        class="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition shadow-sm">
+                        <i class="fa-solid fa-download mr-1"></i> Unduh File PDF
+                    </a>
+                </div>
             </div>
         </div>
     </div>

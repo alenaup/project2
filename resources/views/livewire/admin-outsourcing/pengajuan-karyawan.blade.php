@@ -36,22 +36,18 @@
     @endif
 
     {{-- ─── Header Section ─────────────────────────────────────── --}}
-    <div class="mb-8 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+    
+
+    <div class="animate-bitem flex flex-col md:flex-row justify-between items-start md:items-center border border-emerald-100/60 bg-gradient-to-r from-emerald-50/50 via-teal-50/20 to-transparent p-6 rounded-2xl mb-6 gap-4 shadow-sm">
         <div>
             <h1 class="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">Validasi Perizinan</h1>
             <p class="text-base text-gray-500 mt-2 max-w-xl">Kelola permohonan izin sakit dan cuti karyawan outsourcing.</p>
         </div>
-
-        {{-- Stats --}}
-        <div class="flex space-x-4">
-            <div class="bg-white px-6 py-4 rounded-2xl shadow-sm border border-gray-100 flex items-center space-x-4">
-                <div class="p-3 bg-amber-50 rounded-xl text-amber-500">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-                <div>
-                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Menunggu Validasi</p>
-                    <p class="text-3xl font-black text-gray-900 mt-0.5">{{ $pendingCount }}</p>
-                </div>
+        <div class="bg-white border border-emerald-100/80 px-4 py-2 rounded-xl shadow-xs flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Menunggu Validasi</p>
+                <p class="text-3xl font-black text-gray-900 mt-0.5">{{ $pendingCount }}</p>
             </div>
         </div>
     </div>

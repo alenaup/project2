@@ -2,14 +2,16 @@
 
     {{-- ─── Flash Messages ───────────────────────────────────── --}}
     @if (session()->has('success'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm font-medium flex items-center gap-2">
+        <div
+            class="mb-4 px-4 py-3 rounded-lg bg-green-50 border border-green-200 text-green-700 text-sm font-medium flex items-center gap-2">
             <i class="fas fa-check-circle"></i>
             {{ session('success') }}
         </div>
     @endif
 
     @if (session()->has('error'))
-        <div class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2">
+        <div
+            class="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2">
             <i class="fas fa-exclamation-circle"></i>
             {{ session('error') }}
         </div>
@@ -19,14 +21,11 @@
     <div class="mb-4">
         <div class="relative">
             <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-            <input
-                type="text"
-                wire:model.live.debounce.300ms="search"
+            <input type="text" wire:model.live.debounce.300ms="search"
                 placeholder="Cari berdasarkan NIP, nama, atau asal vendor..."
                 class="w-full sm:w-80 pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm
                        focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500
-                       bg-gray-50/50 placeholder-gray-400 transition-all"
-            >
+                       bg-gray-50/50 placeholder-gray-400 transition-all">
         </div>
     </div>
 
@@ -96,8 +95,9 @@
          ══════════════════════════════════════════════════════════ --}}
     @if ($showApproveModal)
         <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200"
-             wire:click.self="closeApproveConfirm">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden flex flex-col transform transition-transform duration-200">
+            wire:click.self="closeApproveConfirm">
+            <div
+                class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden flex flex-col transform transition-transform duration-200">
 
                 {{-- Header --}}
                 <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -142,8 +142,9 @@
          ══════════════════════════════════════════════════════════ --}}
     @if ($showRejectConfirmModal)
         <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200"
-             wire:click.self="closeRejectConfirm">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden flex flex-col transform transition-transform duration-200">
+            wire:click.self="closeRejectConfirm">
+            <div
+                class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden flex flex-col transform transition-transform duration-200">
 
                 {{-- Header --}}
                 <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -189,8 +190,9 @@
 
     @if ($showDetailModal)
         <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200"
-             wire:click.self="closeDetail">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden flex flex-col max-h-[90vh] transform transition-transform duration-200">
+            wire:click.self="closeDetail">
+            <div
+                class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden flex flex-col max-h-[90vh] transform transition-transform duration-200">
 
                 {{-- Header --}}
                 <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -210,13 +212,13 @@
                     <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm">
                         <div class="space-y-3 text-sm">
                             @foreach ([
-                                'NIP'           => $selectedUser['nip'] ?? '-',
+        'NIP' => $selectedUser['nip'] ?? '-',
 
-                                'Nama Lengkap'  => $selectedUser['nama_lengkap'] ?? '-',
-                                'Email'         => $selectedUser['email'] ?? '-',
-                                'Nomor Telepon' => $selectedUser['nomor_tlp'] ?? '-',
-                                'Alamat'        => $selectedUser['alamat'] ?? '-',
-                            ] as $label => $value)
+        'Nama Lengkap' => $selectedUser['nama_lengkap'] ?? '-',
+        'Email' => $selectedUser['email'] ?? '-',
+        'Nomor Telepon' => $selectedUser['nomor_tlp'] ?? '-',
+        'Alamat' => $selectedUser['alamat'] ?? '-',
+    ] as $label => $value)
                                 <div class="flex items-center justify-between border-b border-gray-50 pb-2">
                                     <span class="font-medium text-gray-500 w-1/3">{{ $label }}</span>
                                     <span class="font-bold text-gray-800 w-2/3 text-right">{{ $value }}</span>
@@ -225,7 +227,8 @@
 
                             <div class="flex items-center justify-between pt-1">
                                 <span class="font-medium text-gray-500 w-1/3">Berasal dari</span>
-                                <span class="font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md text-xs border border-green-100 text-right">
+                                <span
+                                    class="font-bold text-green-700 bg-green-50 px-2 py-1 rounded-md text-xs border border-green-100 text-right">
                                     {{ $selectedUser['asal_vendor'] ?? '-' }}
                                 </span>
                             </div>
@@ -258,8 +261,9 @@
          ══════════════════════════════════════════════════════════ --}}
     @if ($showRejectModal)
         <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200"
-             wire:click.self="closeReject">
-            <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden flex flex-col transform transition-transform duration-200">
+            wire:click.self="closeReject">
+            <div
+                class="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden flex flex-col transform transition-transform duration-200">
 
                 {{-- Header --}}
                 <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -279,15 +283,11 @@
                     <label for="alasanPenolakan" class="block text-sm font-medium text-gray-700 mb-2">
                         Berikan alasan mengapa pengajuan ini ditolak:
                     </label>
-                    <textarea
-                        wire:model="alasanPenolakan"
-                        id="alasanPenolakan"
-                        rows="4"
+                    <textarea wire:model="alasanPenolakan" id="alasanPenolakan" rows="4"
                         class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none
                                focus:ring-2 focus:ring-red-500/20 focus:border-red-500 bg-gray-50/50
                                text-sm placeholder-gray-400 transition-all shadow-inner"
-                        placeholder="Ketik alasan penolakan di sini..."
-                    ></textarea>
+                        placeholder="Ketik alasan penolakan di sini..."></textarea>
 
                     @error('alasanPenolakan')
                         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>

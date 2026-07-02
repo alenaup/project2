@@ -11,11 +11,11 @@
     <!-- CONTENT -->
     <div class="flex-1 p-4 md:p-6 max-w-7xl mx-auto">
         {{-- Card yang menampilkan jadwal karyawan pada hari ini --}}
-        <livewire:Karyawan.dashboard/>
+        <livewire:karyawan.dashboard/>
         
         {{-- menampilkan status absensi masuk dan absensi keluar --}}
         {{-- mengecek lokasi --}}
-        <livewire:Karyawan.dashboardAbsensi/> 
+        <livewire:karyawan.dashboard-absensi/> 
 
         <!-- GRAFIK (LIVEWIRE) -->
         <livewire:karyawan.grafik-rekap-kehadiran />

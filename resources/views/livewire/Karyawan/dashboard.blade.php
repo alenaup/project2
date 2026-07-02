@@ -26,7 +26,7 @@
 
     @if (($status_kehadiran === false && $tipe_kehadiran === null) || $waktu_masuk)
         <div
-            class="animate-item group p-5 rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm mb-2
+            class="animate-bitem group p-5 rounded-2xl border border-gray-100 bg-white/80 backdrop-blur-sm mb-2
                 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer relative overflow-hidden">
             <!-- hover glow -->
             <div
@@ -60,7 +60,7 @@
                     <div class="absolute -top-10 -right-10 w-28 h-28 bg-emerald-200 opacity-20 blur-3xl"></div>
                     <!-- STATUS -->
                     @if ($status_kehadiran === true && $waktu_masuk)
-                        <div class="relative z-10 flex items-start justify-between mb-4">
+                        <div class="animate-bitem relative z-10 flex items-start justify-between mb-4">
                             <div>
                                 <p class="text-xs text-gray-500 uppercase tracking-wide">Anda sudah melakukan Absensi
                                     Masuk
@@ -77,7 +77,7 @@
                             </div>
                         </div>
                     @else
-                        <div class="relative z-10 flex items-start justify-between mb-4">
+                        <div class="animate-bitem relative z-10 flex items-start justify-between mb-4">
                             <div>
                                 <p class="text-xs text-gray-500 uppercase tracking-wide">Absensi Masuk</p>
                                 <p class="font-semibold text-gray-800 text-sm mt-1">
@@ -95,7 +95,7 @@
                                 </svg>
                             </div>
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="animate-bitem flex items-center justify-between">
                             <p id="statusMasuk" class="text-sm text-gray-400">
                                 Belum absen masuk hari ini
                             </p>
@@ -115,7 +115,7 @@
                     <div class="absolute -top-10 -right-10 w-28 h-28 bg-red-200 opacity-20 blur-3xl"></div>
                     <!-- STATUS -->
                     @if ($status_kehadiran === true && $waktu_keluar)
-                        <div class="relative z-10 flex items-start justify-between mb-4">
+                        <div class="animate-bitem relative z-10 flex items-start justify-between mb-4">
                             <div>
                                 <p class="text-xs text-gray-500 uppercase tracking-wide">Anda sudah melakukan Absensi
                                     Keluar
@@ -132,7 +132,7 @@
                             </div>
                         </div>
                     @else
-                        <div class="relative z-10 flex items-start justify-between mb-4">
+                        <div class="animate-bitem relative z-10 flex items-start justify-between mb-4">
                             <div>
                                 <p class="text-xs text-gray-500 uppercase tracking-wide">Absensi Keluar</p>
                                 <p class="font-semibold text-gray-800 text-sm mt-1">

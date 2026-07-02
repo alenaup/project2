@@ -14,10 +14,22 @@ class JadwalKaryawan extends Component
 
     public $currentMonth;
 
+    public $filterBulan;
+
     public function mount()
     {
         $this->currentYear = Carbon::now()->year;
         $this->currentMonth = Carbon::now()->month;
+        $this->filterBulan = Carbon::now()->format('Y-m');
+    }
+
+    public function updatedFilterBulan($value)
+    {
+        if ($value) {
+            $date = Carbon::createFromFormat('Y-m', $value);
+            $this->currentYear = $date->year;
+            $this->currentMonth = $date->month;
+        }
     }
 
     public function previousMonth()
@@ -25,6 +37,7 @@ class JadwalKaryawan extends Component
         $date = Carbon::createFromDate($this->currentYear, $this->currentMonth, 1)->subMonth();
         $this->currentYear = $date->year;
         $this->currentMonth = $date->month;
+        $this->filterBulan = $date->format('Y-m');
     }
 
     public function nextMonth()
@@ -32,12 +45,14 @@ class JadwalKaryawan extends Component
         $date = Carbon::createFromDate($this->currentYear, $this->currentMonth, 1)->addMonth();
         $this->currentYear = $date->year;
         $this->currentMonth = $date->month;
+        $this->filterBulan = $date->format('Y-m');
     }
 
     public function goToToday()
     {
         $this->currentYear = Carbon::now()->year;
         $this->currentMonth = Carbon::now()->month;
+        $this->filterBulan = Carbon::now()->format('Y-m');
     }
 
     public function downloadPdf()

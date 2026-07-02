@@ -54,6 +54,7 @@ Route::get('/kepala-departement/atur-lokasi', function () {
 /* Admin OutSourcing */
 Route::middleware('auth')->group(function () {
     Route::get('/admin-outsourcing/dashboard', [AdminOutsourcingController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin-outsourcing/export-absensi', [AdminOutsourcingController::class, 'exportAbsensi'])->name('admin.export_absensi');
     Route::get('/admin-outsourcing/kelola-karyawan', [AdminOutsourcingController::class, 'kelolaKaryawan']);
     Route::get('/admin-outsourcing/api/departemen', [AdminOutsourcingController::class, 'getDepartemen']);
     Route::post('/admin-outsourcing/api/karyawan', [AdminOutsourcingController::class, 'storeKaryawan']);
@@ -74,6 +75,7 @@ Route::get('/hr/dashboard', function () {
 })->name('hr.dashboard');
 
 Route::get('/hr/export-lembur', [\App\Http\Controllers\HRController::class, 'exportLembur'])->name('hr.export_lembur');
+Route::get('/hr/export-absensi', [\App\Http\Controllers\HRController::class, 'exportAbsensi'])->name('hr.export_absensi');
 
 Route::get('/hr/rekapan-detail', function () {
     return view('hr.rekapanDetail');
@@ -127,12 +129,26 @@ Route::middleware('auth')->group(function () {
             ->join('jadwal', 'karyawan_jadwal.jadwal_id', '=', 'jadwal.id_jadwal')
             ->join('shift', 'jadwal.shift_id', '=', 'shift.id_shift')
             ->where('karyawan_jadwal.user_id', $userId)
-            ->whereBetween('jadwal.tanggal', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->where('jadwal.tanggal_mulai', '<=', $endDate->format('Y-m-d'))
+            ->where('jadwal.tanggal_akhir', '>=', $startDate->format('Y-m-d'))
+            ->select(
+                'jadwal.*',
+                'shift.nama_shift',
+                'shift.jam_masuk',
+                'shift.jam_keluar'
+            )
             ->get();
 
         $jadwalByDate = [];
         foreach ($jadwals as $j) {
-            $jadwalByDate[$j->tanggal] = $j;
+            $mulai = Carbon\Carbon::parse($j->tanggal_mulai);
+            $akhir = Carbon\Carbon::parse($j->tanggal_akhir);
+
+            while ($mulai <= $akhir) {
+                $tanggal = $mulai->format('Y-m-d');
+                $jadwalByDate[$tanggal] = $j;
+                $mulai->addDay();
+            }
         }
 
         $dateObj = Carbon\Carbon::createFromDate($year, $month, 1);

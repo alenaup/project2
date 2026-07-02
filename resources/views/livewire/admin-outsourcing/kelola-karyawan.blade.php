@@ -4,8 +4,6 @@
     showConfirmEditModal: false, 
     showDeleteModal: false 
 }"
-x-on:open-confirm-edit.window="showConfirmEditModal = true"
-x-on:close-confirm-edit.window="showConfirmEditModal = false"
 x-on:close-edit.window="showEditModal = false; showConfirmEditModal = false"
 x-on:close-delete.window="showDeleteModal = false">
 
@@ -57,82 +55,96 @@ x-on:close-delete.window="showDeleteModal = false">
     </div>
 
     {{-- ─── Tabel Karyawan ───────────────────────────────────── --}}
-    <x-table-reusable :headers="['No', 'Nama', 'Email', 'Telepon', 'Alamat', 'Aksi']">
-
-        @forelse ($karyawanList as $index => $karyawan)
-            <tr class="odd:bg-white even:bg-gray-100 shadow-sm hover:bg-green-50 cursor-pointer transition-colors">
-
-                <td class="px-4 py-2 text-gray-500">
-                    {{ $karyawanList->firstItem() + $index }}
-                </td>
-
-                <td class="px-4 py-2">
-                    <div class="font-medium text-gray-800">{{ $karyawan->nama_lengkap }}</div>
-                    <div class="text-xs text-gray-400">
-                        {{ $karyawan->nip && (int) $karyawan->nip !== 0 ? 'NIP-' . $karyawan->nip : '-' }}
-                    </div>
-                </td>
-
-                <td class="px-4 py-2 text-gray-600">{{ $karyawan->email ?? '-' }}</td>
-                <td class="px-4 py-2 text-gray-600">{{ $karyawan->nomor_tlp ?? '-' }}</td>
-                <td class="px-4 py-2 text-gray-500 truncate max-w-xs">{{ $karyawan->alamat ?? '-' }}</td>
-
-                <td class="px-4 py-2">
-                    <div class="flex justify-center gap-2">
-
-                        {{-- Tombol Detail --}}
-                        <button
-                            @click="showDetailModal = true"
-                            wire:click="openDetail({{ $karyawan->id_user }})"
-                            class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition"
-                            title="Lihat Detail">
-                            <i class="fa-solid fa-eye text-gray-600"></i>
-                        </button>
-
-                        {{-- Tombol Edit --}}
-                        <button
-                            @click="showEditModal = true"
-                            wire:click="openEdit({{ $karyawan->id_user }})"
-                            class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-600 transition"
-                            title="Edit Data">
-                            <i class="fa-solid fa-pen-to-square"></i>
-                        </button>
-
-                        {{-- Tombol Hapus --}}
-                        <button
-                            @click="showDeleteModal = true"
-                            wire:click="openDelete({{ $karyawan->id_user }})"
-                            class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition"
-                            title="Hapus Data">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-
-                    </div>
-                </td>
-            </tr>
-        @empty
-            <tr>
-                <td colspan="6" class="px-4 py-8 text-center text-gray-400">
-                    <i class="fas fa-inbox text-3xl mb-2 block"></i>
-                    Tidak ada data karyawan.
-                </td>
-            </tr>
-        @endforelse
-
-    </x-table-reusable>
-
-    {{-- ─── Pagination ───────────────────────────────────────── --}}
-    @if ($karyawanList->hasPages())
-        <div class="flex justify-end mt-4">
-            {{ $karyawanList->links() }}
+    <div class="relative bg-white border border-gray-100 rounded-xl overflow-hidden shadow-xs">
+        {{-- Loading Bar --}}
+        <div wire:loading class="absolute top-0 left-0 right-0 h-1.5 z-30 overflow-hidden bg-emerald-50">
+            <div class="h-full bg-[#3C8B5E] w-full animate-pulse"></div>
         </div>
-    @endif
+
+        <x-table-reusable :headers="['No', 'Nama', 'Email', 'Telepon', 'Alamat', 'Aksi']">
+
+            @forelse ($karyawanList as $index => $karyawan)
+                <tr class="odd:bg-white even:bg-gray-100 shadow-sm hover:bg-green-50 cursor-pointer transition-colors">
+
+                    <td class="px-4 py-2 text-gray-500">
+                        {{ $karyawanList->firstItem() + $index }}
+                    </td>
+
+                    <td class="px-4 py-2">
+                        <div class="font-medium text-gray-800">{{ $karyawan->nama_lengkap }}</div>
+                        <div class="text-xs text-gray-400">
+                            {{ $karyawan->nip && (int) $karyawan->nip !== 0 ? 'NIP-' . $karyawan->nip : '-' }}
+                        </div>
+                    </td>
+
+                    <td class="px-4 py-2 text-gray-600">{{ $karyawan->email ?? '-' }}</td>
+                    <td class="px-4 py-2 text-gray-600">{{ $karyawan->nomor_tlp ?? '-' }}</td>
+                    <td class="px-4 py-2 text-gray-500 truncate max-w-xs">{{ $karyawan->alamat ?? '-' }}</td>
+
+                    <td class="px-4 py-2">
+                        <div class="flex justify-center gap-2">
+
+                            {{-- Tombol Detail --}}
+                            <button
+                                @click="showDetailModal = true"
+                                wire:click="openDetail({{ $karyawan->id_user }})"
+                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 transition"
+                                title="Lihat Detail">
+                                <i class="fa-solid fa-eye text-gray-600"></i>
+                            </button>
+
+                            {{-- Tombol Edit --}}
+                            <button
+                                @click="showEditModal = true"
+                                wire:click="openEdit({{ $karyawan->id_user }})"
+                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-600 transition"
+                                title="Edit Data">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+
+                            {{-- Tombol Hapus --}}
+                            <button
+                                @click="showDeleteModal = true"
+                                wire:click="openDelete({{ $karyawan->id_user }})"
+                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition"
+                                title="Hapus Data">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+
+                        </div>
+                    </td>
+                </tr>
+            @empty
+                <tr>
+                    <td colspan="6" class="px-4 py-8 text-center text-gray-400">
+                        <i class="fas fa-inbox text-3xl mb-2 block"></i>
+                        Tidak ada data karyawan.
+                    </td>
+                </tr>
+            @endforelse
+
+        </x-table-reusable>
+
+        {{-- ─── Pagination ───────────────────────────────────────── --}}
+        @if ($karyawanList->hasPages())
+            <div class="flex justify-end p-4 border-t border-gray-100">
+                {{ $karyawanList->links() }}
+            </div>
+        @endif
+    </div>
 
     {{-- MODAL: Detail Karyawan --}}
     <div x-show="showDetailModal" x-transition.opacity
          class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"
          @click.self="showDetailModal = false; $wire.closeDetail()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden" x-show="showDetailModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden relative" x-show="showDetailModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+            {{-- Spinner while loading data --}}
+            <div wire:loading.flex wire:target="openDetail" class="absolute inset-0 z-50 bg-white/70 backdrop-blur-xs flex items-center justify-center rounded-2xl">
+                <div class="flex flex-col items-center gap-2">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-600"></i>
+                    <span class="text-sm font-semibold text-gray-700">Memuat data...</span>
+                </div>
+            </div>
 
             {{-- Header --}}
             <div class="p-5 border-b border-gray-100 flex items-center gap-4 bg-gray-50">
@@ -179,7 +191,14 @@ x-on:close-delete.window="showDeleteModal = false">
     <div x-show="showEditModal" x-transition.opacity
          class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center"
          @click.self="showEditModal = false; $wire.closeEdit()">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden" x-show="showEditModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden relative" x-show="showEditModal" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+            {{-- Spinner while loading data --}}
+            <div wire:loading.flex wire:target="openEdit" class="absolute inset-0 z-50 bg-white/70 backdrop-blur-xs flex items-center justify-center rounded-2xl">
+                <div class="flex flex-col items-center gap-2">
+                    <i class="fa-solid fa-spinner fa-spin text-3xl text-[#3C8B5E]"></i>
+                    <span class="text-sm font-semibold text-gray-700">Memuat data...</span>
+                </div>
+            </div>
 
             {{-- Header --}}
             <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-gray-50">
@@ -254,8 +273,8 @@ x-on:close-delete.window="showDeleteModal = false">
                     class="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition">
                     Batal
                 </button>
-                <button wire:click="openConfirmEdit"
-                    class="px-4 py-2 text-sm bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-md transition">
+                <button @click="showConfirmEditModal = true"
+                    class="px-4 py-2 text-sm bg-[#3C8B5E] hover:bg-[#2D6A47] text-white rounded-lg shadow-md transition cursor-pointer">
                     <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan
                 </button>
             </div>
@@ -280,8 +299,8 @@ x-on:close-delete.window="showDeleteModal = false">
                     class="flex-1 bg-gray-100 hover:bg-gray-200 py-2 rounded-lg text-sm transition">
                     Batal
                 </button>
-                <button wire:click="saveEdit"
-                    class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm transition">
+                <button @click="showConfirmEditModal = false; $dispatch('show-loading', { message: 'Menyimpan data karyawan...' }); $wire.saveEdit()"
+                    class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg text-sm transition cursor-pointer">
                     <i class="fa-solid fa-check mr-1"></i> Ya, Simpan
                 </button>
             </div>

@@ -23,7 +23,7 @@
     @stack('styles')
 </head>
 
-<body class="min-h-screen bg-gray-50">
+<body class="min-h-screen h-64 overflow-y-scroll [&::-webkit-scrollbar]:w-3 [&::-webkit-scrollbar-track]:bg-gray-100 [&::-webkit-scrollbar-thumb]:bg-emerald-700 [&::-webkit-scrollbar-thumb]:rounded-md" >
     <div class="flex min-h-screen" x-data="{ open: false }">
 
         {{-- SIDEBAR --}}

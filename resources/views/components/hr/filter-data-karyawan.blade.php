@@ -1,4 +1,5 @@
-<div x-data="vendorFilter()" x-init="fetchVendors()" class="mt-6 bg-white p-8 pb-2 rounded-lg shadow-lg border border-gray-100">
+<div x-data="vendorFilter()" x-init="fetchVendors()"
+    class="mt-6 bg-white p-8 pb-2 rounded-lg shadow-lg border border-gray-100">
     <div class="flex items-center gap-3 mb-1">
         <i class="fas fa-search text-blue-600"></i>
         <h2 class="text-lg font-bold text-gray-800">Filter Data Karyawan</h2>
@@ -30,10 +31,11 @@
                         </td>
                         <td class="px-4 py-3 font-medium text-gray-800">Semua Vendor (Tampilkan Semua)</td>
                     </tr>
-                    
+
                     <!-- Vendor dari database -->
                     <template x-for="vendor in vendors" :key="vendor.id_outsourcing">
-                        <tr class="hover:bg-green-50 transition cursor-pointer" @click="$event.currentTarget.querySelector('input[type=radio]').click()">
+                        <tr class="hover:bg-green-50 transition cursor-pointer"
+                            @click="$event.currentTarget.querySelector('input[type=radio]').click()">
                             <td class="px-4 py-3 text-center">
                                 <input type="radio" name="vendor_id" :value="vendor.id_outsourcing"
                                     class="w-4 h-4 text-green-600 focus:ring-green-500 cursor-pointer" @click.stop>
@@ -44,31 +46,28 @@
                 </tbody>
             </table>
         </div>
-        
-        <div class="flex flex-col lg:flex-row items-center gap-4 shrink-0 w-full justify-between mt-2 text-xs text-gray-500" style="display: none;" x-show="!isLoading">
+
+        <div class="flex flex-col lg:flex-row items-center gap-4 shrink-0 w-full justify-between mt-2 text-xs text-gray-500"
+            style="display: none;" x-show="!isLoading">
             <span x-text="`Menampilkan ${startIndex}-${endIndex} dari ${total} vendor`"></span>
-            
+
             <!-- Paginasi -->
             <div class="flex gap-1" x-show="lastPage > 1">
-                <button 
-                    @click="changePage(currentPage - 1)" 
-                    :disabled="currentPage === 1"
+                <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1"
                     class="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-7 h-7 flex items-center justify-center rounded-lg shadow-sm font-medium cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-chevron-left text-[10px]"></i>
                 </button>
-                
+
                 <template x-for="page in paginationRange()" :key="page">
-                    <button 
-                        @click="changePage(page)"
+                    <button @click="changePage(page)"
                         class="w-7 h-7 flex items-center justify-center rounded-lg shadow-sm font-medium cursor-pointer transition"
-                        :class="currentPage === page ? 'bg-green-700 text-white border-transparent' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'"
+                        :class="currentPage === page ? 'bg-green-700 text-white border-transparent' :
+                            'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'"
                         x-text="page">
                     </button>
                 </template>
-                
-                <button 
-                    @click="changePage(currentPage + 1)" 
-                    :disabled="currentPage === lastPage"
+
+                <button @click="changePage(currentPage + 1)" :disabled="currentPage === lastPage"
                     class="bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 w-7 h-7 flex items-center justify-center rounded-lg shadow-sm font-medium cursor-pointer transition disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-chevron-right text-[10px]"></i>
                 </button>

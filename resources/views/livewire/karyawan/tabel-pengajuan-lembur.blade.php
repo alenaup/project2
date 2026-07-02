@@ -1,4 +1,23 @@
-<div x-data="{ openEdit: false, openDelete: false, deleteId: null }"
+<div x-data="{ 
+    openEdit: false, 
+    openDelete: false, 
+    deleteId: null,
+
+    edit_id: '',
+    edit_tanggal: '',
+    edit_mulai: '',
+    edit_selesai: '',
+    edit_keterangan: '',
+
+    openEditModal(id, tanggal, mulai, selesai, keterangan) {
+        this.edit_id = id;
+        this.edit_tanggal = tanggal;
+        this.edit_mulai = mulai;
+        this.edit_selesai = selesai;
+        this.edit_keterangan = keterangan;
+        this.openEdit = true;
+    }
+}"
      @open-modal-edit.window="openEdit = true"
      @close-modal-edit.window="openEdit = false">
     {{-- TABEL RIWAYAT --}}
@@ -91,7 +110,7 @@
                             <td class="px-5 py-3.5">
                                 @if ($item->status_validasi === 'pending')
                                     <div class="flex items-center justify-center gap-2">
-                                        <button wire:click="editLembur({{ $item->id_lembur }})" class="text-blue-500 hover:text-blue-700 transition w-8 h-8 flex items-center justify-center bg-blue-50 hover:bg-blue-100 rounded-lg">
+                                        <button @click="openEditModal({{ $item->id_lembur }}, '{{ \Carbon\Carbon::parse($item->mulai_lembur)->format('Y-m-d') }}', '{{ \Carbon\Carbon::parse($item->mulai_lembur)->format('H:i') }}', '{{ \Carbon\Carbon::parse($item->selesai_lembur)->format('H:i') }}', {{ json_encode($item->keterangan) }})" class="text-blue-500 hover:text-blue-700 transition w-8 h-8 flex items-center justify-center bg-blue-50 hover:bg-blue-100 rounded-lg cursor-pointer">
                                             <i class="fa-solid fa-pen-to-square"></i>
                                         </button>
                                         <button @click="deleteId = {{ $item->id_lembur }}; openDelete = true" class="text-red-500 hover:text-red-700 transition w-8 h-8 flex items-center justify-center bg-red-50 hover:bg-red-100 rounded-lg">
@@ -181,36 +200,43 @@
                 </button>
             </div>
             
-            <form wire:submit.prevent="updateLembur" class="p-6 space-y-4">
+            <form @submit.prevent="$wire.saveLemburEdit(edit_id, edit_tanggal, edit_mulai, edit_selesai, edit_keterangan)" class="p-6 space-y-4 relative">
+                {{-- Spinner Overlay while saving --}}
+                <div wire:loading.flex wire:target="saveLemburEdit" class="absolute inset-0 z-50 bg-white/70 backdrop-blur-xs flex items-center justify-center">
+                    <div class="flex flex-col items-center gap-2">
+                        <i class="fa-solid fa-spinner fa-spin text-3xl text-emerald-600"></i>
+                        <span class="text-sm font-semibold text-gray-700">Menyimpan Perubahan...</span>
+                    </div>
+                </div>
+
                 <div class="space-y-1.5">
                     <label class="block text-sm font-semibold text-gray-700">Tanggal Lembur</label>
-                    <input type="date" wire:model="edit_tanggal" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
+                    <input type="date" x-model="edit_tanggal" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
                     @error('edit_tanggal') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label class="block text-sm font-semibold text-gray-700">Jam Mulai</label>
-                        <input type="time" wire:model="edit_mulai" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
+                        <input type="time" x-model="edit_mulai" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
                         @error('edit_mulai') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-sm font-semibold text-gray-700">Jam Selesai</label>
-                        <input type="time" wire:model="edit_selesai" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
+                        <input type="time" x-model="edit_selesai" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm">
                         @error('edit_selesai') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
                     </div>
                 </div>
 
                 <div class="space-y-1.5">
                     <label class="block text-sm font-semibold text-gray-700">Keterangan / Alasan</label>
-                    <textarea wire:model="edit_keterangan" rows="3" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm resize-none"></textarea>
+                    <textarea x-model="edit_keterangan" rows="3" class="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition shadow-sm resize-none"></textarea>
                     @error('edit_keterangan') <span class="text-xs text-red-500 font-medium">{{ $message }}</span> @enderror
                 </div>
 
                 <div class="pt-4">
-                    <button type="submit" wire:loading.attr="disabled" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2">
-                        <span wire:loading.remove wire:target="updateLembur">Simpan Perubahan</span>
-                        <span wire:loading wire:target="updateLembur"><i class="fa-solid fa-circle-notch fa-spin"></i> Menyimpan...</span>
+                    <button type="submit" class="w-full bg-[#3C8B5E] hover:bg-[#2D6A47] text-white font-bold py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2 cursor-pointer">
+                        <span>Simpan Perubahan</span>
                     </button>
                 </div>
             </form>

@@ -142,9 +142,9 @@ class KelolaKaryawan extends Component
     }
 
     /**
-     * Buka modal konfirmasi edit.
+     * Simpan perubahan data karyawan.
      */
-    public function openConfirmEdit(): void
+    public function saveEdit(): void
     {
         $this->validate([
             'editNama'    => 'required|string|min:3|max:100',
@@ -158,27 +158,10 @@ class KelolaKaryawan extends Component
             'editEmail.email'    => 'Format email tidak valid.',
         ]);
 
-        $this->dispatch('open-confirm-edit');
-    }
-
-    /**
-     * Tutup modal konfirmasi edit.
-     */
-    public function closeConfirmEdit(): void
-    {
-        // Handled by Alpine
-    }
-
-    /**
-     * Simpan perubahan data karyawan.
-     */
-    public function saveEdit(): void
-    {
         $user = User::find($this->selectedId);
 
         if (!$user) {
             session()->flash('error', 'Data karyawan tidak ditemukan.');
-            $this->dispatch('close-confirm-edit');
             return;
         }
 

@@ -34,27 +34,25 @@ class RekapanKaryawan extends Component
         $this->loadData();
     }
 
-    public function updatedStartDate()
-    {
-        $this->halamanAktif = 1;
-        $this->loadData();
-    }
-
-    public function updatedEndDate()
-    {
-        $this->halamanAktif = 1;
-        $this->loadData();
-    }
-
     public function updatedRekapBulan()
     {
-        $this->loadRekapRecord();
+        $this->halamanAktif = 1;
+        $this->loadData();
     }
 
     public function gantiHalaman(int $halaman): void
     {
         $this->halamanAktif = $halaman;
         $this->loadData();
+    }
+
+    // ──────────────────────────────────────────────────────
+    // Service Getter
+    // ──────────────────────────────────────────────────────
+
+    private function getService(): \App\Services\AdminOutsourcingDashboardService
+    {
+        return app(\App\Services\AdminOutsourcingDashboardService::class);
     }
 
     // ──────────────────────────────────────────────────────
@@ -66,13 +64,8 @@ class RekapanKaryawan extends Component
      */
     public function getTotalHadirProperty(): int
     {
-        $karyawanIds = $this->karyawanByOutsourcing;
-        return (new KehadiranService)
-            ->totalHadirByDateRange(
-                $karyawanIds,
-                $this->startDate,
-                $this->endDate
-            );
+        $stats = $this->getService()->getStats(Auth::user()->outsourcing_id, $this->startDate, $this->endDate);
+        return $stats['total_hadir'];
     }
 
     /**
@@ -80,8 +73,8 @@ class RekapanKaryawan extends Component
      */
     public function getTotalAlphaProperty(): int
     {
-        $getKaryawan = $this->karyawanByOutsourcing;
-        return (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange('mankir', $getKaryawan, $this->startDate, $this->endDate);
+        $stats = $this->getService()->getStats(Auth::user()->outsourcing_id, $this->startDate, $this->endDate);
+        return $stats['total_alpha'];
     }
 
     /**
@@ -89,10 +82,8 @@ class RekapanKaryawan extends Component
      */
     public function getTotalIzinSakitProperty(): int
     {
-        $getKaryawan = $this->karyawanByOutsourcing;
-        $sakit = (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange('sakit', $getKaryawan, $this->startDate, $this->endDate);
-        $izin = (new KehadiranService)->cekKehadiranBanyakKaryawanByDateRange('izin', $getKaryawan, $this->startDate, $this->endDate);
-        return $sakit + $izin;
+        $stats = $this->getService()->getStats(Auth::user()->outsourcing_id, $this->startDate, $this->endDate);
+        return $stats['total_izin_sakit'];
     }
 
     /**
@@ -100,10 +91,7 @@ class RekapanKaryawan extends Component
      */
     public function getTotalKaryawanProperty(): int
     {
-        return User::query()->whereNull('tanggal_keluar')
-            ->where('role', UserRole::Karyawan->value)
-            ->where('outsourcing_id', Auth::user()->outsourcing_id)
-            ->count();
+        return $this->getService()->getKaryawanCount(Auth::user()->outsourcing_id);
     }
 
     // ──────────────────────────────────────────────────────
@@ -121,12 +109,21 @@ class RekapanKaryawan extends Component
         return [$start, $end];
     }
 
+    private function updateDateRangeFromBulan()
+    {
+        [$start, $end] = $this->getRekapDateRange();
+        $this->startDate = $start;
+        $this->endDate = $end;
+    }
+
     /**
      * Render component ke view
      */
     protected function loadData(): void
     {
         $this->karyawanByOutsourcing = (new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+
+        $this->updateDateRangeFromBulan();
 
         // inisiasi array
         $this->datas = [];
@@ -141,17 +138,9 @@ class RekapanKaryawan extends Component
             $this->koloms[] = $date->format('d/m');
         }
 
-        $query = User::where('role', UserRole::Karyawan->value)
-            ->where('outsourcing_id', Auth::user()->outsourcing_id)
-            ->where('status', \App\Enums\Status::Active->value)
-            ->whereNull('tanggal_keluar');
+        $this->totalKaryawan = $this->getService()->getKaryawanCount(Auth::user()->outsourcing_id);
 
-        $this->totalKaryawan = $query->count();
-
-        $karyawans = $query
-            ->skip(($this->halamanAktif - 1) * $this->perPage)
-            ->take($this->perPage)
-            ->get();
+        $karyawans = $this->getService()->getKaryawans(Auth::user()->outsourcing_id, $this->halamanAktif, $this->perPage);
 
         $userIds = $karyawans->pluck('id_user');
 
@@ -166,7 +155,8 @@ class RekapanKaryawan extends Component
                 });
             });
 
-        foreach ($karyawans as $karyawan) {
+        $colors = ['bg-green-600','bg-emerald-600','bg-blue-500','bg-purple-600','bg-orange-500'];
+        foreach ($karyawans as $index => $karyawan) {
             $absens = [];
 
             foreach ($dates as $date) {
@@ -198,10 +188,17 @@ class RekapanKaryawan extends Component
                         ];
                         break;
 
-                    case 3: // Mangkir
+                    case 3: // Mangkir (Alpha)
                         $absens[] = [
-                            'value' => 'M',
+                            'value' => 'A',
                             'warna' => 'bg-red-100 text-red-700',
+                        ];
+                        break;
+
+                    case 4: // Cuti
+                        $absens[] = [
+                            'value' => 'L',
+                            'warna' => 'bg-purple-100 text-purple-700',
                         ];
                         break;
 
@@ -209,6 +206,13 @@ class RekapanKaryawan extends Component
                         $absens[] = [
                             'value' => 'I',
                             'warna' => 'bg-blue-100 text-blue-700',
+                        ];
+                        break;
+
+                    case 6: // Terlambat
+                        $absens[] = [
+                            'value' => 'H',
+                            'warna' => 'bg-green-100 text-green-700',
                         ];
                         break;
 
@@ -221,13 +225,18 @@ class RekapanKaryawan extends Component
                 }
             }
 
+            $inisial = collect(explode(' ', $karyawan->nama_lengkap))
+                ->take(2)
+                ->map(fn($w) => !empty($w) ? strtoupper($w[0]) : '')
+                ->join('');
+
             $this->datas[] = [
-                'no' => $karyawan->id_user,
+                'no' => (($this->halamanAktif - 1) * $this->perPage) + ($index + 1),
                 'nama' => $karyawan->nama_lengkap,
-                'inisial' => $karyawan->inisial,
-                'perusahaan' => $karyawan->perusahaan,
-                'posisi' => $karyawan->posisi,
-                'warna' => $karyawan->warna,
+                'inisial' => $inisial,
+                'perusahaan' => Auth::user()->outsourcing->nama_outsourcing ?? 'Vendor',
+                'posisi' => $karyawan->departemen->nama_departemen ?? '-',
+                'warna' => $colors[$index % count($colors)],
                 'absens' => $absens,
             ];
         }
@@ -247,62 +256,19 @@ class RekapanKaryawan extends Component
         [$start, $end] = $this->getRekapDateRange();
         $karyawanIds = $this->karyawanByOutsourcing;
 
-        $firstKehadiranWithRekapan = Kehadiran::whereIn('karyawan_id', $karyawanIds)
-            ->whereBetween('tanggal', [$start, $end])
-            ->whereNotNull('rekapan_kehadiran_id')
-            ->first();
-
-        if ($firstKehadiranWithRekapan) {
-            $this->rekapRecord = \App\Models\RekapKehadiran::find($firstKehadiranWithRekapan->rekapan_kehadiran_id);
-        } else {
-            $this->rekapRecord = null;
-        }
+        $this->rekapRecord = $this->getService()->loadRekapRecord($karyawanIds, $start, $end);
     }
 
     public function kirimRekapan()
     {
-        $this->karyawanByOutsourcing = (new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
         [$start, $end] = $this->getRekapDateRange();
-        $karyawanIds = $this->karyawanByOutsourcing;
 
-        $kehadiranQuery = Kehadiran::whereIn('karyawan_id', $karyawanIds)
-            ->whereBetween('tanggal', [$start, $end]);
+        $rekap = $this->getService()->kirimRekapan(Auth::user()->outsourcing_id, $start, $end);
 
-        if ($kehadiranQuery->count() === 0) {
+        if (!$rekap) {
             session()->flash('error', 'Tidak ada data absensi pada periode rekap ini untuk dikirim.');
             return;
         }
-
-        $this->loadRekapRecord();
-        if ($this->rekapRecord) {
-            session()->flash('error', 'Rekapan absensi untuk periode ini sudah pernah dikirim.');
-            return;
-        }
-
-        $kehadiranService = new KehadiranService;
-        $totalHadir = (new KehadiranService)->totalHadirByDateRange($karyawanIds, $start, $end);
-        $totalAlpha = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('mankir', $karyawanIds, $start, $end);
-        $totalSakit = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('sakit', $karyawanIds, $start, $end);
-        $totalIzin = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('izin', $karyawanIds, $start, $end);
-        $totalCuti = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('cuti', $karyawanIds, $start, $end);
-        $totalTerlambat = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('terlambat', $karyawanIds, $start, $end);
-
-        $rekap = \App\Models\RekapKehadiran::create([
-            'pengaju' => Auth::id(),
-            'status_validasi' => \App\Enums\Validasi::Pending->value,
-            'status' => \App\Enums\Status::Active->value,
-            'total_hadir' => $totalHadir,
-            'total_mankir' => $totalAlpha,
-            'total_sakit' => $totalSakit,
-            'total_izin' => $totalIzin,
-            'total_cuti' => $totalCuti,
-            'total_terlambat' => $totalTerlambat,
-            'total_jam_kerja' => $totalHadir * 8,
-        ]);
-
-        $kehadiranQuery->update([
-            'rekapan_kehadiran_id' => $rekap->id_rekapan
-        ]);
 
         $this->loadRekapRecord();
         session()->flash('success', 'Rekapan absensi berhasil dikirim.');
@@ -310,32 +276,14 @@ class RekapanKaryawan extends Component
 
     public function kirimUlang()
     {
-        $this->karyawanByOutsourcing = (new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
         $this->loadRekapRecord();
         if ($this->rekapRecord && $this->rekapRecord->status_validasi === \App\Enums\Validasi::Invalid->value) {
             [$start, $end] = $this->getRekapDateRange();
-            $karyawanIds = $this->karyawanByOutsourcing;
-            $kehadiranService = new KehadiranService;
 
-            $totalHadir = (new KehadiranService)->totalHadirByDateRange($karyawanIds, $start, $end);
-            $totalAlpha = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('mankir', $karyawanIds, $start, $end);
-            $totalSakit = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('sakit', $karyawanIds, $start, $end);
-            $totalIzin = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('izin', $karyawanIds, $start, $end);
-            $totalCuti = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('cuti', $karyawanIds, $start, $end);
-            $totalTerlambat = $kehadiranService->cekKehadiranBanyakKaryawanByDateRange('terlambat', $karyawanIds, $start, $end);
-
-            $this->rekapRecord->update([
-                'status_validasi' => \App\Enums\Validasi::Pending->value,
-                'total_hadir' => $totalHadir,
-                'total_mankir' => $totalAlpha,
-                'total_sakit' => $totalSakit,
-                'total_izin' => $totalIzin,
-                'total_cuti' => $totalCuti,
-                'total_terlambat' => $totalTerlambat,
-                'total_jam_kerja' => $totalHadir * 8,
-            ]);
+            $this->getService()->kirimUlang($this->rekapRecord, Auth::user()->outsourcing_id, $start, $end);
 
             session()->flash('success', 'Rekapan absensi berhasil dikirim ulang.');
+            $this->loadRekapRecord();
         }
     }
 

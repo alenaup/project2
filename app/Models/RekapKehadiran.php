@@ -20,6 +20,7 @@ class RekapKehadiran extends Model
         'status_validasi',
         'status',
         'tanggal_validasi',
+        'tanggal_rekap',
         'total_jam_kerja',
         'total_terlambat',
         'total_hadir',
@@ -32,6 +33,7 @@ class RekapKehadiran extends Model
 
     protected $casts = [
         'tanggal_validasi' => 'date',
+        'tanggal_rekap' => 'date',
         'status' => Status::class,
     ];
 

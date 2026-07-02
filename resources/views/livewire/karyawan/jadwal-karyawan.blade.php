@@ -1,27 +1,42 @@
-<div>
+<div x-data="{ showExportModal: false, exportMonth: '{{ $currentYear }}-{{ sprintf('%02d', $currentMonth) }}' }">
     <div class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
             <h1 class="text-xl font-bold text-gray-800 md:text-2xl">Jadwal Kerjaku </h1>
             <p class="text-gray-500 text-sm">Lihat detail waktu shift kerjamu untuk bulan ini.</p>
         </div>
-        <a href="/karyawan-outsourcing/jadwal-karyawan/pdf/{{ $currentYear }}/{{ $currentMonth }}"
-            class="bg-white border-2 border-[#3C8B5E] text-[#3C8B5E] px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-emerald-50 transition flex items-center justify-center gap-2">
+        <button @click="showExportModal = true"
+            class="bg-white border-2 border-[#3C8B5E] text-[#3C8B5E] px-4 py-2 rounded-lg font-medium shadow-sm hover:bg-emerald-50 transition flex items-center justify-center gap-2 cursor-pointer">
             <i class="fa-solid fa-download"></i> <span>Download PDF</span>
-        </a>
+        </button>
     </div>
 
     <div class="bg-white rounded-xl shadow p-4 md:p-6 overflow-hidden border-t-4 border-[#3C8B5E]">
 
-        <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <div class="flex items-center gap-2 md:gap-4">
-                <button wire:click="previousMonth" class="p-1 md:p-2 border rounded-lg hover:bg-gray-100 transition"><i
-                        class="fa-solid fa-chevron-left text-gray-600"></i></button>
-                <h2 class="text-lg md:text-xl font-bold text-gray-800 w-40 md:w-56 text-center">{{ $monthName }}</h2>
-                <button wire:click="nextMonth" class="p-1 md:p-2 border rounded-lg hover:bg-gray-100 transition"><i
-                        class="fa-solid fa-chevron-right text-gray-600"></i></button>
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 border-b pb-4">
+            <div class="flex items-center gap-2 flex-wrap">
+                <div class="flex items-center gap-1.5 border border-slate-200 rounded-lg p-1 bg-slate-50">
+                    <button wire:click="previousMonth" x-on:click="$dispatch('show-loading', { message: 'Memuat data...' })"
+                        class="p-1.5 bg-white border border-slate-200 rounded-md hover:bg-slate-50 text-slate-700 shadow-xs transition cursor-pointer">
+                        <i class="fa-solid fa-chevron-left text-xs"></i>
+                    </button>
+                    <span class="text-sm font-semibold text-slate-800 px-3 min-w-32 md:min-w-40 text-center">{{ $monthName }}</span>
+                    <button wire:click="nextMonth" x-on:click="$dispatch('show-loading', { message: 'Memuat data...' })"
+                        class="p-1.5 bg-white border border-slate-200 rounded-md hover:bg-slate-50 text-slate-700 shadow-xs transition cursor-pointer">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </button>
+                </div>
+
+                {{-- Direct Month Picker --}}
+                <div class="flex items-center gap-1">
+                    <input type="month" wire:model.live="filterBulan" x-on:change="$dispatch('show-loading', { message: 'Memuat data...' })"
+                        class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 outline-none bg-white shadow-xs cursor-pointer focus:ring-2 focus:ring-emerald-500">
+                </div>
             </div>
 
-            <button wire:click="goToToday" class="text-sm font-medium text-emerald-600 hover:underline">Ke Hari Ini</button>
+            <button wire:click="goToToday" x-on:click="$dispatch('show-loading', { message: 'Memuat data...' })"
+                class="text-xs font-semibold bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 px-3.5 py-2 rounded-lg transition shadow-xs cursor-pointer">
+                <i class="fa-solid fa-calendar-day mr-1"></i> Ke Hari Ini
+            </button>
         </div>
 
         <div class="overflow-x-auto">
@@ -65,12 +80,12 @@
                                     $shiftClass = 'border-emerald-400 bg-emerald-50 hover:border-emerald-500';
                                     $shiftBg = 'bg-emerald-200';
                                     $shiftText = 'text-emerald-800';
-                                    $shiftLabel = '<i class="fa-solid fa-sun mr-1"></i> ' . $shift->tipe_shift . ' (' . substr($shift->jam_masuk,0,5) . ' - ' . substr($shift->jam_keluar,0,5) . ')';
+                                    $shiftLabel = '<i class="fa-solid fa-sun mr-1"></i> ' . $shift->nama_shift . ' (' . substr($shift->jam_masuk,0,5) . ' - ' . substr($shift->jam_keluar,0,5) . ')';
                                 } elseif (str_contains($tipe, 'malam')) {
                                     $shiftClass = 'border-blue-400 bg-blue-50 hover:border-blue-500';
                                     $shiftBg = 'bg-blue-200';
                                     $shiftText = 'text-blue-800';
-                                    $shiftLabel = '<i class="fa-solid fa-moon mr-1"></i> ' . $shift->tipe_shift . ' (' . substr($shift->jam_masuk,0,5) . ' - ' . substr($shift->jam_keluar,0,5) . ')';
+                                    $shiftLabel = '<i class="fa-solid fa-moon mr-1"></i> ' . $shift->nama_shift . ' (' . substr($shift->jam_masuk,0,5) . ' - ' . substr($shift->jam_keluar,0,5) . ')';
                                 } else {
                                     $shiftClass = 'border-orange-400 bg-orange-50 hover:border-orange-500';
                                     $shiftBg = 'bg-orange-200';
@@ -121,5 +136,73 @@
             </div>
         </div>
 
+    </div>
+
+    {{-- Modal Download PDF --}}
+    <div x-show="showExportModal" 
+        class="fixed inset-0 z-50 flex items-center justify-center overflow-x-hidden overflow-y-auto outline-none"
+        x-cloak>
+        
+        {{-- Backdrop --}}
+        <div x-show="showExportModal"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0"
+            @click="showExportModal = false"
+            class="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"></div>
+
+        {{-- Modal Content Card --}}
+        <div x-show="showExportModal"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+            x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            class="relative w-full max-w-md mx-4 bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden transform transition-all z-10 p-6">
+            
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-red-500 text-lg"></i>
+                    Unduh Jadwal Kerja (PDF)
+                </h3>
+                <button @click="showExportModal = false" class="text-slate-400 hover:text-slate-600 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-4">
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Silakan pilih bulan dan tahun jadwal kerja yang ingin Anda unduh dalam format dokumen PDF.
+                </p>
+
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Pilih Bulan & Tahun</label>
+                    <input type="month" x-model="exportMonth"
+                        class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm text-slate-700 outline-none bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all cursor-pointer">
+                </div>
+            </div>
+
+            <div class="mt-6 flex items-center justify-end gap-3 border-t border-slate-100 pt-4">
+                <button @click="showExportModal = false"
+                    class="px-4 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer">
+                    Batal
+                </button>
+                <button @click="
+                        if (exportMonth) {
+                            const [year, month] = exportMonth.split('-');
+                            window.open('/karyawan-outsourcing/jadwal-karyawan/pdf/' + year + '/' + parseInt(month), '_blank');
+                            showExportModal = false;
+                        }
+                    "
+                    class="inline-flex items-center gap-2 bg-[#3C8B5E] hover:bg-[#2D6A47] text-white text-xs font-semibold px-5 py-2.5 rounded-xl shadow-md transition-all cursor-pointer">
+                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                    Unduh PDF
+                </button>
+            </div>
+        </div>
     </div>
 </div>

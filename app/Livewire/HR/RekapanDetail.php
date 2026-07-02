@@ -5,6 +5,7 @@ namespace App\Livewire\HR;
 use Livewire\Component;
 use App\Models\User;
 use App\Models\Outsourcing;
+use App\Services\OutsourcingService;
 use App\Enums\UserRole;
 use App\Enums\Status;
 use Carbon\Carbon;
@@ -48,7 +49,7 @@ class RekapanDetail extends Component
     public function mount(): void
     {
         $this->bulan   = now()->format('Y-m');
-        $this->vendors = Outsourcing::all();
+        $this->vendors = (new OutsourcingService)->ambilSemuaOutsourcing();
         $this->tampilkanRekap();
     }
 
@@ -66,8 +67,8 @@ class RekapanDetail extends Component
         $this->halamanAktif      = 1;
         $this->bulanAngka        = $carbonBulan->month;
 
-        $awal                    = $carbonBulan->copy()->subMonth()->setDay(25);
-        $akhir                   = $carbonBulan->copy()->setDay(24);
+        $awal                    = $carbonBulan->copy()->subMonth()->setDay(26);
+        $akhir                   = $carbonBulan->copy()->setDay(25);
         $this->periodeAwal       = $awal->format('Y-m-d');
         $this->periodeAkhir      = $akhir->format('Y-m-d');
         $this->labelPeriode      = $awal->translatedFormat('d M Y') . ' – ' . $akhir->translatedFormat('d M Y');
@@ -79,13 +80,25 @@ class RekapanDetail extends Component
 
     public function loadData(): void
     {
+        $this->users = [];
+        $this->totalKaryawan = 0;
+        $this->totalH = 0;
+        $this->totalA = 0;
+        $this->totalSI = 0;
+        $this->totalL = 0;
+
+        $this->loadRekapRecord();
+
+        if (!$this->vendorId || !$this->rekapRecord || !$this->rekapRecord->tanggal_rekap) {
+            $this->sudahFilter = true;
+            return;
+        }
+
         $query = User::with(['outsourcing', 'departemen'])
             ->where('role', UserRole::Karyawan->value)
             ->where('status', Status::Active->value);
 
-        if ($this->vendorId) {
-            $query->where('outsourcing_id', $this->vendorId);
-        }
+        $query->where('outsourcing_id', $this->vendorId);
 
         $this->totalKaryawan = $query->count();
 
@@ -95,11 +108,6 @@ class RekapanDetail extends Component
             ->get();
 
         $formatted      = [];
-        $this->totalH   = 0;
-        $this->totalA   = 0;
-        $this->totalSI  = 0;
-        $this->totalL   = 0;
-
         $awalCarbon = Carbon::parse($this->periodeAwal);
 
         foreach ($rawUsers as $user) {
@@ -108,7 +116,6 @@ class RekapanDetail extends Component
 
         $this->users       = $formatted;
         $this->sudahFilter = true;
-        $this->loadRekapRecord();
     }
 
     /**
@@ -199,29 +206,26 @@ class RekapanDetail extends Component
             return;
         }
 
-        $karyawanIds = User::where('outsourcing_id', $this->vendorId)
-            ->where('role', UserRole::Karyawan->value)
-            ->pluck('id_user')
-            ->toArray();
-
-        $firstKehadiranWithRekapan = \App\Models\Kehadiran::whereIn('karyawan_id', $karyawanIds)
-            ->whereBetween('tanggal', [$this->periodeAwal, $this->periodeAkhir])
-            ->whereNotNull('rekapan_kehadiran_id')
+        // Cari rekap yang diajukan oleh Admin Outsourcing dari vendorId ini
+        // dan memiliki tanggal_rekap yang valid, serta terhubung dengan kehadiran pada periode rekap
+        $this->rekapRecord = \App\Models\RekapKehadiran::whereHas('pengajuUser', function ($q) {
+                $q->where('outsourcing_id', $this->vendorId);
+            })
+            ->whereNotNull('tanggal_rekap')
+            ->where('tanggal_rekap', '>=', $this->periodeAwal)
+            ->whereHas('kehadiran', function ($q) {
+                $q->whereBetween('tanggal', [$this->periodeAwal, $this->periodeAkhir]);
+            })
             ->first();
 
-        if ($firstKehadiranWithRekapan) {
-            $this->rekapRecord = \App\Models\RekapKehadiran::find($firstKehadiranWithRekapan->rekapan_kehadiran_id);
-            if ($this->rekapRecord) {
-                $statusVal = $this->rekapRecord->status_validasi;
-                if ($statusVal === \App\Enums\Validasi::Valid->value) {
-                    $this->statusRekap = 'Disetujui';
-                } elseif ($statusVal === \App\Enums\Validasi::Invalid->value) {
-                    $this->statusRekap = 'Ditolak';
-                } else {
-                    $this->statusRekap = 'Menunggu Persetujuan';
-                }
+        if ($this->rekapRecord) {
+            $statusVal = $this->rekapRecord->status_validasi;
+            if ($statusVal === \App\Enums\Validasi::Valid->value) {
+                $this->statusRekap = 'Disetujui';
+            } elseif ($statusVal === \App\Enums\Validasi::Invalid->value) {
+                $this->statusRekap = 'Ditolak';
             } else {
-                $this->statusRekap = 'Belum Diajukan';
+                $this->statusRekap = 'Menunggu Persetujuan';
             }
         } else {
             $this->rekapRecord = null;

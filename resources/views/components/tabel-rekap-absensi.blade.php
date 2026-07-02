@@ -40,7 +40,7 @@
             <tr>
                 <th class="px-4 py-3 border-b border-gray-200">#</th>
                 <th
-                    class="px-4 py-3 border-b border-gray-200 sticky left-0 z-20 bg-gray-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                    class="px-4 py-3 border-b border-gray-200 md:sticky md:left-0 md:z-20 bg-gray-50 md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                     NAMA KARYAWAN</th>
                 <th class="px-4 py-3 border-b border-gray-200">POSISI</th>
                 @foreach ($koloms as $kolom)
@@ -56,11 +56,14 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
             @foreach ($datas as $data)
-                <tr class="group hover:bg-gray-100 bg-white transition-colors cursor-pointer"
+                @php
+                    $rowBg = $loop->even ? 'bg-emerald-50' : 'bg-white';
+                @endphp
+                <tr class="animate-bitem group hover:bg-emerald-100 {{ $rowBg }} transition-colors cursor-pointer"
                     onclick="openModal('{{ $data['nama'] }}')">
                     <td class="px-4 py-3 text-gray-500">{{ $data['no'] }}</td>
                     <td
-                        class="px-4 py-3 sticky left-0 z-10 bg-white group-hover:bg-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors">
+                        class="px-4 py-3 md:sticky md:left-0 md:z-10 {{ $rowBg }} group-hover:bg-emerald-100 md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors">
                         <div class="flex items-center gap-2">
                             <div
                                 class="w-8 h-8 rounded-full text-white flex items-center justify-center font-bold {{ $data['warna'] }} shrink-0">
@@ -129,7 +132,7 @@
             <tr>
                 <td class="px-4 py-3 text-gray-700"></td>
                 <td
-                    class="px-4 py-3 text-gray-800 text-right sticky left-0 z-10 bg-gray-100 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                    class="px-4 py-3 text-gray-800 text-right md:sticky md:left-0 md:z-10 bg-gray-100 md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                     TOTAL REKAP</td>
                 <td class="px-4 py-3 text-gray-700"></td>
                 <td colspan="31"></td>

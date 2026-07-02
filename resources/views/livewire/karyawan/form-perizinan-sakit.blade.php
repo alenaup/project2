@@ -39,7 +39,7 @@
                         <label class="text-sm font-semibold text-gray-700 block mb-2">
                             Tanggal Selesai <span class="text-red-500">*</span>
                         </label>
-                        <input type="date" wire:model.live="tanggal_selesai"
+                        <input type="date" wire:model.live="tanggal_selesai" min="{{ $tanggal_mulai }}"
                             class="w-full border @error('tanggal_selesai') border-red-500 @else border-gray-200 @enderror rounded-lg p-3">
                         @error('tanggal_selesai') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                     </div>

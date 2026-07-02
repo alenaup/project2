@@ -32,27 +32,14 @@ class TabelPengajuanLembur extends Component
         $this->resetPage();
     }
 
-    public function editLembur($id): void
+    public function saveLemburEdit($id, $tanggal, $mulai, $selesai, $keterangan): void
     {
-        $lembur = Lembur::findOrFail($id);
-        
-        // Hanya yang status pending yang bisa diubah
-        if ($lembur->status_validasi !== 'pending') {
-            session()->flash('error', 'Hanya pengajuan dengan status Menunggu yang dapat diubah.');
-            return;
-        }
+        $this->edit_id = $id;
+        $this->edit_tanggal = $tanggal;
+        $this->edit_mulai = $mulai;
+        $this->edit_selesai = $selesai;
+        $this->edit_keterangan = $keterangan;
 
-        $this->edit_id = $lembur->id_lembur;
-        $this->edit_tanggal = \Carbon\Carbon::parse($lembur->mulai_lembur)->format('Y-m-d');
-        $this->edit_mulai = \Carbon\Carbon::parse($lembur->mulai_lembur)->format('H:i');
-        $this->edit_selesai = \Carbon\Carbon::parse($lembur->selesai_lembur)->format('H:i');
-        $this->edit_keterangan = $lembur->keterangan;
-
-        $this->dispatch('open-modal-edit');
-    }
-
-    public function updateLembur(): void
-    {
         $this->validate([
             'edit_tanggal'    => 'required|date',
             'edit_mulai'      => 'required',
@@ -66,7 +53,7 @@ class TabelPengajuanLembur extends Component
             'edit_keterangan.required' => 'Keterangan wajib diisi.',
         ]);
 
-        $lembur = Lembur::findOrFail($this->edit_id);
+        $lembur = Lembur::findOrFail($id);
         
         if ($lembur->status_validasi !== 'pending') {
             session()->flash('error', 'Hanya pengajuan dengan status Menunggu yang dapat diubah.');
@@ -74,9 +61,9 @@ class TabelPengajuanLembur extends Component
         }
 
         $lembur->update([
-            'mulai_lembur'   => $this->edit_tanggal . ' ' . $this->edit_mulai . ':00',
-            'selesai_lembur' => $this->edit_tanggal . ' ' . $this->edit_selesai . ':00',
-            'keterangan'     => $this->edit_keterangan,
+            'mulai_lembur'   => $tanggal . ' ' . $mulai . ':00',
+            'selesai_lembur' => $tanggal . ' ' . $selesai . ':00',
+            'keterangan'     => $keterangan,
         ]);
 
         $this->dispatch('close-modal-edit');

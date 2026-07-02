@@ -27,6 +27,7 @@ return new class extends Migration
 
             $table->integer('total_jam_kerja')->default(0);
             $table->date('tanggal_validasi')->nullable();
+            $table->date('tanggal_rekap')->nullable();
             $table->enum('status_validasi', [Validasi::Valid->value, Validasi::Invalid->value, Validasi::Pending->value])->nullable();
             $table->enum('status', [Status::Active->value, Status::Inactive->value])->default(Status::Active->value);
 

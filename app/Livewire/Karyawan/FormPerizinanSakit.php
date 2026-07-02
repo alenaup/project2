@@ -32,7 +32,6 @@ class FormPerizinanSakit extends Component
                 'required',
                 'date',
                 'after_or_equal:tanggal_mulai',
-                'before_or_equal:'.now()->format('Y-m-d'),
             ],
 
             'keterangan' => [

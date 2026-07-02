@@ -76,7 +76,7 @@
                         @if($hasJadwal)
                             @php
                                 $shift = $calendarData[$dateStr];
-                                $tipe = strtolower($shift->tipe_shift);
+                                $tipe = strtolower($shift->nama_shift);
                                 $class = '';
                                 if (str_contains($tipe, 'malam')) {
                                     $class = 'malam';
@@ -85,7 +85,7 @@
                                 }
                             @endphp
                             <div class="shift-label {{ $class }}">
-                                {{ $shift->tipe_shift }}<br>
+                                {{ $shift->nama_shift }}<br>
                                 {{ substr($shift->jam_masuk,0,5) }} - {{ substr($shift->jam_keluar,0,5) }}
                             </div>
                         @else

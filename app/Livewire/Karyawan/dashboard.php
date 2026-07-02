@@ -3,9 +3,7 @@
 namespace App\Livewire\Karyawan;
 
 use Livewire\Component;
-use App\Models\Jadwal;
 use App\Services\JadwalService;
-use Illuminate\Support\Facades\Auth;
 use App\Services\KehadiranService;
 
 class Dashboard extends Component

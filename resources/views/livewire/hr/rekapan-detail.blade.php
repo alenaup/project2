@@ -134,12 +134,18 @@
                 </span>
             </div>
 
-            {{-- Export Excel (opsional: bisa tambah logika export nanti) --}}
-            <button class="bg-green-600 shadow-lg text-white hover:text-green-700 px-4 py-2 rounded-lg
-                           text-sm flex items-center gap-2 cursor-pointer transition-colors duration-200
-                           hover:bg-white border-transparent border hover:border-green-600">
-                <i class="fas fa-file-excel"></i> Export Excel
-            </button>
+            @if ($vendorId && $rekapRecord && $rekapRecord->tanggal_rekap)
+                <a href="{{ route('hr.export_absensi', ['vendor_id' => $vendorId, 'bulan' => $bulan]) }}"
+                   class="bg-green-600 shadow-lg text-white hover:text-white hover:bg-green-700 px-4 py-2 rounded-lg
+                          text-sm flex items-center gap-2 cursor-pointer transition-colors duration-200 border-transparent border">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </a>
+            @else
+                <button disabled
+                        class="bg-gray-200 text-gray-400 px-4 py-2 rounded-lg text-sm flex items-center gap-2 cursor-not-allowed opacity-60">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+            @endif
         </div>
 
         {{-- Tabel Absensi --}}
@@ -148,7 +154,7 @@
                 <thead class="bg-gray-50 text-gray-500 font-semibold uppercase">
                     <tr>
                         <th class="px-4 py-3 border-b border-gray-200">#</th>
-                        <th class="px-4 py-3 border-b border-gray-200 sticky left-0 z-20 bg-gray-50 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                        <th class="px-4 py-3 border-b border-gray-200 md:sticky md:left-0 md:z-20 bg-gray-50 md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                             NAMA KARYAWAN
                         </th>
                         <th class="px-4 py-3 border-b border-gray-200">POSISI</th>
@@ -186,13 +192,14 @@
                                             ->take(2)->map(fn($w) => strtoupper($w[0]))->join('');
                             $colors = ['bg-green-600','bg-emerald-600','bg-blue-500','bg-purple-600','bg-orange-500'];
                             $bg = $colors[$index % count($colors)];
+                            $rowBg = $loop->even ? 'bg-emerald-50' : 'bg-white';
                         @endphp
-                        <tr class="group hover:bg-gray-50 bg-white transition-colors cursor-pointer">
+                        <tr class="group hover:bg-emerald-100 {{ $rowBg }} transition-colors cursor-pointer">
                             <td class="px-4 py-3 text-gray-500">{{ (($halamanAktif - 1) * $perPage) + ($index + 1) }}</td>
 
                             {{-- Nama sticky --}}
-                            <td class="px-4 py-3 sticky left-0 z-10 bg-white group-hover:bg-gray-50
-                                       shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors">
+                            <td class="px-4 py-3 md:sticky md:left-0 md:z-10 {{ $rowBg }} group-hover:bg-emerald-100
+                                       md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)] transition-colors">
                                 <div class="flex items-center gap-2">
                                     <div class="w-8 h-8 rounded-full text-white flex items-center justify-center
                                                 font-bold {{ $bg }} shrink-0">
@@ -247,8 +254,14 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="{{ $jumlahHariDalamBulan + 7 }}" class="px-4 py-8 text-center text-gray-400">
-                                Tidak ada data karyawan ditemukan.
+                            <td colspan="{{ $jumlahHariDalamBulan + 7 }}" class="px-4 py-8 text-center text-gray-450 text-gray-400">
+                                @if (!$vendorId)
+                                    Silakan pilih vendor/admin outsourcing terlebih dahulu untuk melihat rekapan absensi.
+                                @elseif (!$rekapRecord || !$rekapRecord->tanggal_rekap)
+                                    Tidak ada pengajuan rekap absensi dari vendor untuk periode ini.
+                                @else
+                                    Tidak ada data karyawan ditemukan.
+                                @endif
                             </td>
                         </tr>
                     @endforelse
@@ -258,8 +271,8 @@
                 <tfoot class="bg-gray-100 border-t-2 border-gray-200 font-bold text-sm">
                     <tr>
                         <td class="px-4 py-3 text-gray-700"></td>
-                        <td class="px-4 py-3 text-gray-800 text-right sticky left-0 z-10 bg-gray-100
-                                   shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                        <td class="px-4 py-3 text-gray-800 text-right md:sticky md:left-0 md:z-10 bg-gray-100
+                                   md:shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                             TOTAL REKAP
                         </td>
                         <td class="px-4 py-3 text-gray-700"></td>

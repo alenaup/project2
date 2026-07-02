@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Karyawan;
 
-use App\Models\Kehadiran;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Services\KehadiranService;
