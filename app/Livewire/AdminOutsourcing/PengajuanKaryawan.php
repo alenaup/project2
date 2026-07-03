@@ -2,11 +2,8 @@
 
 namespace App\Livewire\AdminOutsourcing;
 
-use App\Enums\UserRole;
-use App\Models\PerizinanSakit;
-use App\Models\User;
+use App\Services\PerizinanSakitService;
 use Livewire\Component;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Class PengajuanKaryawan
@@ -67,9 +64,9 @@ class PengajuanKaryawan extends Component
     /**
      * Buka modal detail pengajuan.
      */
-    public function openDetail(int $id): void
+    public function openDetail(int $id, PerizinanSakitService $perizinanSakitService): void
     {
-        $perizinan = PerizinanSakit::with('karyawan.departemen', 'karyawan.outsourcing')->find($id);
+        $perizinan = $perizinanSakitService->getPerizinanById($id);
 
         if (!$perizinan) return;
 
@@ -127,17 +124,15 @@ class PengajuanKaryawan extends Component
     /**
      * Terima pengajuan perizinan.
      */
-    public function approve(): void
+    public function approve(PerizinanSakitService $perizinanSakitService): void
     {
-        $perizinan = PerizinanSakit::find($this->selectedId);
+        $perizinan = $perizinanSakitService->updateStatus($this->selectedId, 'disetujui');
 
         if (!$perizinan) {
             session()->flash('error', 'Data pengajuan tidak ditemukan.');
             $this->closeApprove();
             return;
         }
-
-        $perizinan->update(['status' => 'disetujui']);
 
         session()->flash('success', "✅ Pengajuan dari {$perizinan->karyawan->nama_lengkap} telah diterima.");
 
@@ -195,17 +190,15 @@ class PengajuanKaryawan extends Component
     /**
      * Tolak pengajuan perizinan.
      */
-    public function reject(): void
+    public function reject(PerizinanSakitService $perizinanSakitService): void
     {
-        $perizinan = PerizinanSakit::find($this->selectedId);
+        $perizinan = $perizinanSakitService->updateStatus($this->selectedId, 'ditolak');
 
         if (!$perizinan) {
             session()->flash('error', 'Data pengajuan tidak ditemukan.');
             $this->closeReject();
             return;
         }
-
-        $perizinan->update(['status' => 'ditolak']);
 
         session()->flash('success', "❌ Pengajuan dari {$perizinan->karyawan->nama_lengkap} telah ditolak.");
 
@@ -214,50 +207,13 @@ class PengajuanKaryawan extends Component
         $this->detailPengajuan = [];
     }
 
-    /* ──────────────────────────────────────────────────────────────
-     |  Query
-     * ──────────────────────────────────────────────────────────── */
-
-    /**
-     * Ambil data pengajuan yang menunggu validasi.
-     */
-    private function getPengajuanMenunggu()
+    public function render(PerizinanSakitService $perizinanSakitService)
     {
-        return PerizinanSakit::with('karyawan.departemen', 'karyawan.outsourcing')
-            ->where('status', 'menunggu')
-            ->whereHas('karyawan', function ($q) {
-                if ($this->search) {
-                    $keyword = '%' . $this->search . '%';
-                    $q->where('nama_lengkap', 'like', $keyword);
-                }
-                $q->where('role', UserRole::Karyawan->value);
-            })
-            ->orderBy('tanggal_pengajuan', 'desc')
-            ->get();
-    }
-
-    /**
-     * Ambil riwayat validasi (disetujui / ditolak) hari ini.
-     */
-    private function getRiwayatValidasi()
-    {
-        return PerizinanSakit::with('karyawan.departemen')
-            ->whereIn('status', ['disetujui', 'ditolak'])
-            ->whereDate('updated_at', today())
-            ->orderBy('updated_at', 'desc')
-            ->get();
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-     |  Render
-     * ──────────────────────────────────────────────────────────── */
-
-    public function render()
-    {
+        $pendingList = $perizinanSakitService->getPengajuanMenunggu($this->search);
         return view('livewire.admin-outsourcing.pengajuan-karyawan', [
-            'pengajuanList' => $this->getPengajuanMenunggu(),
-            'riwayatList'   => $this->getRiwayatValidasi(),
-            'pendingCount'  => $this->getPengajuanMenunggu()->count(),
+            'pengajuanList' => $pendingList,
+            'riwayatList'   => $perizinanSakitService->getRiwayatValidasiHariIni(),
+            'pendingCount'  => $pendingList->count(),
         ]);
     }
 }

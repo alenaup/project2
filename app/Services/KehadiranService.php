@@ -7,6 +7,7 @@ use App\Models\Kehadiran;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class KehadiranService
 {
@@ -88,12 +89,44 @@ class KehadiranService
         // menggunakan service UserService untuk mempermudah dalam mendapatkan data user
         $user = Auth::user()->id_user;
         // mengambil tanggal hari ini
-        $tanggal = now()->toDateString();
+        $hariIni = now()->toDateString();
+        $kemarin = now()->subDay()->toDateString();
 
-        // melakukan query ke database berdasarkan karyawan_id dan tanggal
-        $query = Kehadiran::select('id_kehadiran', 'tipe_kehadiran_id', 'waktu_masuk', 'waktu_keluar')
-            ->where('karyawan_id', $user)->where('tanggal', $tanggal)->first();
-        return $query;
+        // 1. Cek apakah sudah ada absensi masuk untuk HARI INI
+        $kehadiranHariIni = Kehadiran::select('id_kehadiran', 'tipe_kehadiran_id', 'waktu_masuk', 'waktu_keluar', 'jadwal_id')
+            ->where('karyawan_id', $user)
+            ->where('tanggal', $hariIni)
+            ->first();
+
+        // 2. Jika hari ini sudah ada record dengan waktu masuk, langsung gunakan hari ini
+        if ($kehadiranHariIni && $kehadiranHariIni->waktu_masuk) {
+            return $kehadiranHariIni;
+        }
+
+        // 3. Jika hari ini belum absen masuk, periksa data HARI KEMARIN
+        // Cari apakah kemarin ada absensi masuk yang waktu_keluarnya masih kosong (null)
+        $kehadiranKemarin = Kehadiran::select('id_kehadiran', 'tipe_kehadiran_id', 'waktu_masuk', 'waktu_keluar', 'jadwal_id')
+            ->where('karyawan_id', $user)
+            ->where('tanggal', $kemarin)
+            ->whereNotNull('waktu_masuk')
+            ->whereNull('waktu_keluar')
+            ->first();
+
+        if ($kehadiranKemarin) {
+            // Ambil jadwal kemarin untuk memastikan apakah itu shift malam
+            $jadwalKemarin = $kehadiranKemarin->jadwal;
+            if ($jadwalKemarin && $jadwalKemarin->shift) {
+                $shift = $jadwalKemarin->shift;
+                // Shift malam terdeteksi jika jam masuk lebih besar dari jam keluar (misal: 22:00:00 > 06:00:00)
+                $isShiftMalam = $shift->jam_masuk > $shift->jam_keluar;
+
+                if ($isShiftMalam) {
+                    return $kehadiranKemarin;
+                }
+            }
+        }
+
+        return $kehadiranHariIni;
     }
 
     // method untuk mengecek kehadiran banyak karyawan berdasarkan tipe kehadiran dan bulan dan tahun
@@ -318,5 +351,43 @@ class KehadiranService
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->count();
         return $query;
+    }
+
+    /**
+     * Mengambil detail status kehadiran untuk satu karyawan dalam range tanggal tertentu.
+     */
+    public function getKehadiranDetailByKaryawan(int $userId, string $startDate, string $endDate)
+    {
+        return DB::table('kehadiran')
+            ->join('jadwal', 'kehadiran.jadwal_id', '=', 'jadwal.id_jadwal')
+            ->join('karyawan_jadwal', 'jadwal.id_jadwal', '=', 'karyawan_jadwal.jadwal_id')
+            ->join('tipe_kehadiran', 'kehadiran.tipe_kehadiran_id', '=', 'tipe_kehadiran.id_tipe_kehadiran')
+            ->where('karyawan_jadwal.user_id', $userId)
+            ->whereBetween('kehadiran.tanggal', [$startDate, $endDate])
+            ->select('kehadiran.tanggal', 'tipe_kehadiran.status_kehadiran')
+            ->get();
+    }
+
+    /**
+     * Dapatkan daftar tahun unik yang memiliki catatan absensi dari daftar ID karyawan.
+     */
+    public function getYearsListByKaryawanIds(array $karyawanIds): array
+    {
+        return Kehadiran::whereIn('karyawan_id', $karyawanIds)
+            ->selectRaw('YEAR(tanggal) as tahun')
+            ->groupBy('tahun')
+            ->orderBy('tahun', 'desc')
+            ->pluck('tahun')
+            ->toArray();
+    }
+
+    /**
+     * Ambil data absensi berdasarkan daftar ID karyawan dan tahun tertentu.
+     */
+    public function getKehadiranByKaryawanIdsAndYear(array $karyawanIds, int $year)
+    {
+        return Kehadiran::whereIn('karyawan_id', $karyawanIds)
+            ->whereYear('tanggal', $year)
+            ->get();
     }
 }

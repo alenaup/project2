@@ -19,6 +19,8 @@ class Dashboard extends Component
     public $jadwal = null;
     public $absen = null;
 
+    protected $listeners = ['refresh-dashboard' => '$refresh'];
+
     public function mount() 
     {
         // mengambil tanggal pada hari ini dengan tipe data string
@@ -26,15 +28,14 @@ class Dashboard extends Component
         // inisiasi objek dari service jadwl dan melakukan fungsi kirim waktu jadwal
         // mengembalikan data berupa data user yang memiliki jadwal dalam rentang waktu hari ini, dan berstatus aktif
         $this->jadwal = (new JadwalService)->kirimWaktuJadwal();
-        // inisiasi objek dari service kehadiran dan melakukan fungsi validasi kehadiran
-        // mengembalikan data berupa status kehadiran dan waktu masuk dan keluar
-        $this->absen = (new KehadiranService)->validasiKehadiran();
-        // menyimpan data tipe kehadiran
-        $this->tipe_kehadiran = $this->absen['tipe_kehadiran'];
     }
     
     public function render() 
     {
+        // Refresh data kehadiran agar selalu sinkron & terupdate
+        $this->absen = (new KehadiranService)->validasiKehadiran();
+        $this->tipe_kehadiran = $this->absen['tipe_kehadiran'];
+
         // melakukan pengecekan apakah user memiliki jadwal 
         if ($this->jadwal) {
             $this->shift = $this->jadwal->shift;

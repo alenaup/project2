@@ -4,12 +4,13 @@ namespace App\Livewire\HR;
 
 use Livewire\Component;
 use App\Models\User;
-use App\Models\Outsourcing;
 use App\Services\OutsourcingService;
+use App\Services\UserService;
+use App\Services\KehadiranService;
+use App\Services\RekapService;
 use App\Enums\UserRole;
 use App\Enums\Status;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class RekapanDetail extends Component
 {
@@ -46,14 +47,14 @@ class RekapanDetail extends Component
         'terlambat' => 'H',
     ];
 
-    public function mount(): void
+    public function mount(OutsourcingService $outsourcingService, UserService $userService, RekapService $rekapService): void
     {
         $this->bulan   = now()->format('Y-m');
-        $this->vendors = (new OutsourcingService)->ambilSemuaOutsourcing();
-        $this->tampilkanRekap();
+        $this->vendors = $outsourcingService->ambilSemuaOutsourcing();
+        $this->tampilkanRekap($userService, $rekapService, app(KehadiranService::class));
     }
 
-    public function tampilkanRekap(): void
+    public function tampilkanRekap(UserService $userService, RekapService $rekapService, KehadiranService $kehadiranService): void
     {
         $this->validate(
             ['bulan' => 'required'],
@@ -75,10 +76,10 @@ class RekapanDetail extends Component
         $this->jumlahHariDalamBulan = (int) $awal->diffInDays($akhir) + 1;
 
         $this->halamanAktif = 1;
-        $this->loadData();
+        $this->loadData($userService, $rekapService, $kehadiranService);
     }
 
-    public function loadData(): void
+    public function loadData(UserService $userService, RekapService $rekapService, KehadiranService $kehadiranService): void
     {
         $this->users = [];
         $this->totalKaryawan = 0;
@@ -87,31 +88,26 @@ class RekapanDetail extends Component
         $this->totalSI = 0;
         $this->totalL = 0;
 
-        $this->loadRekapRecord();
+        $this->loadRekapRecord($rekapService);
 
         if (!$this->vendorId || !$this->rekapRecord || !$this->rekapRecord->tanggal_rekap) {
             $this->sudahFilter = true;
             return;
         }
 
-        $query = User::with(['outsourcing', 'departemen'])
-            ->where('role', UserRole::Karyawan->value)
-            ->where('status', Status::Active->value);
+        $this->totalKaryawan = $userService->getKaryawanByVendorCount($this->vendorId);
 
-        $query->where('outsourcing_id', $this->vendorId);
-
-        $this->totalKaryawan = $query->count();
-
-        $rawUsers = $query
-            ->skip(($this->halamanAktif - 1) * $this->perPage)
-            ->take($this->perPage)
-            ->get();
+        $rawUsers = $userService->getKaryawanByVendorPaginated(
+            $this->vendorId,
+            $this->halamanAktif,
+            $this->perPage
+        );
 
         $formatted      = [];
         $awalCarbon = Carbon::parse($this->periodeAwal);
 
         foreach ($rawUsers as $user) {
-            $formatted[] = $this->processKehadiranData($user, $awalCarbon);
+            $formatted[] = $this->processKehadiranData($user, $awalCarbon, $kehadiranService);
         }
 
         $this->users       = $formatted;
@@ -121,16 +117,9 @@ class RekapanDetail extends Component
     /**
      * Memproses data kehadiran untuk satu karyawan dan menghitung rekapannya.
      */
-    private function processKehadiranData(User $user, Carbon $awalCarbon): array
+    private function processKehadiranData(User $user, Carbon $awalCarbon, KehadiranService $kehadiranService): array
     {
-        $kehadiranData = DB::table('kehadiran')
-            ->join('jadwal', 'kehadiran.jadwal_id', '=', 'jadwal.id_jadwal')
-            ->join('karyawan_jadwal', 'jadwal.id_jadwal', '=', 'karyawan_jadwal.jadwal_id')
-            ->join('tipe_kehadiran', 'kehadiran.tipe_kehadiran_id', '=', 'tipe_kehadiran.id_tipe_kehadiran')
-            ->where('karyawan_jadwal.user_id', $user->id_user)
-            ->whereBetween('kehadiran.tanggal', [$this->periodeAwal, $this->periodeAkhir])
-            ->select('kehadiran.tanggal', 'tipe_kehadiran.status_kehadiran')
-            ->get();
+        $kehadiranData = $kehadiranService->getKehadiranDetailByKaryawan($user->id_user, $this->periodeAwal, $this->periodeAkhir);
 
         $kehadiranMap = [];
         foreach ($kehadiranData as $kehadiran) {
@@ -161,21 +150,21 @@ class RekapanDetail extends Component
         ];
     }
 
-    public function pilihVendor(?int $id): void
+    public function pilihVendor(?int $id, UserService $userService, RekapService $rekapService, KehadiranService $kehadiranService): void
     {
         $this->vendorId   = $id;
         $this->halamanAktif = 1;
 
         // Jika rekap sudah pernah ditampilkan, langsung reload dengan filter baru
         if ($this->sudahFilter) {
-            $this->loadData();
+            $this->loadData($userService, $rekapService, $kehadiranService);
         }
     }
 
-    public function gantiHalaman(int $halaman): void
+    public function gantiHalaman(int $halaman, UserService $userService, RekapService $rekapService, KehadiranService $kehadiranService): void
     {
         $this->halamanAktif = $halaman;
-        $this->loadData();
+        $this->loadData($userService, $rekapService, $kehadiranService);
     }
 
     public function resetFilter(): void
@@ -198,7 +187,7 @@ class RekapanDetail extends Component
 
     public ?\App\Models\RekapKehadiran $rekapRecord = null;
 
-    public function loadRekapRecord(): void
+    public function loadRekapRecord(RekapService $rekapService): void
     {
         if (!$this->vendorId || !$this->periodeAwal || !$this->periodeAkhir) {
             $this->rekapRecord = null;
@@ -206,17 +195,7 @@ class RekapanDetail extends Component
             return;
         }
 
-        // Cari rekap yang diajukan oleh Admin Outsourcing dari vendorId ini
-        // dan memiliki tanggal_rekap yang valid, serta terhubung dengan kehadiran pada periode rekap
-        $this->rekapRecord = \App\Models\RekapKehadiran::whereHas('pengajuUser', function ($q) {
-                $q->where('outsourcing_id', $this->vendorId);
-            })
-            ->whereNotNull('tanggal_rekap')
-            ->where('tanggal_rekap', '>=', $this->periodeAwal)
-            ->whereHas('kehadiran', function ($q) {
-                $q->whereBetween('tanggal', [$this->periodeAwal, $this->periodeAkhir]);
-            })
-            ->first();
+        $this->rekapRecord = $rekapService->getRekapRecord($this->vendorId, $this->periodeAwal, $this->periodeAkhir);
 
         if ($this->rekapRecord) {
             $statusVal = $this->rekapRecord->status_validasi;
@@ -233,15 +212,11 @@ class RekapanDetail extends Component
         }
     }
 
-    public function setujuiRekap(): void
+    public function setujuiRekap(RekapService $rekapService): void
     {
-        $this->loadRekapRecord();
+        $this->loadRekapRecord($rekapService);
         if ($this->rekapRecord) {
-            $this->rekapRecord->update([
-                'status_validasi' => \App\Enums\Validasi::Valid->value,
-                'pevalidasi' => auth()->id(),
-                'tanggal_validasi' => now(),
-            ]);
+            $rekapService->updateStatusValidasi($this->rekapRecord->id_rekapan, \App\Enums\Validasi::Valid->value, auth()->id());
             $this->statusRekap = 'Disetujui';
             session()->flash('success', 'Rekap berhasil disetujui.');
         } else {
@@ -249,15 +224,11 @@ class RekapanDetail extends Component
         }
     }
 
-    public function tolakRekap(): void
+    public function tolakRekap(RekapService $rekapService): void
     {
-        $this->loadRekapRecord();
+        $this->loadRekapRecord($rekapService);
         if ($this->rekapRecord) {
-            $this->rekapRecord->update([
-                'status_validasi' => \App\Enums\Validasi::Invalid->value,
-                'pevalidasi' => auth()->id(),
-                'tanggal_validasi' => now(),
-            ]);
+            $rekapService->updateStatusValidasi($this->rekapRecord->id_rekapan, \App\Enums\Validasi::Invalid->value, auth()->id());
             $this->statusRekap = 'Ditolak';
             session()->flash('success', 'Rekap telah ditolak.');
         } else {

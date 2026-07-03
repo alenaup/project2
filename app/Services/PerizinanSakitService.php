@@ -2,9 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\PerizinanSakit;
 use App\Enums\Status;
 use App\Enums\UserRole;
+use App\Models\PerizinanSakit;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -87,6 +88,11 @@ class PerizinanSakitService
         return $query;
     }
 
+    public function ambilPerizinanSakitUserLogin()
+    {
+        return PerizinanSakit::where('karyawan_id', Auth::id() ?? User::first()->id_user);
+    }
+
     public function ambilPerizinanSakitSemuaKaryawan($deptId)
     {
         return PerizinanSakit::query()
@@ -127,5 +133,55 @@ class PerizinanSakitService
         }
 
         return $query->orderBy('tanggal_pengajuan', 'desc')->get();
+    }
+
+    /**
+     * Dapatkan detail perizinan berdasarkan ID beserta relasi karyawan, departemen, dan outsourcing.
+     */
+    public function getPerizinanById(int $id): ?PerizinanSakit
+    {
+        return PerizinanSakit::with('karyawan.departemen', 'karyawan.outsourcing')->find($id);
+    }
+
+    /**
+     * Update status perizinan (disetujui / ditolak).
+     */
+    public function updateStatus(int $id, string $status): ?PerizinanSakit
+    {
+        $perizinan = PerizinanSakit::with('karyawan')->find($id);
+        if ($perizinan) {
+            $perizinan->update(['status' => $status]);
+        }
+        return $perizinan;
+    }
+
+    /**
+     * Ambil data perizinan yang menunggu validasi (menunggu).
+     */
+    public function getPengajuanMenunggu(string $search = '')
+    {
+        return PerizinanSakit::with('karyawan.departemen', 'karyawan.outsourcing')
+            ->where('status', 'menunggu')
+            ->whereHas('karyawan', function ($q) use ($search) {
+                if ($search) {
+                    $keyword = '%' . $search . '%';
+                    $q->where('nama_lengkap', 'like', $keyword);
+                }
+                $q->where('role', UserRole::Karyawan->value);
+            })
+            ->orderBy('tanggal_pengajuan', 'desc')
+            ->get();
+    }
+
+    /**
+     * Ambil riwayat perizinan yang sudah divalidasi hari ini.
+     */
+    public function getRiwayatValidasiHariIni()
+    {
+        return PerizinanSakit::with('karyawan.departemen')
+            ->whereIn('status', ['disetujui', 'ditolak'])
+            ->whereDate('updated_at', today())
+            ->orderBy('updated_at', 'desc')
+            ->get();
     }
 }

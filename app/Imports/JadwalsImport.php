@@ -101,6 +101,9 @@ class JadwalsImport implements ToCollection
                     $shift = Shift::where('nama_shift', 'like', "%{$namaShift}%")->first();
                     $shiftId = $shift ? $shift->id_shift : 1; // Default ke shift ke-1 jika gagal
 
+                    // Selesaikan jadwal yang tumpang tindih untuk tanggal tunggal ini sebelum mengimpor
+                    (new \App\Services\JadwalService)->resolveOverlappingJadwal($user->id_user, $tanggal, $tanggal);
+
                     // Cek apakah karyawan sudah memiliki jadwal pada tanggal ini
                     $existingJadwal = $user->jadwal()
                         ->whereDate('tanggal_mulai', $tanggal)

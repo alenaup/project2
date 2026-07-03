@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Karyawan;
 
-use App\Models\Lembur;
+use App\Services\LemburService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -54,15 +54,7 @@ class FormPengajuanLembur extends Component
 
         $this->validate();
 
-        Lembur::create([
-            'mulai_lembur'    => $this->tanggal_lembur . ' ' . $this->jam_mulai . ':00',
-            'selesai_lembur'  => $this->tanggal_lembur . ' ' . $this->jam_selesai . ':00',
-            'created_at'  => now(),
-            'status'          => 'active',
-            'status_validasi' => 'pending',
-            'keterangan'      => $this->keterangan,
-            'karyawan_id'     => Auth::id() ?? \App\Models\User::first()->id_user,
-        ]);
+        (new LemburService)->createLembur();
 
         $this->reset(['tanggal_lembur', 'jam_mulai', 'jam_selesai', 'keterangan']);
         $this->resetValidation();
@@ -74,10 +66,10 @@ class FormPengajuanLembur extends Component
     {
         $user = Auth::user();
         if (!$user) {
-            $user = \App\Models\User::first(); // Fallback for testing if session is missing
+            $user = \App\Models\User::first(); 
         }
-
-        return view('livewire.karyawan.form-pengajuan-lembur', [
+        
+        return view('livewire.Karyawan.form-pengajuan-lembur', [
             'user' => $user,
         ]);
     }

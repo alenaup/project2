@@ -2,10 +2,8 @@
 
 namespace App\Livewire\AdminOutsourcing;
 
-use App\Enums\Status;
-use App\Enums\UserRole;
-use App\Models\Departemen;
-use App\Models\User;
+use App\Services\UserService;
+use App\Services\DepartemenService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Livewire\WithFileUploads;
@@ -46,7 +44,7 @@ class PengajuanAkun extends Component
         $this->resetPage();
     }
 
-    public function submit(): void
+    public function submit(UserService $userService): void
     {
         $validated = $this->validate([
             'nip' => 'required|string|max:50',
@@ -67,21 +65,14 @@ class PengajuanAkun extends Component
             'departemen_id.required' => 'Departemen wajib dipilih.',
         ]);
 
-        User::create([
+        $userService->createKaryawanSubmission([
             'nama_lengkap' => $this->nama_lengkap,
             'email' => $this->email,
-            'password' => bcrypt('admin123'),
             'nomor_tlp' => $this->nomor_tlp,
             'alamat' => $this->alamat,
-            'nip' => 'NIP-' . ltrim(str_replace('NIP-', '', $this->nip)),
+            'nip' => $this->nip,
             'departemen_id' => $this->departemen_id,
-            'tanggal_keluar' => null,
-            'tanggal_masuk' => null,
-            'role' => UserRole::Karyawan->value,
-            'status' => Status::Pending->value,
-            'user_id' => auth()->id(),
-            'outsourcing_id' => auth()->user()->outsourcing_id,
-        ]);
+        ], auth()->id(), auth()->user()->outsourcing_id);
 
         session()->flash('success', '✅ Pengajuan data karyawan berhasil dikirim.');
 
@@ -104,15 +95,11 @@ class PengajuanAkun extends Component
         $this->selectedId = $userId;
     }
 
-    public function cancelSubmission(): void
+    public function cancelSubmission(UserService $userService): void
     {
-        $user = User::where('id_user', $this->selectedId)
-            ->where('role', UserRole::Karyawan->value)
-            ->where('status', Status::Pending->value)
-            ->first();
+        $success = $userService->cancelKaryawanSubmission($this->selectedId);
 
-        if ($user) {
-            $user->delete();
+        if ($success) {
             session()->flash('success', '🗑️ Pengajuan data karyawan berhasil dibatalkan.');
         } else {
             session()->flash('error', 'Gagal membatalkan pengajuan.');
@@ -122,13 +109,9 @@ class PengajuanAkun extends Component
         $this->dispatch('close-cancel-modal');
     }
 
-    public function openEdit(int $userId): void
+    public function openEdit(int $userId, UserService $userService): void
     {
-        $user = User::where('id_user', $userId)
-            ->where('role', UserRole::Karyawan->value)
-            ->where('status', Status::Inactive->value)
-            ->whereNull('tanggal_keluar')
-            ->first();
+        $user = $userService->getInactiveSubmission($userId);
 
         if ($user) {
             $this->selectedId = $userId;
@@ -152,7 +135,7 @@ class PengajuanAkun extends Component
         $this->editDepartemenId = null;
     }
 
-    public function resubmit(): void
+    public function resubmit(UserService $userService): void
     {
         $validated = $this->validate([
             'editNip' => 'required|string|max:50',
@@ -173,23 +156,16 @@ class PengajuanAkun extends Component
             'editDepartemenId.required' => 'Departemen wajib dipilih.',
         ]);
 
-        $user = User::where('id_user', $this->selectedId)
-            ->where('role', UserRole::Karyawan->value)
-            ->where('status', Status::Inactive->value)
-            ->whereNull('tanggal_keluar')
-            ->first();
+        $success = $userService->resubmitKaryawan($this->selectedId, [
+            'nip' => $this->editNip,
+            'nama_lengkap' => $this->editNama,
+            'email' => $this->editEmail,
+            'nomor_tlp' => $this->editTelepon,
+            'alamat' => $this->editAlamat,
+            'departemen_id' => $this->editDepartemenId,
+        ]);
 
-        if ($user) {
-            $user->update([
-                'nip' => 'NIP-' . ltrim(str_replace('NIP-', '', $this->editNip)),
-                'nama_lengkap' => $this->editNama,
-                'email' => $this->editEmail,
-                'nomor_tlp' => $this->editTelepon,
-                'alamat' => $this->editAlamat,
-                'departemen_id' => $this->editDepartemenId,
-                'status' => Status::Pending->value, // set back to pending
-            ]);
-
+        if ($success) {
             session()->flash('success', '✅ Pengajuan data karyawan berhasil diperbarui dan dikirim kembali.');
         } else {
             session()->flash('error', 'Gagal mengirim kembali pengajuan.');
@@ -199,23 +175,7 @@ class PengajuanAkun extends Component
         $this->dispatch('close-edit-modal');
     }
 
-    private function getSubmissions()
-    {
-        return User::with('departemen')
-            ->where('role', UserRole::Karyawan->value)
-            ->where('user_id', auth()->id())
-            ->where('outsourcing_id', auth()->user()->outsourcing_id)
-            ->when($this->search, function ($query) {
-                $keyword = '%' . $this->search . '%';
-                $query->where(function ($q) use ($keyword) {
-                    $q->where('nip', 'like', $keyword)
-                      ->orWhere('nama_lengkap', 'like', $keyword)
-                      ->orWhere('email', 'like', $keyword);
-                });
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate($this->perPage);
-    }
+
 
     public function downloadTemplate()
     {
@@ -264,7 +224,7 @@ class PengajuanAkun extends Component
         $sheetInstructions->setCellValue('B' . ($startRow + 1), 'Nama Departemen');
         $sheetInstructions->getStyle('A' . ($startRow + 1) . ':B' . ($startRow + 1))->getFont()->setBold(true);
         
-        $depts = Departemen::all();
+        $depts = app(DepartemenService::class)->getAllDepartemen();
         $currRow = $startRow + 2;
         foreach ($depts as $dept) {
             $sheetInstructions->setCellValue('A' . $currRow, $dept->id_departemen);
@@ -342,11 +302,11 @@ class PengajuanAkun extends Component
         }
     }
 
-    public function render()
+    public function render(UserService $userService, DepartemenService $departemenService)
     {
         return view('livewire.admin-outsourcing.pengajuan-akun', [
-            'submissions' => $this->getSubmissions(),
-            'departments' => Departemen::all(),
+            'submissions' => $userService->getSubmissionsPaginated(auth()->id(), auth()->user()->outsourcing_id, $this->search, $this->perPage),
+            'departments' => $departemenService->getAllDepartemen(),
         ]);
     }
 }

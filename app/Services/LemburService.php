@@ -2,11 +2,29 @@
 
 namespace App\Services;
 
-use App\Models\Lembur;
 use App\Enums\Validasi;
+use App\Models\Lembur;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use App\Enums\Status;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 
 class LemburService
 {
+    /**
+     * Mendapatkan data detail lembur berdasarkan ID.
+     */
+    public function getLemburById(int $id): ?Lembur
+    {
+        return Lembur::with('karyawan')->find($id);
+    }
+
+    public function getLemburOrFail(int $id): Lembur
+    {
+        return Lembur::findOrFail($id);
+    }
+
     /**
      * Mendapatkan daftar pengajuan lembur per departemen dengan paginasi.
      */
@@ -59,21 +77,13 @@ class LemburService
                 ->orderBy('created_at', 'asc')
                 ->get();
     }
-
-    /**
-     * Mendapatkan data detail lembur berdasarkan ID.
-     */
-    public function getLemburById(int $id): ?Lembur
-    {
-        return Lembur::with('karyawan')->find($id);
-    }
-
+    
     /**
      * Menyetujui pengajuan lembur.
      */
     public function approveLembur(int $id, int $validatorId, string $status_validasi): bool
     {
-        $lembur = Lembur::find($id);
+        $lembur = $this->getLemburOrFail($id);
         if ($lembur && $lembur->status_validasi === Validasi::Pending->value) {
             if ($status_validasi === 'valid') {
                 return $lembur->update([
@@ -129,5 +139,101 @@ class LemburService
         }
 
         return $count;
+    }
+
+    public function createLembur($tanggal_lembur, $jam_mulai, $jam_selesai, $keterangan)
+    {
+        return Lembur::create([
+            'mulai_lembur'    => $tanggal_lembur . ' ' . $jam_mulai . ':00',
+            'selesai_lembur'  => $tanggal_lembur . ' ' . $jam_selesai . ':00',
+            'created_at'  => now(),
+            'status'          => 'active',
+            'status_validasi' => 'pending',
+            'keterangan'      => $keterangan,
+            'karyawan_id'     => Auth::id() ?? User::first()->id_user,
+        ]);
+    }
+
+    public function getLemburByIdAuth(): ?Lembur
+    {
+        $id = Auth::id() ?? User::first()->id_user;
+        return Lembur::with('karyawan')->find($id);
+    }
+
+    /**
+     * Dapatkan query data lembur berdasarkan filter.
+     */
+    public function getLemburQuery(string $startDate = '', string $endDate = '', string $departemenId = ''): Builder
+    {
+        $query = Lembur::with(['karyawan.outsourcing', 'karyawan.departemen'])
+            ->where('status', Status::Active->value)
+            ->orderByDesc('mulai_lembur');
+
+        if ($startDate !== '') {
+            $query->whereDate('mulai_lembur', '>=', $startDate);
+        }
+
+        if ($endDate !== '') {
+            $query->whereDate('mulai_lembur', '<=', $endDate);
+        }
+
+        if ($departemenId !== '') {
+            $query->whereHas('karyawan', function ($q) use ($departemenId) {
+                $q->where('departemen_id', $departemenId);
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Hitung total lembur periode (26 bulan lalu s/d 25 bulan terpilih).
+     */
+    public function calculateTotalLembur(string $bulan, string $tahun, string $departemenId = ''): array
+    {
+        $month = (int) $bulan;
+        $year = (int) $tahun;
+
+        if ($month === 1) {
+            $bulanLalu = 12;
+            $tahunLalu = $year - 1;
+        } else {
+            $bulanLalu = $month - 1;
+            $tahunLalu = $year;
+        }
+
+        $startDate = sprintf('%04d-%02d-26', $tahunLalu, $bulanLalu);
+        $endDate = sprintf('%04d-%02d-25', $year, $month);
+
+        $query = Lembur::where('status', Status::Active->value)
+            ->where('status_validasi', Validasi::Valid->value)
+            ->whereDate('mulai_lembur', '>=', $startDate)
+            ->whereDate('selesai_lembur', '<=', $endDate);
+
+        if ($departemenId !== '') {
+            $query->whereHas('karyawan', function ($q) use ($departemenId) {
+                $q->where('departemen_id', $departemenId);
+            });
+        }
+
+        $lemburs = $query->get(['mulai_lembur', 'selesai_lembur']);
+
+        $totalMenit = 0;
+        foreach ($lemburs as $lembur) {
+            if ($lembur->mulai_lembur && $lembur->selesai_lembur) {
+                $totalMenit += (int) Carbon::parse($lembur->mulai_lembur)->diffInMinutes(Carbon::parse($lembur->selesai_lembur));
+            }
+        }
+
+        return [
+            'total_menit' => $totalMenit,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+        ];
+    }
+
+    public function getPendingCount(): int
+    {
+        return Lembur::where('status_validasi', Validasi::Pending->value)->count();
     }
 }

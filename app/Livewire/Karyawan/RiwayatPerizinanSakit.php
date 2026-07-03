@@ -88,7 +88,7 @@ class RiwayatPerizinanSakit extends Component
 
     public function render()
     {
-        $query = PerizinanSakit::where('karyawan_id', Auth::id() ?? User::first()->id_user);
+        $query = (new PerizinanSakitService)->ambilPerizinanSakitUserLogin();
 
         if ($this->filterStatus !== 'semua') {
             $query->where('status', $this->filterStatus);

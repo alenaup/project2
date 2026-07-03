@@ -4,12 +4,13 @@ namespace App\Livewire\SuperAdmin;
 
 use App\Enums\Status;
 use App\Enums\UserRole;
+use App\Services\DepartemenService;
+use App\Services\UserService;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
-use App\Services\UserService;
-use Livewire\Attributes\On;
 
 class UserManagement extends Component
 {
@@ -322,7 +323,7 @@ class UserManagement extends Component
             $this->filterStatus,
             10
         );
-        $departemens = $this->departemenService->getActiveDepartemens();
+        $departemens = (new DepartemenService)->getActiveDepartemen();
 
         return view('livewire.super-admin.user-management', [
             'users'       => $users,

@@ -4,7 +4,7 @@ namespace App\Livewire\HR;
 
 use App\Enums\Status;
 use App\Enums\UserRole;
-use App\Models\User;
+use App\Services\UserService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -82,9 +82,9 @@ class AjuanDataKaryawan extends Component
      *
      * @param int $userId
      */
-    public function openDetail(int $userId): void
+    public function openDetail(int $userId, UserService $userService): void
     {
-        $user = User::with('outsourcing')->find($userId);
+        $user = $userService->getUserWithOutsourcing($userId);
 
         if (!$user) {
             return;
@@ -228,18 +228,15 @@ class AjuanDataKaryawan extends Component
      *
      * @param int|null $userId
      */
-    public function approve(?int $userId = null): void
+    public function approve(?int $userId = null, UserService $userService): void
     {
         $id   = $userId ?? $this->selectedUserId;
-        $user = User::find($id);
-
+        $user = $userService->approveKaryawan($id);
 
         if (!$user) {
             session()->flash('error', 'Data karyawan tidak ditemukan.');
             return;
         }
-
-        $user->update(['status' => Status::Active->value]);
 
         session()->flash('success', "Karyawan {$user->nama_lengkap} berhasil disetujui.");
 
@@ -251,7 +248,7 @@ class AjuanDataKaryawan extends Component
      * Mengubah status user dari pending menjadi inactive.
      * tanggal_keluar tetap null.
      */
-    public function reject(): void
+    public function reject(UserService $userService): void
     {
         $this->validate([
             'alasanPenolakan' => 'required|string|min:5',
@@ -260,54 +257,16 @@ class AjuanDataKaryawan extends Component
             'alasanPenolakan.min'      => 'Alasan penolakan minimal 5 karakter.',
         ]);
 
-        $user = User::find($this->selectedUserId);
+        $user = $userService->rejectKaryawan($this->selectedUserId, $this->alasanPenolakan);
 
         if (!$user) {
             session()->flash('error', 'Data karyawan tidak ditemukan.');
             return;
         }
 
-        $namaKaryawan = $user->nama_lengkap;
-
-        // Ubah status menjadi inactive (ditolak), tanggal_keluar tetap null
-        $user->update([
-            'status'         => Status::Inactive->value,
-            'tanggal_keluar' => null,
-        ]);
-
-        session()->flash('success', "Karyawan {$namaKaryawan} ditolak dengan alasan: {$this->alasanPenolakan}");
+        session()->flash('success', "Karyawan {$user->nama_lengkap} ditolak dengan alasan: {$this->alasanPenolakan}");
 
         $this->closeReject();
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-     |  Query Builder
-     * ──────────────────────────────────────────────────────────── */
-
-    /**
-     * Mengambil data karyawan outsourcing yang berstatus pending (menunggu persetujuan).
-     * Mendukung pencarian berdasarkan NIP, nama, dan nama vendor.
-     *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
-     */
-    private function getKaryawanPending()
-    {
-        return User::with('outsourcing')
-            ->where('role', UserRole::Karyawan->value)
-            ->where('status', Status::Pending->value)
-            ->whereNull('tanggal_keluar')
-            ->when($this->search, function ($query) {
-                $keyword = '%' . $this->search . '%';
-                $query->where(function ($q) use ($keyword) {
-                    $q->where('nip', 'like', $keyword)
-                      ->orWhere('nama_lengkap', 'like', $keyword)
-                      ->orWhereHas('outsourcing', function ($sub) use ($keyword) {
-                          $sub->where('nama_outsourcing', 'like', $keyword);
-                      });
-                });
-            })
-            ->orderBy('created_at', 'desc')
-            ->paginate($this->perPage);
     }
 
     /* ──────────────────────────────────────────────────────────────
@@ -317,10 +276,10 @@ class AjuanDataKaryawan extends Component
     /**
      * Render component ke view livewire.hr.ajuan-data-karyawan.
      */
-    public function render()
+    public function render(UserService $userService)
     {
         return view('livewire.hr.ajuan-data-karyawan', [
-            'karyawanList' => $this->getKaryawanPending(),
+            'karyawanList' => $userService->getKaryawanPendingPaginated($this->search, $this->perPage),
         ]);
     }
 }

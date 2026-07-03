@@ -2,7 +2,6 @@
 
 namespace App\Livewire\AdminOutsourcing;
 
-use App\Models\Kehadiran;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Services\KehadiranService;
@@ -20,20 +19,15 @@ class Grafik extends Component
 
     // fungsi ini untuk mengambil data yang ada di database
     // dan akan di jalankan pertama kali saat komponen di load
-    public function mount()
+    public function mount(UserService $userService, KehadiranService $kehadiranService)
     {
         $this->tahun = date('Y');
         $this->bulan = date('m');
 
         // Mendapatkan daftar tahun dari data absensi karyawan outsourcing
-        $karyawanIds = (new UserService)->getOutsourcing();
+        $karyawanIds = $userService->getOutsourcing();
         
-        $years = Kehadiran::whereIn('karyawan_id', $karyawanIds)
-            ->selectRaw('YEAR(tanggal) as tahun')
-            ->groupBy('tahun')
-            ->orderBy('tahun', 'desc')
-            ->pluck('tahun')
-            ->toArray();
+        $years = $kehadiranService->getYearsListByKaryawanIds($karyawanIds);
 
         if (empty($years)) {
             $years = [date('Y')];
@@ -58,7 +52,10 @@ class Grafik extends Component
 
     public function getChartData()
     {
-        $karyawanIds = (new UserService)->getOutsourcing();
+        $userService = app(UserService::class);
+        $kehadiranService = app(KehadiranService::class);
+
+        $karyawanIds = $userService->getOutsourcing();
         $tahun = $this->tahun;
 
         // ==========================
@@ -79,9 +76,7 @@ class Grafik extends Component
             $dataMankir = array_fill(0, 12, 0);
             $dataTerlambat = array_fill(0, 12, 0);
 
-            $kehadiran = Kehadiran::whereIn('karyawan_id', $karyawanIds)
-                ->whereYear('tanggal', $tahun)
-                ->get();
+            $kehadiran = $kehadiranService->getKehadiranByKaryawanIdsAndYear($karyawanIds, $tahun);
                 
             foreach ($kehadiran as $absen) { 
 
@@ -139,7 +134,7 @@ class Grafik extends Component
         $dataMankir = array_fill(0, $jumlahHari, 0);
         $dataTerlambat = array_fill(0, $jumlahHari, 0);
 
-        $kehadiran = (new KehadiranService)->ambilBanyaklKehadiranRange($karyawanIds, $this->bulan, $tahun);
+        $kehadiran = $kehadiranService->ambilBanyaklKehadiranRange($karyawanIds, $this->bulan, $tahun);
         
 
         foreach ($kehadiran as $absen) {

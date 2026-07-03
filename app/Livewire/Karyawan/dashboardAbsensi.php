@@ -100,6 +100,28 @@ class DashboardAbsensi extends Component
 
     public function simpanAbsensi(KehadiranService $service)
     {
+        // Validasi backend: pastikan lokasi dan waktu absensi sudah berhasil diambil dari GPS
+        if (empty($this->latitude) || empty($this->longitude) || empty($this->waktu)) {
+            $this->dispatch(
+                'flash-error',
+                message: 'Silakan klik tombol "Ambil Lokasi" terlebih dahulu sebelum melakukan absensi.'
+            );
+            return;
+        }
+
+        // Validasi backend: pastikan jarak berada di dalam radius yang diizinkan
+        $user = auth()->user();
+        $lokasi = $user && $user->departemen ? $user->departemen->lokasi : null;
+        $radius = $lokasi ? $lokasi->radius : 100;
+
+        if ($this->jarak > $radius) {
+            $this->dispatch(
+                'flash-error',
+                message: 'Anda berada di luar area kantor. Jarak: ' . round($this->jarak) . ' meter.'
+            );
+            return;
+        }
+
         $data = [
             'waktu'     => $this->waktu,
             'latitude'  => $this->latitude,
@@ -129,6 +151,8 @@ class DashboardAbsensi extends Component
             'flash-success',
             message: $hasil['message']
         );
+
+        $this->dispatch('refresh-dashboard');
 
         // Update status absensi tanpa reload halaman
         $kehadiranHariIni = (new KehadiranService)->cekKehadiran();

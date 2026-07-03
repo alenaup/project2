@@ -2,13 +2,11 @@
 
 namespace App\Livewire\AdminOutsourcing;
 
-use App\Models\Kehadiran;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use App\Enums\UserRole;
 use App\Services\UserService;
 use App\Services\KehadiranService;
+use App\Services\RekapService;
 use Livewire\Component;
 
 // class component livewire
@@ -47,15 +45,6 @@ class RekapanKaryawan extends Component
     }
 
     // ──────────────────────────────────────────────────────
-    // Service Getter
-    // ──────────────────────────────────────────────────────
-
-    private function getService(): \App\Services\AdminOutsourcingDashboardService
-    {
-        return app(\App\Services\AdminOutsourcingDashboardService::class);
-    }
-
-    // ──────────────────────────────────────────────────────
     // Computed Properties (data dari database)
     // ──────────────────────────────────────────────────────
 
@@ -64,8 +53,8 @@ class RekapanKaryawan extends Component
      */
     public function getTotalHadirProperty(): int
     {
-        $stats = $this->getService()->getStats(Auth::user()->outsourcing_id, $this->startDate, $this->endDate);
-        return $stats['total_hadir'];
+        $karyawanIds = app(UserService::class)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+        return app(KehadiranService::class)->totalHadirByDateRange($karyawanIds, $this->startDate, $this->endDate);
     }
 
     /**
@@ -73,8 +62,8 @@ class RekapanKaryawan extends Component
      */
     public function getTotalAlphaProperty(): int
     {
-        $stats = $this->getService()->getStats(Auth::user()->outsourcing_id, $this->startDate, $this->endDate);
-        return $stats['total_alpha'];
+        $karyawanIds = app(UserService::class)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+        return app(KehadiranService::class)->cekKehadiranBanyakKaryawanByDateRange('mankir', $karyawanIds, $this->startDate, $this->endDate);
     }
 
     /**
@@ -82,8 +71,10 @@ class RekapanKaryawan extends Component
      */
     public function getTotalIzinSakitProperty(): int
     {
-        $stats = $this->getService()->getStats(Auth::user()->outsourcing_id, $this->startDate, $this->endDate);
-        return $stats['total_izin_sakit'];
+        $karyawanIds = app(UserService::class)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+        $sakit = app(KehadiranService::class)->cekKehadiranBanyakKaryawanByDateRange('sakit', $karyawanIds, $this->startDate, $this->endDate);
+        $izin = app(KehadiranService::class)->cekKehadiranBanyakKaryawanByDateRange('izin', $karyawanIds, $this->startDate, $this->endDate);
+        return $sakit + $izin;
     }
 
     /**
@@ -91,7 +82,7 @@ class RekapanKaryawan extends Component
      */
     public function getTotalKaryawanProperty(): int
     {
-        return $this->getService()->getKaryawanCount(Auth::user()->outsourcing_id);
+        return app(UserService::class)->getKaryawanCountByOutsourcing(Auth::user()->outsourcing_id);
     }
 
     // ──────────────────────────────────────────────────────
@@ -138,11 +129,11 @@ class RekapanKaryawan extends Component
             $this->koloms[] = $date->format('d/m');
         }
 
-        $this->totalKaryawan = $this->getService()->getKaryawanCount(Auth::user()->outsourcing_id);
+        $this->totalKaryawan = app(UserService::class)->getKaryawanCountByOutsourcing(Auth::user()->outsourcing_id);
 
-        $karyawans = $this->getService()->getKaryawans(Auth::user()->outsourcing_id, $this->halamanAktif, $this->perPage);
+        $karyawans = app(UserService::class)->getKaryawansByOutsourcingPaginated(Auth::user()->outsourcing_id, $this->halamanAktif, $this->perPage);
 
-        $userIds = $karyawans->pluck('id_user');
+        $userIds = $karyawans->pluck('id_user')->toArray();
 
         // Ambil seluruh kehadiran dalam range tanggal ini dalam 1 query
         $kehadirans = (new KehadiranService)->ambilBanyakKehadiranByDateRange($userIds, $this->startDate, $this->endDate);
@@ -256,14 +247,14 @@ class RekapanKaryawan extends Component
         [$start, $end] = $this->getRekapDateRange();
         $karyawanIds = $this->karyawanByOutsourcing;
 
-        $this->rekapRecord = $this->getService()->loadRekapRecord($karyawanIds, $start, $end);
+        $this->rekapRecord = app(RekapService::class)->loadRekapRecordForOutsourcing($karyawanIds, $start, $end);
     }
 
     public function kirimRekapan()
     {
         [$start, $end] = $this->getRekapDateRange();
 
-        $rekap = $this->getService()->kirimRekapan(Auth::user()->outsourcing_id, $start, $end);
+        $rekap = app(RekapService::class)->kirimRekapanForOutsourcing(Auth::user()->outsourcing_id, $start, $end, Auth::id());
 
         if (!$rekap) {
             session()->flash('error', 'Tidak ada data absensi pada periode rekap ini untuk dikirim.');
@@ -280,7 +271,7 @@ class RekapanKaryawan extends Component
         if ($this->rekapRecord && $this->rekapRecord->status_validasi === \App\Enums\Validasi::Invalid->value) {
             [$start, $end] = $this->getRekapDateRange();
 
-            $this->getService()->kirimUlang($this->rekapRecord, Auth::user()->outsourcing_id, $start, $end);
+            app(RekapService::class)->kirimUlangRekapanForOutsourcing($this->rekapRecord, Auth::user()->outsourcing_id, $start, $end);
 
             session()->flash('success', 'Rekapan absensi berhasil dikirim ulang.');
             $this->loadRekapRecord();

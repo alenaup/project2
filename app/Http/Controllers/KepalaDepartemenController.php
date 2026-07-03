@@ -183,6 +183,9 @@ class KepalaDepartemenController extends Controller
         $createdCount = 0;
 
         foreach ($request->user_ids as $userId) {
+            // Selesaikan jadwal yang tumpang tindih untuk karyawan ini sebelum membuat yang baru
+            (new \App\Services\JadwalService)->resolveOverlappingJadwal($userId, $request->start_date, $request->end_date);
+
             $jadwal = Jadwal::create([
                 'status' => Status::Active->value,
                 'tanggal_mulai' => $request->start_date,

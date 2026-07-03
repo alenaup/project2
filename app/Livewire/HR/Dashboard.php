@@ -3,7 +3,10 @@
 namespace App\Livewire\HR;
 
 use App\Enums\Validasi;
-use App\Services\HRDashboardService;
+use App\Services\DepartemenService;
+use App\Services\LemburService;
+use App\Services\UserService;
+use App\Services\RekapService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Carbon\Carbon;
@@ -28,7 +31,6 @@ class Dashboard extends Component
     public string $kalkulatorPeriodeMulai = '';
     public string $kalkulatorPeriodeSelesai = '';
     public string $kalkulatorError = '';
-
     // ── Daftar departemen untuk dropdown ─────────────────────────
     public array $departemens = [];
 
@@ -36,12 +38,12 @@ class Dashboard extends Component
     public int $perPage = 10;
 
     // ── Saat pertama dibuka, load departemen melalui service ──────
-    public function mount(HRDashboardService $dashboardService): void
+    public function mount(DepartemenService $deptService): void
     {
         $this->startDate    = '';
         $this->endDate      = '';
         $this->departemenId = '';
-        $this->departemens  = $dashboardService->getDepartemenList();
+        $this->departemens  = $deptService->getDepartemenList();
     }
 
     // ── Reset halaman saat filter berubah ───────────────────────
@@ -93,9 +95,9 @@ class Dashboard extends Component
     }
 
     /**
-     * Hitung rekapitulasi lembur menggunakan HRDashboardService.
+     * Hitung rekapitulasi lembur menggunakan LemburService.
      */
-    public function hitungLemburKalkulator(HRDashboardService $dashboardService): void
+    public function hitungLemburKalkulator(LemburService $lemburService): void
     {
         $this->kalkulatorError = '';
         $this->sudahHitung = false;
@@ -105,7 +107,7 @@ class Dashboard extends Component
             return;
         }
 
-        $result = $dashboardService->calculateTotalLembur(
+        $result = $lemburService->calculateTotalLembur(
             $this->kalkulatorBulan,
             $this->kalkulatorTahun,
             $this->kalkulatorDepartemenId
@@ -132,11 +134,23 @@ class Dashboard extends Component
     }
 
     // ── Render Halaman ───────────────────────────────────────────
-    public function render(HRDashboardService $dashboardService)
+    public function render(LemburService $lemburService, UserService $userService, RekapService $rekapService)
     {
+        $userStats = $userService->getOutsourcingStats();
+        $lemburPendingCount = $lemburService->getPendingCount();
+        $rekapPendingCount = $rekapService->getPendingCount();
+
+        $stats = [
+            'outsourcing_aktif'     => $userStats['outsourcing_aktif'],
+            'outsourcing_terdaftar' => $userStats['outsourcing_terdaftar'],
+            'lembur_pending'        => $lemburPendingCount,
+            'rekap_pending'         => $rekapPendingCount,
+            'ajuan_pending'         => $userStats['ajuan_pending'],
+        ];
+
         return view('livewire.hr.dashboard', [
-            'stats'   => $dashboardService->getStats(),
-            'lemburs' => $dashboardService->getLemburQuery(
+            'stats'   => $stats,
+            'lemburs' => $lemburService->getLemburQuery(
                 $this->startDate,
                 $this->endDate,
                 $this->departemenId

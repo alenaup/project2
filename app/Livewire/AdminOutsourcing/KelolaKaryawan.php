@@ -2,9 +2,7 @@
 
 namespace App\Livewire\AdminOutsourcing;
 
-use App\Enums\Status;
-use App\Enums\UserRole;
-use App\Models\User;
+use App\Services\UserService;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -88,9 +86,9 @@ class KelolaKaryawan extends Component
     /**
      * Buka modal detail karyawan.
      */
-    public function openDetail(int $userId): void
+    public function openDetail(int $userId, UserService $userService): void
     {
-        $user = User::with('outsourcing', 'departemen')->find($userId);
+        $user = $userService->getUserWithOutsourcingAndDepartemen($userId);
 
         if (!$user) return;
 
@@ -120,9 +118,9 @@ class KelolaKaryawan extends Component
     /**
      * Buka modal edit dan isi form dengan data karyawan.
      */
-    public function openEdit(int $userId): void
+    public function openEdit(int $userId, UserService $userService): void
     {
-        $user = User::find($userId);
+        $user = $userService->getUserWithOutsourcingAndDepartemen($userId);
 
         if (!$user) return;
 
@@ -144,7 +142,7 @@ class KelolaKaryawan extends Component
     /**
      * Simpan perubahan data karyawan.
      */
-    public function saveEdit(): void
+    public function saveEdit(UserService $userService): void
     {
         $this->validate([
             'editNama'    => 'required|string|min:3|max:100',
@@ -158,19 +156,17 @@ class KelolaKaryawan extends Component
             'editEmail.email'    => 'Format email tidak valid.',
         ]);
 
-        $user = User::find($this->selectedId);
-
-        if (!$user) {
-            session()->flash('error', 'Data karyawan tidak ditemukan.');
-            return;
-        }
-
-        $user->update([
+        $user = $userService->updateKaryawan($this->selectedId, [
             'nama_lengkap' => $this->editNama,
             'email'        => $this->editEmail,
             'nomor_tlp'    => $this->editTelepon,
             'alamat'       => $this->editAlamat,
         ]);
+
+        if (!$user) {
+            session()->flash('error', 'Data karyawan tidak ditemukan.');
+            return;
+        }
 
         session()->flash('success', "✅ Data karyawan {$user->nama_lengkap} berhasil diperbarui.");
 
@@ -200,9 +196,9 @@ class KelolaKaryawan extends Component
     /**
      * Hapus data karyawan.
      */
-    public function delete(): void
+    public function delete(UserService $userService): void
     {
-        $user = User::find($this->selectedId);
+        $user = $userService->deleteKaryawan($this->selectedId);
 
         if (!$user) {
             session()->flash('error', 'Data karyawan tidak ditemukan.');
@@ -210,10 +206,7 @@ class KelolaKaryawan extends Component
             return;
         }
 
-        $nama = $user->nama_lengkap;
-        $user->delete();
-
-        session()->flash('success', "🗑️ Karyawan {$nama} berhasil dihapus.");
+        session()->flash('success', "🗑️ Karyawan {$user->nama_lengkap} berhasil dihapus.");
 
         $this->dispatch('close-delete');
     }
@@ -238,34 +231,10 @@ class KelolaKaryawan extends Component
      |  Query
      * ──────────────────────────────────────────────────────────── */
 
-    /**
-     * Query karyawan aktif dengan pencarian.
-     */
-    private function getKaryawan()
-    {
-        return User::with('outsourcing')
-            ->where('role', UserRole::Karyawan->value)
-            ->where('status', Status::Active->value)
-            ->when($this->search, function ($query) {
-                $keyword = '%' . $this->search . '%';
-                $query->where(function ($q) use ($keyword) {
-                    $q->where('nip', 'like', $keyword)
-                      ->orWhere('nama_lengkap', 'like', $keyword)
-                      ->orWhere('email', 'like', $keyword);
-                });
-            })
-            ->orderBy('nama_lengkap')
-            ->paginate($this->perPage);
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-     |  Render
-     * ──────────────────────────────────────────────────────────── */
-
-    public function render()
+    public function render(UserService $userService)
     {
         return view('livewire.admin-outsourcing.kelola-karyawan', [
-            'karyawanList' => $this->getKaryawan(),
+            'karyawanList' => $userService->getKaryawanAktifPaginated($this->search, auth()->user()->outsourcing_id, $this->perPage),
         ]);
     }
 }

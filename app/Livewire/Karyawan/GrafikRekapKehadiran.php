@@ -170,6 +170,13 @@ class GrafikRekapKehadiran extends Component
         ];
     }
 
+    protected $listeners = ['refresh-dashboard' => 'onDashboardRefresh'];
+
+    public function onDashboardRefresh()
+    {
+        $this->dispatch('refreshChart', data: $this->getChartData());
+    }
+
     public function render()
     {
         return view('livewire.Karyawan.grafik-rekap-kehadiran', [

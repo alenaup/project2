@@ -103,21 +103,7 @@ function ambilLokasi() {
 
                 console.log("Jarak ke kantor:", jarak);
 
-                // Cek radius
-                if (jarak > radiusKantor) {
-                    window.dispatchEvent(new CustomEvent('flash-error', {
-                        detail: { message: `Anda berada di luar area kantor. Jarak: ${Math.round(jarak)} meter` }
-                    }));
-                    // Sembunyikan modal — tidak ada Livewire request yang akan terjadi
-                    window.dispatchEvent(new CustomEvent('hide-loading'));
-                    return;
-                }
-
-                // Jika dalam radius — kirim ke Livewire (hook Livewire akan menutup modal otomatis)
-                window.dispatchEvent(new CustomEvent('flash-success', {
-                    detail: { message: `Lokasi valid. Jarak ke kantor: ${Math.round(jarak)} meter` }
-                }));
-
+                // Cari komponen Livewire
                 const componentEl = document.getElementById('map').closest('[wire\\:id]');
                 let component = null;
                 if (componentEl && typeof Livewire !== 'undefined') {
@@ -141,10 +127,23 @@ function ambilLokasi() {
 
                     console.log("Data lokasi & waktu dikirim ke Livewire:", { lat, lng, jarak: Math.round(jarak), waktu });
                 } else {
-                    // Komponen tidak ditemukan, tutup modal manual
-                    window.dispatchEvent(new CustomEvent('hide-loading'));
                     console.error("Komponen Livewire tidak ditemukan!");
                 }
+
+                // Cek radius
+                if (jarak > radiusKantor) {
+                    window.dispatchEvent(new CustomEvent('flash-error', {
+                        detail: { message: `Anda berada di luar area kantor. Jarak: ${Math.round(jarak)} meter` }
+                    }));
+                    // Sembunyikan modal — tidak ada Livewire request yang akan terjadi
+                    window.dispatchEvent(new CustomEvent('hide-loading'));
+                    return;
+                }
+
+                // Jika dalam radius — kirim ke Livewire (hook Livewire akan menutup modal otomatis)
+                window.dispatchEvent(new CustomEvent('flash-success', {
+                    detail: { message: `Lokasi valid. Jarak ke kantor: ${Math.round(jarak)} meter` }
+                }));
 
             },
 

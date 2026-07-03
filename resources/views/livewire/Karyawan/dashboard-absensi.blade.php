@@ -194,7 +194,7 @@
                             Sudah absen hari ini <i class="fas fa-check"></i> </button>
                     </template>
                     <template x-if="!(sudahMasuk && sudahKeluar)">
-                        <button type="submit"
+                        <button type="submit" @disabled(empty($latitude) || empty($longitude) || empty($waktu))
                             class="relative z-10 w-full bg-emerald-600 text-white py-3 rounded-2xl font-semibold shadow-sm
                         hover:shadow-lg hover:-translate-y-0.5 transition flex items-center justify-center gap-2
                         disabled:opacity-50 disabled:cursor-not-allowed">Absen

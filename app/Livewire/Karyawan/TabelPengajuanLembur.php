@@ -2,8 +2,7 @@
 
 namespace App\Livewire\Karyawan;
 
-use App\Models\Lembur;
-use Illuminate\Support\Facades\Auth;
+use App\Services\LemburService;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -53,7 +52,7 @@ class TabelPengajuanLembur extends Component
             'edit_keterangan.required' => 'Keterangan wajib diisi.',
         ]);
 
-        $lembur = Lembur::findOrFail($id);
+        $lembur = (new LemburService)->getLemburOrFail($id);
         
         if ($lembur->status_validasi !== 'pending') {
             session()->flash('error', 'Hanya pengajuan dengan status Menunggu yang dapat diubah.');
@@ -72,7 +71,7 @@ class TabelPengajuanLembur extends Component
 
     public function deleteLembur($id): void
     {
-        $lembur = Lembur::findOrFail($id);
+        $lembur = (new LemburService)->getLemburOrFail($id);
 
         if ($lembur->status_validasi !== 'pending') {
             session()->flash('error', 'Hanya pengajuan dengan status Menunggu yang dapat dihapus.');
@@ -85,8 +84,7 @@ class TabelPengajuanLembur extends Component
 
     public function render()
     {
-        $query = Lembur::where('karyawan_id', Auth::id() ?? \App\Models\User::first()->id_user)
-            ->where('status', 'active');
+        $query = (new LemburService)->getLemburByIdAuth()->karyawan->lembur();
 
         if ($this->filterStatus !== 'semua') {
             $query->where('status_validasi', $this->filterStatus);
@@ -94,7 +92,7 @@ class TabelPengajuanLembur extends Component
 
         $pengajuan = $query->latest('created_at')->paginate(10);
 
-        return view('livewire.karyawan.tabel-pengajuan-lembur', [
+        return view('livewire.Karyawan.tabel-pengajuan-lembur', [
             'pengajuan' => $pengajuan,
         ]);
     }

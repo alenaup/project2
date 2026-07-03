@@ -92,4 +92,20 @@ class DepartemenService
         $departemen = $this->getDepartemenById($id);
         return $departemen->delete();
     }
+
+    /**
+     * Dapatkan daftar departemen untuk dropdown.
+     */
+    public function getDepartemenList(): array
+    {
+        return Departemen::orderBy('nama_departemen')->get(['id_departemen', 'nama_departemen'])->toArray();
+    }
+
+    /**
+     * Dapatkan semua departemen.
+     */
+    public function getAllDepartemen()
+    {
+        return Departemen::all();
+    }
 }

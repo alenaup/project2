@@ -6,13 +6,11 @@
     <!-- PAGE CONTENT -->   
     <div class="space-y-6">
 
-
-
         <!-- Form Pengajuan Lembur Component -->
-        <livewire:karyawan.form-pengajuan-lembur />
+        <livewire:Karyawan.form-pengajuan-lembur />
 
         <!-- Tabel Riwayat Pengajuan Lembur Component -->
-        <livewire:karyawan.tabel-pengajuan-lembur />
+        <livewire:Karyawan.tabel-pengajuan-lembur />
 
     </div>
 @endsection

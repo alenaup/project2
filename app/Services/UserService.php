@@ -239,5 +239,257 @@ class UserService
 
         return $query->latest('id_user')->paginate($perPage);
     }
+
+    /**
+     * Dapatkan statistik karyawan outsourcing untuk dashboard HR.
+     */
+    public function getOutsourcingStats(): array
+    {
+        $totalOutsourcingAktif = User::whereNotNull('outsourcing_id')
+            ->whereNull('tanggal_keluar')
+            ->count();
+
+        $totalOutsourcingTerdaftar = User::whereNotNull('outsourcing_id')->count();
+
+        $totalAjuanPending = User::whereNotNull('outsourcing_id')
+            ->where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Inactive->value)
+            ->count();
+
+        return [
+            'outsourcing_aktif'     => $totalOutsourcingAktif,
+            'outsourcing_terdaftar' => $totalOutsourcingTerdaftar,
+            'ajuan_pending'         => $totalAjuanPending,
+        ];
+    }
+
+    /**
+     * Dapatkan detail user beserta data outsourcing.
+     */
+    public function getUserWithOutsourcing(int $userId): ?User
+    {
+        return User::with('outsourcing')->find($userId);
+    }
+
+    /**
+     * Mengambil data karyawan outsourcing yang berstatus pending (menunggu persetujuan).
+     * Mendukung pencarian berdasarkan NIP, nama, dan nama vendor.
+     */
+    public function getKaryawanPendingPaginated(string $search = '', int $perPage = 10)
+    {
+        return User::with('outsourcing')
+            ->where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Pending->value)
+            ->whereNull('tanggal_keluar')
+            ->when($search, function ($query) use ($search) {
+                $keyword = '%' . $search . '%';
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('nip', 'like', $keyword)
+                      ->orWhere('nama_lengkap', 'like', $keyword)
+                      ->orWhereHas('outsourcing', function ($sub) use ($keyword) {
+                          $sub->where('nama_outsourcing', 'like', $keyword);
+                      });
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    /**
+     * Menyetujui ajuan karyawan outsourcing.
+     */
+    public function approveKaryawan(int $userId): ?User
+    {
+        $user = User::find($userId);
+        if ($user) {
+            $user->update(['status' => Status::Active->value]);
+        }
+        return $user;
+    }
+
+    /**
+     * Menolak ajuan karyawan outsourcing.
+     */
+    public function rejectKaryawan(int $userId, string $alasan): ?User
+    {
+        $user = User::find($userId);
+        if ($user) {
+            $user->update([
+                'status'         => Status::Inactive->value,
+                'tanggal_keluar' => null,
+            ]);
+        }
+        return $user;
+    }
+
+    /**
+     * Hitung total karyawan aktif untuk vendor tertentu.
+     */
+    public function getKaryawanByVendorCount(int $vendorId): int
+    {
+        return User::where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Active->value)
+            ->where('outsourcing_id', $vendorId)
+            ->count();
+    }
+
+    /**
+     * Ambil data karyawan aktif untuk vendor tertentu dengan batas paging manual.
+     */
+    public function getKaryawanByVendorPaginated(int $vendorId, int $page, int $perPage)
+    {
+        return User::with(['outsourcing', 'departemen'])
+            ->where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Active->value)
+            ->where('outsourcing_id', $vendorId)
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+    }
+
+    /**
+     * Membuat pengajuan karyawan baru oleh Admin Outsourcing.
+     */
+    public function createKaryawanSubmission(array $data, int $authId, int $outsourcingId): User
+    {
+        return User::create([
+            'nama_lengkap' => $data['nama_lengkap'],
+            'email' => $data['email'],
+            'password' => bcrypt('admin123'),
+            'nomor_tlp' => $data['nomor_tlp'],
+            'alamat' => $data['alamat'],
+            'nip' => 'NIP-' . ltrim(str_replace('NIP-', '', $data['nip'])),
+            'departemen_id' => $data['departemen_id'],
+            'tanggal_keluar' => null,
+            'tanggal_masuk' => null,
+            'role' => UserRole::Karyawan->value,
+            'status' => Status::Pending->value,
+            'user_id' => $authId,
+            'outsourcing_id' => $outsourcingId,
+        ]);
+    }
+
+    /**
+     * Membatalkan/menghapus pengajuan karyawan yang masih pending.
+     */
+    public function cancelKaryawanSubmission(int $userId): bool
+    {
+        $user = User::where('id_user', $userId)
+            ->where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Pending->value)
+            ->first();
+
+        if ($user) {
+            $user->delete();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Mengambil data pengajuan yang ditolak (inactive) untuk diajukan kembali.
+     */
+    public function getInactiveSubmission(int $userId): ?User
+    {
+        return User::where('id_user', $userId)
+            ->where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Inactive->value)
+            ->whereNull('tanggal_keluar')
+            ->first();
+    }
+
+    /**
+     * Mengirim ulang pengajuan karyawan yang sebelumnya ditolak.
+     */
+    public function resubmitKaryawan(int $userId, array $data): bool
+    {
+        $user = $this->getInactiveSubmission($userId);
+
+        if ($user) {
+            return $user->update([
+                'nip' => 'NIP-' . ltrim(str_replace('NIP-', '', $data['nip'])),
+                'nama_lengkap' => $data['nama_lengkap'],
+                'email' => $data['email'],
+                'nomor_tlp' => $data['nomor_tlp'],
+                'alamat' => $data['alamat'],
+                'departemen_id' => $data['departemen_id'],
+                'status' => Status::Pending->value,
+            ]);
+        }
+        return false;
+    }
+
+    /**
+     * Mengambil data seluruh ajuan karyawan yang diajukan oleh Admin Outsourcing tertentu (terpaginasi).
+     */
+    public function getSubmissionsPaginated(int $authId, int $outsourcingId, string $search = '', int $perPage = 10)
+    {
+        return User::with('departemen')
+            ->where('role', UserRole::Karyawan->value)
+            ->where('user_id', $authId)
+            ->where('outsourcing_id', $outsourcingId)
+            ->when($search, function ($query) use ($search) {
+                $keyword = '%' . $search . '%';
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('nip', 'like', $keyword)
+                      ->orWhere('nama_lengkap', 'like', $keyword)
+                      ->orWhere('email', 'like', $keyword);
+                });
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    /**
+     * Update data profil karyawan oleh Admin Outsourcing.
+     */
+    public function updateKaryawan(int $userId, array $data): ?User
+    {
+        $user = User::find($userId);
+        if ($user) {
+            $user->update([
+                'nama_lengkap' => $data['nama_lengkap'],
+                'email'        => $data['email'],
+                'nomor_tlp'    => $data['nomor_tlp'] ?? null,
+                'alamat'       => $data['alamat'] ?? null,
+            ]);
+        }
+        return $user;
+    }
+
+    /**
+     * Menghapus karyawan dari database.
+     */
+    public function deleteKaryawan(int $userId): ?User
+    {
+        $user = User::find($userId);
+        if ($user) {
+            $user->delete();
+        }
+        return $user;
+    }
+
+    /**
+     * Mengambil data karyawan aktif terpaginasi dengan filter pencarian dan vendor.
+     */
+    public function getKaryawanAktifPaginated(string $search = '', ?int $outsourcingId = null, int $perPage = 10)
+    {
+        return User::with('outsourcing')
+            ->where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Active->value)
+            ->when($outsourcingId, function ($query) use ($outsourcingId) {
+                $query->where('outsourcing_id', $outsourcingId);
+            })
+            ->when($search, function ($query) use ($search) {
+                $keyword = '%' . $search . '%';
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('nip', 'like', $keyword)
+                      ->orWhere('nama_lengkap', 'like', $keyword)
+                      ->orWhere('email', 'like', $keyword);
+                });
+            })
+            ->orderBy('nama_lengkap')
+            ->paginate($perPage);
+    }
 }
 
