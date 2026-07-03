@@ -43,9 +43,8 @@ class PersetujuanPengajuan extends Component
     public function approve(int $id)
     {
         $user = Auth::user();
-        if ($user && $this->lemburService->approveLembur($id, $user->id_user)) {
-            session()->flash('success', 'Pengajuan lembur berhasil disetujui.');
-            session()->flash('alert-type', 'success-approved');
+        if ($user && $this->lemburService->approveLembur($id, $user->id_user, 'valid')) {
+            $this->dispatch('flash-success', message: 'Pengajuan lembur berhasil disetujui.');
         }
     }
 
@@ -58,9 +57,8 @@ class PersetujuanPengajuan extends Component
     public function reject(int $id)
     {
         $user = Auth::user();
-        if ($user && $this->lemburService->rejectLembur($id, $user->id_user)) {
-            session()->flash('success', 'Pengajuan lembur berhasil ditolak.');
-            session()->flash('alert-type', 'success-rejected');
+        if ($user && $this->lemburService->approveLembur($id, $user->id_user, 'invalid')) {
+            $this->dispatch('flash-success', message: 'Pengajuan lembur berhasil ditolak.');
         }
     }
 
@@ -79,11 +77,9 @@ class PersetujuanPengajuan extends Component
         $count = $this->lemburService->approveAllPendingLembur($user->departemen_id, $user->id_user, $date);
 
         if ($count > 0) {
-            session()->flash('success', $count . ' pengajuan lembur berhasil disetujui.');
-            session()->flash('alert-type', 'success-approved');
+            $this->dispatch('flash-success', message: $count . ' pengajuan lembur berhasil disetujui.');
         } else {
-            session()->flash('success', 'Tidak ada pengajuan yang berstatus pending pada kriteria tersebut.');
-            session()->flash('alert-type', 'success-approved');
+            $this->dispatch('flash-error', message: 'Tidak ada pengajuan yang berstatus pending pada kriteria tersebut.');
         }
     }
 

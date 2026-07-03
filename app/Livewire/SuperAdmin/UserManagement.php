@@ -4,7 +4,6 @@ namespace App\Livewire\SuperAdmin;
 
 use App\Enums\Status;
 use App\Enums\UserRole;
-use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Component;
@@ -36,6 +35,14 @@ class UserManagement extends Component
     public string $role                  = '';
     public string $password              = '';
     public string $password_confirmation = '';
+    public ?int   $departemen_id         = null;
+
+    public function updatedRole($value): void
+    {
+        if ($value !== UserRole::KepalaDepartemen->value) {
+            $this->departemen_id = null;
+        }
+    }
 
     // =========================================================
     // Modal: Tambah / Edit
@@ -110,7 +117,7 @@ class UserManagement extends Component
     {
         $this->reset([
             'nama_lengkap', 'email', 'nomor_tlp',
-            'role', 'password', 'password_confirmation',
+            'role', 'password', 'password_confirmation', 'departemen_id',
         ]);
         $this->resetValidation();
     }
@@ -121,13 +128,15 @@ class UserManagement extends Component
 
     public function simpanAkun(): void
     {
-        $this->validate([
+        $rules = [
             'nama_lengkap' => 'required|string|max:255',
             'email'        => 'required|email|unique:user,email',
             'nomor_tlp'    => 'nullable|string|max:20',
             'role'         => ['required', new Enum(UserRole::class)],
             'password'     => 'required|string|min:8|confirmed',
-        ], [
+        ];
+
+        $messages = [
             'nama_lengkap.required' => 'Nama tidak boleh kosong.',
             'email.required'        => 'Email tidak boleh kosong.',
             'email.unique'          => 'Email sudah terdaftar.',
@@ -135,9 +144,23 @@ class UserManagement extends Component
             'password.required'     => 'Password tidak boleh kosong.',
             'password.min'          => 'Password minimal 8 karakter.',
             'password.confirmed'    => 'Konfirmasi password tidak cocok.',
-        ]);
+        ];
 
-        $this->userService->generateUser($this->nama_lengkap, $this->email, $this->nomor_tlp, $this->role, $this->password);
+        if ($this->role === UserRole::KepalaDepartemen->value) {
+            $rules['departemen_id'] = 'required|exists:departemen,id_departemen';
+            $messages['departemen_id.required'] = 'Departemen wajib dipilih untuk Kepala Departemen.';
+            $messages['departemen_id.exists'] = 'Departemen tidak valid.';
+        }
+
+        $this->validate($rules, $messages);
+        $this->userService->generateUser(
+            $this->nama_lengkap,
+            $this->email,
+            $this->nomor_tlp,
+            $this->role,
+            $this->password,
+            $this->role === UserRole::KepalaDepartemen->value ? $this->departemen_id : null
+        );
 
         $this->closeModal();
         $this->dispatch('flash-success', message: 'Akun berhasil ditambahkan!');
@@ -151,7 +174,7 @@ class UserManagement extends Component
 
     public function editAkun(int $id): void
     {
-        $user = User::findOrFail($id);
+        $user = $this->userService->getUserById($id);
 
         $this->editingUserId = $id;
         $this->nama_lengkap  = $user->nama_lengkap;
@@ -160,6 +183,7 @@ class UserManagement extends Component
         $this->role          = $user->role instanceof UserRole
             ? $user->role->value
             : (string) $user->role;
+        $this->departemen_id = $user->departemen_id;
 
         $this->isEditing = true;
         $this->showModal = true;
@@ -172,7 +196,7 @@ class UserManagement extends Component
 
     public function updateAkun(): void
     {
-        $this->validate([
+        $rules = [
             'nama_lengkap' => 'required|string|max:255',
             'email'        => [
                 'required', 'email',
@@ -180,18 +204,29 @@ class UserManagement extends Component
             ],
             'nomor_tlp'    => 'nullable|string|max:20',
             'role'         => ['required', new Enum(UserRole::class)],
-        ], [
+        ];
+
+        $messages = [
             'nama_lengkap.required' => 'Nama tidak boleh kosong.',
             'email.required'        => 'Email tidak boleh kosong.',
             'email.unique'          => 'Email sudah terdaftar.',
             'role.required'         => 'Role tidak boleh kosong.',
-        ]);
+        ];
+
+        if ($this->role === UserRole::KepalaDepartemen->value) {
+            $rules['departemen_id'] = 'required|exists:departemen,id_departemen';
+            $messages['departemen_id.required'] = 'Departemen wajib dipilih untuk Kepala Departemen.';
+            $messages['departemen_id.exists'] = 'Departemen tidak valid.';
+        }
+
+        $this->validate($rules, $messages);
 
         $this->userService->updateUser($this->editingUserId, [
-            'nama_lengkap' => $this->nama_lengkap,
-            'email'        => $this->email,
-            'nomor_tlp'    => $this->nomor_tlp,
-            'role'         => $this->role,
+            'nama_lengkap'  => $this->nama_lengkap,
+            'email'         => $this->email,
+            'nomor_tlp'     => $this->nomor_tlp,
+            'role'          => $this->role,
+            'departemen_id' => $this->role === UserRole::KepalaDepartemen->value ? $this->departemen_id : null,
         ]);
 
         $this->closeModal();
@@ -217,7 +252,7 @@ class UserManagement extends Component
 
     public function confirmHapus(int $id): void
     {
-        $user                    = User::findOrFail($id);
+        $user                    = $this->userService->getUserById($id);
         $this->deletingUserId    = $id;
         $this->deletingUserName  = $user->nama_lengkap;
 
@@ -281,37 +316,17 @@ class UserManagement extends Component
 
     public function render()
     {
-        $query = User::query();
-
-        // Filter berdasarkan tab aktif
-        match ($this->activeTab) {
-            'admin_outsourcing' => $query->where('role', UserRole::AdminVendor->value),
-            'hr'                => $query->where('role', UserRole::Hr->value),
-            'kepala_departemen' => $query->where('role', UserRole::KepalaDepartemen->value),
-            default             => $query->whereIn('role', [
-                UserRole::AdminVendor->value,
-                UserRole::Hr->value,
-                UserRole::KepalaDepartemen->value,
-            ]),
-        };
-
-        // Pencarian nama atau email
-        if (! empty($this->search)) {
-            $query->where(function ($q) {
-                $q->where('nama_lengkap', 'like', '%' . $this->search . '%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%');
-            });
-        }
-
-        // Filter berdasarkan status aktif/nonaktif
-        if ($this->filterStatus !== 'semua') {
-            $query->where('status', $this->filterStatus);
-        }
-
-        $users = $query->latest('id_user')->paginate(10);
+        $users = $this->userService->getUsersPaginated(
+            $this->activeTab,
+            $this->search,
+            $this->filterStatus,
+            10
+        );
+        $departemens = $this->departemenService->getActiveDepartemens();
 
         return view('livewire.super-admin.user-management', [
-            'users' => $users,
+            'users'       => $users,
+            'departemens' => $departemens,
         ]);
     }
 }

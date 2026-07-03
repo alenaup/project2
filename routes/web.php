@@ -103,6 +103,10 @@ Route::get('/super-admin/dashboard', function () {
     return view('superAdmin.dashboardAdmin');
 })->name('super.dashboard');
 
+Route::get('/super-admin/departemen', function () {
+    return view('superAdmin.departemenAdmin');
+})->name('super.departemen');
+
 Route::get('/super-admin/pengaturan', function () {
     return view('superAdmin.pengaturanAdmin');
 });

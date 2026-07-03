@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Departemen;
 use App\Models\Lokasi;
+use Illuminate\Support\Facades\Auth;
 
 class LokasiService
 {
@@ -41,5 +42,16 @@ class LokasiService
         }
 
         return true;
+    }
+
+    public function getLokasiDepartemenUser()
+    {
+        if (!Auth::check()) {
+            return null;
+        }
+        $user = Auth::user();
+        if ($user && $user->departemen_id) {
+            return Departemen::with('lokasi')->find($user->departemen_id);
+        }
     }
 }

@@ -5,23 +5,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     {{-- kode CDN untuk leaflet map ini hanya unntuk user karyawan outsorcing --}}
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-@endpush    
+@endpush
 
 @section('content')
     <!-- CONTENT -->
     <div class="flex-1 p-4 md:p-6 max-w-7xl mx-auto">
         {{-- Card yang menampilkan jadwal karyawan pada hari ini --}}
         <livewire:karyawan.dashboard/>
-        
+
         {{-- menampilkan status absensi masuk dan absensi keluar --}}
         {{-- mengecek lokasi --}}
-        <livewire:karyawan.dashboard-absensi/> 
+        <livewire:karyawan.dashboard-absensi/>
 
         <!-- GRAFIK (LIVEWIRE) -->
         <livewire:karyawan.grafik-rekap-kehadiran />
 
     </div>
-    
+
 @endsection
 @push('scripts')
     {{-- kode CDN untuk leaflet map ini hanya unntuk user karyawan outsorcing --}}

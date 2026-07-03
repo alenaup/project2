@@ -86,7 +86,7 @@ class KehadiranService
     {
         // mengambil user yang sedang login
         // menggunakan service UserService untuk mempermudah dalam mendapatkan data user
-        $user = (new UserService)->getUserById();
+        $user = Auth::user()->id_user;
         // mengambil tanggal hari ini
         $tanggal = now()->toDateString();
 
@@ -95,7 +95,7 @@ class KehadiranService
             ->where('karyawan_id', $user)->where('tanggal', $tanggal)->first();
         return $query;
     }
-    
+
     // method untuk mengecek kehadiran banyak karyawan berdasarkan tipe kehadiran dan bulan dan tahun
     /* mengembalikan data
     - jumlah int data yang cocok */
@@ -260,7 +260,7 @@ class KehadiranService
         return $query;
     }
 
-    
+
     public function ambilBanyaklKehadiranRange(
         $karyawanIds,
         int $bulan,

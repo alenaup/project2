@@ -14,11 +14,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <title>Kelola User - Super Admin</title>
+    <title>Kelola Departemen - Super Admin</title>
     @livewireStyles
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-gray-100" style="font-family: 'Poppins', sans-serif;">
 
     <!-- TOPBAR -->
     <div
@@ -64,26 +64,22 @@
             <div class="flex items-center justify-between">
                 <div>
                     <h1 class="text-xl font-semibold text-gray-800">
-                        Kelola Akun Pengguna
+                        Kelola Departemen Perusahaan
                     </h1>
+
                     <p class="mt-1 text-sm text-gray-500">
-                        Tambah, ubah, dan hapus akun Admin Outsourcing, HR, dan Kepala Departemen.
+                        Tambah, ubah, nonaktifkan, dan hapus departemen perusahaan serta atur relasi lokasi absensinya.
                     </p>
                 </div>
+
                 <div
                     class="hidden sm:flex h-10 w-10 items-center justify-center rounded-full bg-brand-light text-brand">
-                    👥
+                    🏢
                 </div>
             </div>
         </div>
 
-        <livewire:super-admin.dashboard-stats />
-
-        <livewire:components.excel-importer templatePath="templates/tamplate_ecogreen.xlsx"
-            importClass="App\Imports\UsersImport" buttonLabel="Impor User" onSuccessEvent="userImported" />
-
-        {{-- melakukan request kepada bagian service folder app/livewire/superAdmin/user-management --}}
-        <livewire:super-admin.user-management />
+        <livewire:super-admin.department-management />
     </div>
 
     {{-- ✅ Loading Modal diletakkan di root body agar fixed inset-0 bisa menutupi seluruh halaman --}}

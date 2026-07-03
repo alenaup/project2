@@ -71,29 +71,24 @@ class LemburService
     /**
      * Menyetujui pengajuan lembur.
      */
-    public function approveLembur(int $id, int $validatorId): bool
+    public function approveLembur(int $id, int $validatorId, string $status_validasi): bool
     {
         $lembur = Lembur::find($id);
         if ($lembur && $lembur->status_validasi === Validasi::Pending->value) {
-            return $lembur->update([
-                'status_validasi' => Validasi::Valid->value,
-                'pemvalidasi_id' => $validatorId,
-            ]);
-        }
-        return false;
-    }
+            if ($status_validasi === 'valid') {
+                return $lembur->update([
+                    'status_validasi' => Validasi::Valid->value,
+                    'pemvalidasi_id' => $validatorId,
+                ]);
+            } else if ($status_validasi === 'invalid') {
+                return $lembur->update([
+                    'status_validasi' => Validasi::Invalid->value,
+                    'pemvalidasi_id' => $validatorId,
+                ]);
+            } else {
+                return false;
+            }
 
-    /**
-     * Menolak pengajuan lembur.
-     */
-    public function rejectLembur(int $id, int $validatorId): bool
-    {
-        $lembur = Lembur::find($id);
-        if ($lembur && $lembur->status_validasi === Validasi::Pending->value) {
-            return $lembur->update([
-                'status_validasi' => Validasi::Invalid->value,
-                'pemvalidasi_id' => $validatorId,
-            ]);
         }
         return false;
     }

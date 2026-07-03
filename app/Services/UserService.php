@@ -12,16 +12,22 @@ use Illuminate\Support\Facades\Hash;
 class UserService
 {
     // CREATE user baru untuk user Super Admin, Kepala Departemen, Admin Vendor, dan HR
-    public function generateUser($nama_lengkap, $email, $nomor_tlp, $role, $password)
+    // dipakai di:
+    // UserManagement super Admin
+    public function generateUser($nama_lengkap, $email, $nomor_tlp, $role, $password, $departemen_id = null)
     {
+        if(Auth::check() && Auth::user()->role !== UserRole::SuperAdmin->value) {
+            throw new \Exception('Hanya Super Admin yang dapat membuat user baru.');
+        }
         $query = User::create([
-            'nama_lengkap' => $nama_lengkap,
-            'email'        => $email,
-            'nomor_tlp'    => $nomor_tlp,
-            'role'         => $role,
-            'password'     => Hash::make($password),
-            'status'       => Status::Active->value,
-            'user_id'      => Auth::id(),
+            'nama_lengkap'  => $nama_lengkap,
+            'email'         => $email,
+            'nomor_tlp'     => $nomor_tlp,
+            'role'          => $role,
+            'password'      => Hash::make($password),
+            'status'        => Status::Active->value,
+            'user_id'       => Auth::id(),
+            'departemen_id' => $departemen_id,
         ]);
 
         return $query;
@@ -45,18 +51,18 @@ class UserService
             'nip'             => $user->nip ?? '-',
             'alamat'          => $user->alamat ?? '-',
             'status'          => $user->status,
-            'tanggal_masuk'   => $user->tanggal_masuk 
-                ? date('d F Y', strtotime($user->tanggal_masuk)) 
+            'tanggal_masuk'   => $user->tanggal_masuk
+                ? date('d F Y', strtotime($user->tanggal_masuk))
                 : '-',
             'departemen_nama' => $user->departemen->nama_departemen ?? '-',
             'vendor_nama'     => $user->outsourcing->nama_outsourcing ?? '-',
         ];
     }
 
-    // 
-    public function getUserById()
+    //
+    public function getUserById($id)
     {
-        return Auth::user()->id_user;
+        return User::findOrFail($id);;
     }
 
     public function getUserSuperAdmin()
@@ -73,13 +79,7 @@ class UserService
             ->get();
     }
 
-    public function getLokasiDepartemenUser()
-    {
-        $user = Auth::user();
-        if ($user && $user->departemen_id) {
-            return Departemen::with('lokasi')->find($user->departemen_id);
-        }
-    }
+    
     public function getUserAdmin()
     {
         return User::where('role', UserRole::AdminVendor->value)
@@ -106,7 +106,7 @@ class UserService
     {
         return User::where('role', UserRole::Karyawan->value)
             ->where('id_user', $user)
-            ->get();
+            ->first();
     }
 
     public function getKaryawanByOutsourcing($outsourcing, $jenis)
@@ -129,6 +129,9 @@ class UserService
 
     public function getOutsourcing()
     {
+        if (!Auth::check()) {
+            return [];
+        }
         $query = User::where('outsourcing_id', Auth::user()->outsourcing_id)
             ->where('status', Status::Active->value)
             ->where('role', UserRole::Karyawan->value)
@@ -197,6 +200,44 @@ class UserService
     public function getDepartemenById($deptId)
     {
         return \App\Models\Departemen::find($deptId);
+    }
+
+    /**
+     * Mengambil data user terpaginasi dengan filter activeTab, search query, dan filterStatus.
+     */
+
+    // dipakai di :
+    // UserManagement super Admin
+    public function getUsersPaginated(string $activeTab, string $search = '', string $filterStatus = 'semua', int $perPage = 10)
+    {
+        $query = User::query();
+
+        // Filter berdasarkan tab aktif
+        match ($activeTab) {
+            'admin_outsourcing' => $query->where('role', UserRole::AdminVendor->value),
+            'hr'                => $query->where('role', UserRole::Hr->value),
+            'kepala_departemen' => $query->where('role', UserRole::KepalaDepartemen->value),
+            default             => $query->whereIn('role', [
+                UserRole::AdminVendor->value,
+                UserRole::Hr->value,
+                UserRole::KepalaDepartemen->value,
+            ]),
+        };
+
+        // Pencarian nama atau email
+        if (! empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Filter berdasarkan status aktif/nonaktif
+        if ($filterStatus !== 'semua') {
+            $query->where('status', $filterStatus);
+        }
+
+        return $query->latest('id_user')->paginate($perPage);
     }
 }
 

@@ -51,7 +51,7 @@ class GrafikRekapKehadiran extends Component
 
     public function getChartData()
     {
-        $karyawanId = (new UserService)->getUserById(Auth::user()->id);
+        $karyawanId = Auth::user()->id_user ?? null;
         $tahun = $this->tahun;
 
         // ==========================

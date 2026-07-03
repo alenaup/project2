@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Profil;
 
-use App\Models\User;
-use App\Services\UserService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
@@ -17,7 +15,7 @@ class ProfilIndex extends Component
     public $email;
     public $nomor_tlp;
     public $nip;
-    
+
     public $password_lama;
     public $password_baru;
     public $password_baru_confirmation;
@@ -28,7 +26,7 @@ class ProfilIndex extends Component
     public function mount()
     {
         $user = Auth::user();
-        
+
         $this->nama_lengkap = $user->nama_lengkap;
         $this->email = $user->email;
         $this->nomor_tlp = $user->nomor_tlp;
@@ -44,7 +42,7 @@ class ProfilIndex extends Component
             'nomor_tlp.max' => 'Nomor telepon maksimal 20 karakter.',
         ]);
 
-        $user = (new UserService())->getUserById();
+        $user = Auth::user();
         $user->nomor_tlp = $this->nomor_tlp;
         $user->save();
 
@@ -63,7 +61,7 @@ class ProfilIndex extends Component
             'password_baru.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
-        $user = (new UserService())->getUserById();
+        $user = Auth::user();
 
         if (!Hash::check($this->password_lama, $user->password)) {
             $this->addError('password_lama', 'Password lama tidak sesuai.');
@@ -88,14 +86,14 @@ class ProfilIndex extends Component
         ]);
 
         $filename = 'profil_' . Auth::id() . '.jpg';
-        
+
         // Simpan ke storage/app/public/profiles/
         $this->foto_baru->storeAs('profiles', $filename, 'public');
 
         // Reset file input dan perbarui cache buster
         $this->reset('foto_baru');
         $this->versi_foto = time();
-        
+
         session()->flash('success_foto', 'Foto profil berhasil diperbarui!');
     }
 

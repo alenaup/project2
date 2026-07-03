@@ -3,7 +3,6 @@
 namespace App\Livewire\KepalaDepartemen;
 
 use App\Services\LokasiService;
-use App\Services\UserService;
 use Livewire\Component;
 
 class AturLokasi extends Component
@@ -24,7 +23,7 @@ class AturLokasi extends Component
     public function mount()
     {
         // Ambil departemen milik kepala departemen yang login
-        $departemen = (new UserService)->getLokasiDepartemenUser();
+        $departemen = (new LokasiService)->getLokasiDepartemenUser();
 
         if ($departemen) {
             $this->departemen_id = $departemen->id_departemen;

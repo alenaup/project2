@@ -5,10 +5,9 @@ namespace App\Livewire\Karyawan;
 use App\Services\JadwalService;
 use App\Services\KehadiranService;
 use App\Services\RekapService;
-use App\Enums\TipeKehadiran;
 use Livewire\Component;
 
-class dashboardAbsensi extends Component
+class DashboardAbsensi extends Component
 {
     // ── Input dari frontend ────────────────────────────────────────────────
     public string $jenisAbsensi = 'masuk';
@@ -148,7 +147,7 @@ class dashboardAbsensi extends Component
 
     public function render()
     {
-        return view('livewire.Karyawan.dashboardAbsensi', [
+        return view('livewire.Karyawan.dashboard-absensi', [
             'jamMasuk'              => $this->jamMasuk,
             'jamKeluar'             => $this->jamKeluar,
             'kehadiranSudahTerisi'  => $this->kehadiranSudahTerisi,
