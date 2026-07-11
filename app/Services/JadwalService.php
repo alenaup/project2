@@ -50,7 +50,7 @@ class JadwalService
                 'jam_keluar' => $jam_keluar . ':00',
             ]);
             return true;
-        }  
+        }
     }
 
 
@@ -63,10 +63,12 @@ class JadwalService
      * Menyelesaikan jadwal yang tumpang tindih untuk satu karyawan.
      * Logika ini memotong, membelah (split), atau menghapus jadwal lama yang beririsan dengan range tanggal baru.
      */
-    public function resolveOverlappingJadwal($userId, $startDateStr, $endDateStr)
+    public function resolveOverlappingJadwal($userId, $startDate, $endDate)
     {
-        $startDate = Carbon::parse($startDateStr);
-        $endDate = Carbon::parse($endDateStr);
+        $startDate = Carbon::parse($startDate);
+        $endDate = Carbon::parse($endDate);
+        $startDateStr = $startDate->toDateString();
+        $endDateStr = $endDate->toDateString();
 
         $user = User::find($userId);
         if (!$user) {
@@ -124,5 +126,63 @@ class JadwalService
                 ]);
             }
         }
+    }
+
+    public function getJadwalKaryawanPaginated($deptId, $startDate, $endDate, $perPage = 10)
+    {
+        $query = User::where('role', \App\Enums\UserRole::Karyawan->value)
+            ->with(['jadwal' => function($query) use ($startDate, $endDate) {
+                $query->where(function ($q) use ($startDate, $endDate) {
+                    $q->where('tanggal_mulai', '<=', $endDate)
+                      ->where('tanggal_akhir', '>=', $startDate);
+                })->with('shift');
+            }]);
+
+        if ($deptId) {
+            $query->where('departemen_id', $deptId);
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    public function getAllShifts()
+    {
+        return Shift::all();
+    }
+
+    public function createJadwalForUser($userId, array $data, $createdBy)
+    {
+        $this->resolveOverlappingJadwal($userId, $data['start_date'], $data['end_date']);
+
+        $jadwal = Jadwal::create([
+            'status' => Status::Active->value,
+            'tanggal_mulai' => $data['start_date'],
+            'tanggal_akhir' => $data['end_date'],
+            'shift_id' => $data['shift_id'],
+            'dibuat_oleh' => $createdBy,
+            'nama_periode' => 'Periode ' . Carbon::parse($data['start_date'])->format('M Y'),
+        ]);
+
+        $user = User::find($userId);
+        if ($user) {
+            $user->jadwal()->attach($jadwal->id_jadwal);
+            return $jadwal;
+        }
+        return null;
+    }
+
+    public function getJadwalUserByRange($userId, $startDate, $endDate)
+    {
+        $user = User::find($userId);
+        if (!$user) {
+            return collect();
+        }
+        return $user->jadwal()
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->where('tanggal_mulai', '<=', $endDate)
+                  ->where('tanggal_akhir', '>=', $startDate);
+            })
+            ->with('shift')
+            ->get();
     }
 }

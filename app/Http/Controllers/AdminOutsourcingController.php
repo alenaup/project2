@@ -2,473 +2,62 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
-use App\Models\Outsourcing;
 use App\Enums\UserRole;
+use App\Services\UserService;
+use App\Services\OutsourcingService;
+use App\Services\DepartemenService;
 use Carbon\Carbon;
 
 class AdminOutsourcingController extends Controller
 {
+    protected $userService;
+    protected $outsourcingService;
+    protected $departemenService;
+
+    public function __construct(
+        UserService $userService,
+        OutsourcingService $outsourcingService,
+        DepartemenService $departemenService
+    ) {
+        $this->userService = $userService;
+        $this->outsourcingService = $outsourcingService;
+        $this->departemenService = $departemenService;
+    }
     public function dashboard()
     {
-        $datas = [
-            [
-                'no' => 1,
-                'nama' => 'Rizky Darmawan',
-                'inisial' => 'RD',
-                'perusahaan' => 'PT. Chemistry Jaya',
-                'posisi' => 'Operator',
-                'warna' => 'bg-green-600',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-
-            [
-                'no' => 2,
-                'nama' => 'Siti Aminah',
-                'inisial' => 'SA',
-                'perusahaan' => 'PT. TechSolution',
-                'posisi' => 'Teknisi',
-                'warna' => 'bg-emerald-600',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                ],
-            ],
-
-            [
-                'no' => 3,
-                'nama' => 'Budi Santoso',
-                'inisial' => 'BS',
-                'perusahaan' => 'PT. GlobalMaju',
-                'posisi' => 'Helper',
-                'warna' => 'bg-blue-500',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-            [
-                'no' => 4,
-                'nama' => 'Andi Pratama',
-                'inisial' => 'AP',
-                'perusahaan' => 'PT. Sinar Abadi',
-                'posisi' => 'Operator',
-                'warna' => 'bg-indigo-600',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-
-            [
-                'no' => 5,
-                'nama' => 'Dewi Lestari',
-                'inisial' => 'DL',
-                'perusahaan' => 'PT. Nusantara Tech',
-                'posisi' => 'Admin',
-                'warna' => 'bg-pink-500',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-            [
-                'no' => 6,
-                'nama' => 'Rian Saputra',
-                'inisial' => 'RS',
-                'perusahaan' => 'PT. Globalindo',
-                'posisi' => 'Driver',
-                'warna' => 'bg-orange-500',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-
-            [
-                'no' => 7,
-                'nama' => 'Maya Sari',
-                'inisial' => 'MS',
-                'perusahaan' => 'PT. Mitra Jaya',
-                'posisi' => 'HR',
-                'warna' => 'bg-teal-500',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-
-            [
-                'no' => 8,
-                'nama' => 'Fajar Nugroho',
-                'inisial' => 'FN',
-                'perusahaan' => 'PT. Karya Mandiri',
-                'posisi' => 'Security',
-                'warna' => 'bg-gray-600',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-
-            [
-                'no' => 9,
-                'nama' => 'Tika Ramadhani',
-                'inisial' => 'TR',
-                'perusahaan' => 'PT. Sumber Rejeki',
-                'posisi' => 'Admin',
-                'warna' => 'bg-fuchsia-600',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-
-            [
-                'no' => 10,
-                'nama' => 'Yoga Prasetyo',
-                'inisial' => 'YP',
-                'perusahaan' => 'PT. Mega Industri',
-                'posisi' => 'Operator',
-                'warna' => 'bg-cyan-600',
-                'absens' => [
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'S', 'warna' => 'bg-yellow-100 text-yellow-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'I', 'warna' => 'bg-blue-100 text-blue-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'A', 'warna' => 'bg-red-100 text-red-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => 'L', 'warna' => 'bg-purple-100 text-purple-700'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                    ['value' => '-', 'warna' => 'text-gray-300'],
-                    ['value' => 'H', 'warna' => 'bg-green-100 text-green-700'],
-                ],
-            ],
-        ];
-
-        return view('adminOutsourcing.dashboard', compact('datas'));
+        return view('adminOutsourcing.dashboard');
     }
 
+    // fungsi ini melakukan 
     public function exportAbsensi(\Illuminate\Http\Request $request)
     {
         $rekapBulan = $request->input('rekap_bulan', Carbon::now()->format('Y-m'));
         $outsourcingId = auth()->user()->outsourcing_id;
-        
-        $outsourcing = Outsourcing::find($outsourcingId);
+
+        $outsourcing = $this->outsourcingService->getOutsourcingById($outsourcingId);
         $outsourcingNama = $outsourcing ? $outsourcing->nama_outsourcing : 'Vendor';
 
         // Calculate dates (26th of previous month to 25th of current month)
         $carbon = Carbon::createFromFormat('Y-m', $rekapBulan);
         $prevMonthStart = $carbon->copy()->subMonth();
-        
+
         $startDateStr = $prevMonthStart->day(26)->format('Y-m-d');
         $endDateStr = $carbon->day(25)->format('Y-m-d');
 
         $start = Carbon::parse($startDateStr);
         $end = Carbon::parse($endDateStr);
-        
+
         $dates = [];
         for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
             $dates[] = $date->copy();
         }
 
-        $karyawans = User::with('departemen')
-            ->where('role', UserRole::Karyawan->value)
-            ->where('outsourcing_id', $outsourcingId)
-            ->where('status', \App\Enums\Status::Active->value)
-            ->whereNull('tanggal_keluar')
-            ->orderBy('nama_lengkap', 'asc')
-            ->get();
+        $karyawans = $this->userService->getKaryawanByOutsourcingWithDepartemen($outsourcingId);
 
         $userIds = $karyawans->pluck('id_user');
-        
+
         $kehadirans = (new \App\Services\KehadiranService)->ambilBanyakKehadiranByDateRange($userIds, $startDateStr, $endDateStr);
-        
+
         $kehadiranMap = $kehadirans
             ->groupBy('karyawan_id')
             ->map(function ($items) {
@@ -520,7 +109,7 @@ class AdminOutsourcingController extends Controller
 
             // 2. Table Header
             $headers = ['No', 'NIP', 'Nama Karyawan', 'Posisi', 'Departemen'];
-            
+
             $colIdx = 1;
             foreach ($headers as $h) {
                 $colLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($colIdx);
@@ -551,7 +140,7 @@ class AdminOutsourcingController extends Controller
                 $sheet->getStyle($colLetter . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $colIdx++;
             }
-            
+
             // Set header border
             $borderHeaderStyle = [
                 'borders' => [
@@ -563,7 +152,7 @@ class AdminOutsourcingController extends Controller
             ];
             $sheet->getStyle('A' . $row . ':' . $lastColLetter . $row)->applyFromArray($borderHeaderStyle);
             $sheet->getRowDimension($row)->setRowHeight(20);
-            
+
             $startDataRow = $row + 1;
             $row++;
 
@@ -574,7 +163,7 @@ class AdminOutsourcingController extends Controller
                 $nip = ($karyawan->nip ?? null) && (int) $karyawan->nip !== 0
                     ? 'NIP-' . $karyawan->nip
                     : '-';
-                
+
                 $sheet->setCellValueByColumnAndRow(1, $row, $index + 1);
                 $sheet->setCellValueByColumnAndRow(2, $row, $nip);
                 $sheet->setCellValueByColumnAndRow(3, $row, $karyawan->nama_lengkap);
@@ -622,15 +211,15 @@ class AdminOutsourcingController extends Controller
                 // Style data row
                 $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $sheet->getStyle('B' . $row)->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT);
-                
+
                 // Alternating bg
                 if ($row % 2 === 0) {
                     $sheet->getStyle('A' . $row . ':' . $lastColLetter . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('F9FAFB');
                 }
-                
+
                 $row++;
             }
-            
+
             $endDataRow = $row - 1;
 
             // 4. Department Totals Row
@@ -653,7 +242,7 @@ class AdminOutsourcingController extends Controller
             // Total row style
             $sheet->getStyle('A' . $row . ':' . $lastColLetter . $row)->getFont()->setBold(true);
             $sheet->getStyle('A' . $row . ':' . $lastColLetter . $row)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('EAEAEA');
-            
+
             // Apply borders to this department's table block
             $borderStyle = [
                 'borders' => [
@@ -664,7 +253,7 @@ class AdminOutsourcingController extends Controller
                 ],
             ];
             $sheet->getStyle('A' . $startDataRow . ':' . $lastColLetter . $row)->applyFromArray($borderStyle);
-            
+
             $row += 3; // spacing of 2 empty rows between tables
         }
 
@@ -701,7 +290,7 @@ class AdminOutsourcingController extends Controller
 
     public function getDepartemen()
     {
-        $departemens = \App\Models\Departemen::all();
+        $departemens = $this->departemenService->getAllDepartemen();
         return response()->json($departemens);
     }
 
@@ -717,21 +306,8 @@ class AdminOutsourcingController extends Controller
                 'departemen_id' => 'required|exists:departemen,id_departemen',
             ]);
 
-            $user = \App\Models\User::create([
-                'nama_lengkap' => $validated['nama_lengkap'],
-                'email' => $validated['email'],
-                'password' => bcrypt('admin123'),
-                'nomor_tlp' => $validated['nomor_tlp'],
-                'alamat' => $validated['alamat'],
-                'nip' => 'NIP-' . $validated['nip'],
-                'departemen_id' => $validated['departemen_id'],
-                'tanggal_keluar' => null,
-                'tanggal_masuk' => null,
-                'role' => \App\Enums\UserRole::Karyawan->value,
-                'status' => \App\Enums\Status::Inactive->value,
-                'user_id' => auth()->id(),
-                'outsourcing_id' => auth()->user()->outsourcing_id,
-            ]);
+            $user = $this->userService->createKaryawanSubmission($validated, auth()->id(), auth()->user()->outsourcing_id);
+            $user->update(['status' => \App\Enums\Status::Inactive->value]);
 
             return response()->json([
                 'success' => true,

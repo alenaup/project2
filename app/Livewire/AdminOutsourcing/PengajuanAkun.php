@@ -44,6 +44,8 @@ class PengajuanAkun extends Component
         $this->resetPage();
     }
 
+    // melakukan submission data karyawan yang diajukan, melakuka vaalidasi
+    // output event message hasil dari pengajuan
     public function submit(UserService $userService): void
     {
         $validated = $this->validate([
@@ -270,6 +272,7 @@ class PengajuanAkun extends Component
         );
     }
 
+    // melakukan validasi tipe, ukuran file excel, dan menyesuaikan format dengan tamplate
     public function importExcel(): void
     {
         $this->validate([
@@ -285,7 +288,7 @@ class PengajuanAkun extends Component
             \Maatwebsite\Excel\Facades\Excel::import($import, $this->fileExcel->getRealPath());
 
             $this->reset('fileExcel');
-            session()->flash('success', '✅ Pengajuan data karyawan dari Excel berhasil diimpor.');
+            session()->flash('success', ' Pengajuan data karyawan dari Excel berhasil diimpor.');
             $this->dispatch('close-import-modal');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();

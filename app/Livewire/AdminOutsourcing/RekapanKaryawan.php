@@ -53,7 +53,7 @@ class RekapanKaryawan extends Component
      */
     public function getTotalHadirProperty(): int
     {
-        $karyawanIds = app(UserService::class)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+        $karyawanIds = ( new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
         return app(KehadiranService::class)->totalHadirByDateRange($karyawanIds, $this->startDate, $this->endDate);
     }
 
@@ -62,7 +62,7 @@ class RekapanKaryawan extends Component
      */
     public function getTotalAlphaProperty(): int
     {
-        $karyawanIds = app(UserService::class)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+        $karyawanIds = ( new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
         return app(KehadiranService::class)->cekKehadiranBanyakKaryawanByDateRange('mankir', $karyawanIds, $this->startDate, $this->endDate);
     }
 
@@ -71,7 +71,7 @@ class RekapanKaryawan extends Component
      */
     public function getTotalIzinSakitProperty(): int
     {
-        $karyawanIds = app(UserService::class)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
+        $karyawanIds = ( new UserService)->getKaryawanByOutsourcing(Auth::user()->outsourcing_id, "array");
         $sakit = app(KehadiranService::class)->cekKehadiranBanyakKaryawanByDateRange('sakit', $karyawanIds, $this->startDate, $this->endDate);
         $izin = app(KehadiranService::class)->cekKehadiranBanyakKaryawanByDateRange('izin', $karyawanIds, $this->startDate, $this->endDate);
         return $sakit + $izin;
@@ -82,7 +82,7 @@ class RekapanKaryawan extends Component
      */
     public function getTotalKaryawanProperty(): int
     {
-        return app(UserService::class)->getKaryawanCountByOutsourcing(Auth::user()->outsourcing_id);
+        return ( new UserService)->getKaryawanByVendorCount(Auth::user()->outsourcing_id);
     }
 
     // ──────────────────────────────────────────────────────
@@ -93,10 +93,10 @@ class RekapanKaryawan extends Component
     {
         $carbon = Carbon::createFromFormat('Y-m', $this->rekapBulan);
         $prevMonthStart = $carbon->copy()->subMonth();
-        
+
         $start = $prevMonthStart->day(26)->format('Y-m-d');
         $end = $carbon->day(25)->format('Y-m-d');
-        
+
         return [$start, $end];
     }
 
@@ -122,16 +122,16 @@ class RekapanKaryawan extends Component
 
         $start = Carbon::parse($this->startDate);
         $end = Carbon::parse($this->endDate);
-        
+
         $dates = [];
         for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
             $dates[] = $date->copy();
             $this->koloms[] = $date->format('d/m');
         }
 
-        $this->totalKaryawan = app(UserService::class)->getKaryawanCountByOutsourcing(Auth::user()->outsourcing_id);
+        $this->totalKaryawan = $this->getTotalKaryawanProperty();
 
-        $karyawans = app(UserService::class)->getKaryawansByOutsourcingPaginated(Auth::user()->outsourcing_id, $this->halamanAktif, $this->perPage);
+        $karyawans = ( new UserService)->getKaryawanByVendorPaginated(Auth::user()->outsourcing_id, $this->halamanAktif, $this->perPage);
 
         $userIds = $karyawans->pluck('id_user')->toArray();
 

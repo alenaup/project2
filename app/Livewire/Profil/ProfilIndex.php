@@ -34,6 +34,8 @@ class ProfilIndex extends Component
         $this->versi_foto = time();
     }
 
+    // melakukan validasi input, menyimpan perubahan profil, dan menampilkan pesan sukses
+    // input berupa data profil, output berupa void session flash message
     public function updateProfil()
     {
         $this->validate([
@@ -49,6 +51,8 @@ class ProfilIndex extends Component
         session()->flash('success_profil', 'Profil berhasil diperbarui!');
     }
 
+    // melakukan validasi input, memeriksa kecocokan password lama, menyimpan password baru, dan menampilkan pesan sukses
+    // input berupa password lama dan password baru, output berupa void session flash message
     public function updatePassword()
     {
         $this->validate([
@@ -75,6 +79,8 @@ class ProfilIndex extends Component
         session()->flash('success_password', 'Password berhasil diubah!');
     }
 
+    // melakukan validasi input, menyimpan foto baru, dan menampilkan pesan sukses
+    // input berupa file foto baru, output berupa void session flash message
     public function updateFoto()
     {
         $this->validate([

@@ -86,6 +86,8 @@ class KelolaKaryawan extends Component
     /**
      * Buka modal detail karyawan.
      */
+
+    // megambil data karyawan untuk diisi pada modal 
     public function openDetail(int $userId, UserService $userService): void
     {
         $user = $userService->getUserWithOutsourcingAndDepartemen($userId);
@@ -118,6 +120,8 @@ class KelolaKaryawan extends Component
     /**
      * Buka modal edit dan isi form dengan data karyawan.
      */
+
+    // melakukan validasi input secara realtime
     public function openEdit(int $userId, UserService $userService): void
     {
         $user = $userService->getUserWithOutsourcingAndDepartemen($userId);
@@ -142,6 +146,7 @@ class KelolaKaryawan extends Component
     /**
      * Simpan perubahan data karyawan.
      */
+    // melakukan update pada data yang dilakukan perubahan
     public function saveEdit(UserService $userService): void
     {
         $this->validate([
@@ -196,6 +201,7 @@ class KelolaKaryawan extends Component
     /**
      * Hapus data karyawan.
      */
+    // mengahpus data karyawan yang dipilih berdasarkan id user nya
     public function delete(UserService $userService): void
     {
         $user = $userService->deleteKaryawan($this->selectedId);

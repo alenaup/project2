@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Logout extends Component
 {
+    // fungsi untuk melakukan logout user, menghapus session, dan mengarahkan ke halaman login
     public function logout()
     {
         Auth::logout();

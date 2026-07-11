@@ -54,4 +54,9 @@ class LokasiService
             return Departemen::with('lokasi')->find($user->departemen_id);
         }
     }
+
+    public function getAllLokasi()
+    {
+        return Lokasi::where('status', 'active')->get();
+    }
 }

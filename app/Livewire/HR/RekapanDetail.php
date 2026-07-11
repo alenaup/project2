@@ -8,8 +8,6 @@ use App\Services\OutsourcingService;
 use App\Services\UserService;
 use App\Services\KehadiranService;
 use App\Services\RekapService;
-use App\Enums\UserRole;
-use App\Enums\Status;
 use Carbon\Carbon;
 
 class RekapanDetail extends Component
@@ -54,6 +52,8 @@ class RekapanDetail extends Component
         $this->tampilkanRekap($userService, $rekapService, app(KehadiranService::class));
     }
 
+    // melakukan validasi input bulan, mengambil data karyawan berdasarkan vendor, menghitung rekapitulasi kehadiran, dan menampilkan hasilnya
+    // input bulan, vendor, dan halaman aktif, memberikan output daftar karyawan dengan rekapitulasi kehadiran, total karyawan, dan status rekap
     public function tampilkanRekap(UserService $userService, RekapService $rekapService, KehadiranService $kehadiranService): void
     {
         $this->validate(
@@ -79,6 +79,8 @@ class RekapanDetail extends Component
         $this->loadData($userService, $rekapService, $kehadiranService);
     }
 
+    // melakukan paginasi data karyawan berdasarkan vendor, bulan, dan halaman aktif
+    // input vendor, bulan, dan halaman aktif, memberikan output daftar karyawan dengan rekap
     public function loadData(UserService $userService, RekapService $rekapService, KehadiranService $kehadiranService): void
     {
         $this->users = [];
@@ -117,6 +119,8 @@ class RekapanDetail extends Component
     /**
      * Memproses data kehadiran untuk satu karyawan dan menghitung rekapannya.
      */
+    // melakukan pemetaan data kehadiran karyawan, menghitung jumlah hadir, mangkir, sakit/izin, dan cuti
+    // input data karyawan, tanggal awal periode, dan service kehadiran, memberikan output array berisi data karyawan, peta kehadiran, dan ringkasan jumlah kehad
     private function processKehadiranData(User $user, Carbon $awalCarbon, KehadiranService $kehadiranService): array
     {
         $kehadiranData = $kehadiranService->getKehadiranDetailByKaryawan($user->id_user, $this->periodeAwal, $this->periodeAkhir);
@@ -187,6 +191,8 @@ class RekapanDetail extends Component
 
     public ?\App\Models\RekapKehadiran $rekapRecord = null;
 
+    // melakukan pemuatan data rekapan kehadiran berdasarkan vendor dan periode, serta menentukan status rekap
+    // input vendor, periode awal, dan periode akhir, memberikan output data rekapan kehadiran dan status rekap (Disetujui, Ditolak, Menunggu Persetujuan,
     public function loadRekapRecord(RekapService $rekapService): void
     {
         if (!$this->vendorId || !$this->periodeAwal || !$this->periodeAkhir) {

@@ -3,9 +3,8 @@
 namespace App\Livewire\SuperAdmin;
 
 use App\Enums\Status;
-use App\Models\Departemen;
-use App\Models\Lokasi;
 use App\Services\DepartemenService;
+use App\Services\LokasiService;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Component;
@@ -203,7 +202,7 @@ class DepartmentManagement extends Component
             $this->filterStatus,
             10
         );
-        $lokasis = Lokasi::where('status', Status::Active->value)->get();
+        $lokasis = ( new LokasiService() )->getAllLokasi();
 
         return view('livewire.super-admin.department-management', [
             'departemens' => $departemens,

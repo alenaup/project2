@@ -16,13 +16,13 @@ class DepartemenService
         return Departemen::where('status', Status::Active->value)->get();
     }
 
-    public function createDepartemen($nama_departemen, $status, $lokasi_id){
-        if (Departemen::where('nama_departemen', $nama_departemen)->exists()) {
+    public function createDepartemen($departemen, $status, $lokasi_id){
+        if (Departemen::where('nama_departemen', $departemen)->exists()) {
             throw new \Exception('Nama departemen sudah terdaftar.');
         }
 
         return Departemen::create([
-            'nama_departemen' => $nama_departemen,
+            'nama_departemen' => $departemen,
             'status' => $status,
             'lokasi_id' => $lokasi_id ?: null,
         ]);
@@ -107,5 +107,10 @@ class DepartemenService
     public function getAllDepartemen()
     {
         return Departemen::all();
+    }
+
+    public function findDepartemen($id): ?Departemen
+    {
+        return Departemen::find($id);
     }
 }

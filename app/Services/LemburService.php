@@ -236,4 +236,21 @@ class LemburService
     {
         return Lembur::where('status_validasi', Validasi::Pending->value)->count();
     }
+
+    public function getValidLemburForExport(string $startDate, string $endDate, ?string $departemenId = null)
+    {
+        $query = Lembur::with(['karyawan.departemen', 'karyawan.outsourcing'])
+            ->where('status', Status::Active->value)
+            ->where('status_validasi', Validasi::Valid->value)
+            ->whereDate('mulai_lembur', '>=', $startDate)
+            ->whereDate('selesai_lembur', '<=', $endDate);
+
+        if (!empty($departemenId)) {
+            $query->whereHas('karyawan', function ($q) use ($departemenId) {
+                $q->where('departemen_id', $departemenId);
+            });
+        }
+
+        return $query->orderBy('mulai_lembur', 'asc')->get();
+    }
 }

@@ -40,7 +40,7 @@ Route::middleware(['auth'])->group(function () {
         return view('kepala-departement.pengajuanKaryawan');
     });
 
-    
+
 Route::get('/kepala-departement/atur-lokasi', function () {
     return view('kepala-departement.atur-lokasi');
 });
@@ -123,55 +123,10 @@ Route::middleware('auth')->group(function () {
         return view('karyawanOutsourcing.dashboardKaryawan');
     })->name('dashboard');
 
-    Route::get('/karyawan-outsourcing/jadwal-karyawan/pdf/{year}/{month}', function ($year, $month) {
-        $userId = Auth::id() ?? 1; // Fallback to user 1 for test if session is missing
-
-        $startDate = Carbon\Carbon::createFromDate($year, $month, 1)->startOfMonth();
-        $endDate = $startDate->copy()->endOfMonth();
-
-        $jadwals = DB::table('karyawan_jadwal')
-            ->join('jadwal', 'karyawan_jadwal.jadwal_id', '=', 'jadwal.id_jadwal')
-            ->join('shift', 'jadwal.shift_id', '=', 'shift.id_shift')
-            ->where('karyawan_jadwal.user_id', $userId)
-            ->where('jadwal.tanggal_mulai', '<=', $endDate->format('Y-m-d'))
-            ->where('jadwal.tanggal_akhir', '>=', $startDate->format('Y-m-d'))
-            ->select(
-                'jadwal.*',
-                'shift.nama_shift',
-                'shift.jam_masuk',
-                'shift.jam_keluar'
-            )
-            ->get();
-
-        $jadwalByDate = [];
-        foreach ($jadwals as $j) {
-            $mulai = Carbon\Carbon::parse($j->tanggal_mulai);
-            $akhir = Carbon\Carbon::parse($j->tanggal_akhir);
-
-            while ($mulai <= $akhir) {
-                $tanggal = $mulai->format('Y-m-d');
-                $jadwalByDate[$tanggal] = $j;
-                $mulai->addDay();
-            }
-        }
-
-        $dateObj = Carbon\Carbon::createFromDate($year, $month, 1);
-        $monthName = clone $dateObj;
-        $monthName->locale('id');
-        $monthNameStr = $monthName->translatedFormat('F Y');
-
-        $pdf = Pdf::loadView('pdf.jadwal-karyawan', [
-            'calendarData' => $jadwalByDate,
-            'monthName' => $monthNameStr,
-            'user' => Auth::user(),
-            'daysInMonth' => $dateObj->daysInMonth,
-            'firstDayOfWeek' => $dateObj->copy()->startOfMonth()->dayOfWeekIso,
-            'currentYear' => $year,
-            'currentMonth' => $month,
-        ]);
-
-        return $pdf->download('Jadwal_Kerja_'.str_replace(' ', '_', $monthNameStr).'.pdf');
-    });
+    Route::get(
+    '/karyawan-outsourcing/jadwal-karyawan/pdf/{year}/{month}',
+    [JadwalKaryawanController::class, 'exportPdf']
+);
 
     Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
         return view('karyawanOutsourcing.perizinan');

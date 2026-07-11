@@ -13,6 +13,8 @@ class Login extends Component
     public string $password = '';
 
     /* menginisiasi Service Auth dengan menamakan $authService */
+    // fungsi ini melakukan pembatasan percobaan login, validasi input, memanggil service untuk login, dan mengirimkan event ke frontend
+    // input berupa object AuthService, output berupa void yang mengirimkan event ke frontend
     public function login(AuthService $authService)
     {
         // * untuk membatasi percobaan login, dengan menggunakan fitur RateLimiter bawaan laravel

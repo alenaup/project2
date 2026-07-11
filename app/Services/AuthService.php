@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 /* Bagian untukk mengatur Logic pada Auth */
 class AuthService
 {
+    // berfungsi untuk melakukan Logic login user dengan melakukan pengecekan terhadap email dan password yang diinputkan oleh user
+    // input berupa email dan password, output berupa array yang berisi status login, user, dan redirect
     public function login(string $email, string $password): array
     {
         // * Mengambil data user berdasarkan email dengan memilih (select) kolom spesifik yang dibutuhkan saja
@@ -50,6 +52,8 @@ class AuthService
     }
 
     /* Bagian untuk menentukan redirect berdasarkan role user */
+    // melakukan pengecekan terhadap role user dan mengembalikan string berupa path redirect yang sesuai dengan role user
+    // input berupa string role, output berupa string path redirect
     public function getRedirectByRole(string $role): string
     {
         return match ($role) {

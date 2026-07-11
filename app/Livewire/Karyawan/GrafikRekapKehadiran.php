@@ -41,6 +41,9 @@ class GrafikRekapKehadiran extends Component
         ];
     }
 
+    // melakukan fungsi updated untuk memanggil fungsi getChartData ketika ada perubahan pada properti mode, tahun, atau bulan
+    // input propertyName adalah nama properti yang diubah
+    // output berupa void yang mengirimkan event ke frontend untuk memperbarui chart dengan data baru
     public function updated($propertyName)
     {
         // Emit event to update chart
@@ -49,6 +52,8 @@ class GrafikRekapKehadiran extends Component
         }
     }
 
+    // melakukan pengambilan data kehadiran karyawan berdasarkan mode, tahun, dan bulan yang dipilih
+    // output berupa array yang berisi label dan data kehadiran karyawan
     public function getChartData()
     {
         $karyawanId = Auth::user()->id_user ?? null;
@@ -73,7 +78,7 @@ class GrafikRekapKehadiran extends Component
             $dataTerlambat = array_fill(0, 12, 0);
 
             $kehadiran = (new KehadiranService)->ambilKehadiranRange($tahun, null);
-            foreach ($kehadiran as $absen) { 
+            foreach ($kehadiran as $absen) {
 
                 $bulanIndex = (int) date('m', strtotime($absen->tanggal)) - 1;
 
@@ -130,7 +135,7 @@ class GrafikRekapKehadiran extends Component
         $dataTerlambat = array_fill(0, $jumlahHari, 0);
 
         $kehadiran = (new KehadiranService)->ambilKehadiranRange($tahun, $this->bulan);
-        
+
 
         foreach ($kehadiran as $absen) {
 
@@ -172,6 +177,8 @@ class GrafikRekapKehadiran extends Component
 
     protected $listeners = ['refresh-dashboard' => 'onDashboardRefresh'];
 
+    // fungsi ini akan dijalankan ketika event 'refresh-dashboard' diterima
+    // dan akan memanggil fungsi getChartData untuk memperbarui data chart
     public function onDashboardRefresh()
     {
         $this->dispatch('refreshChart', data: $this->getChartData());

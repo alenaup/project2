@@ -31,6 +31,9 @@ class TabelPengajuanLembur extends Component
         $this->resetPage();
     }
 
+    // melakukan penyimpanan data pengajuan lembur yang diedit
+    // input berupa id pengajuan lembur, tanggal lembur, jam mulai, jam selesai, dan keterangan
+    // output berupa validasi berhasil atau gagal, jika berhasil maka data akan diperbarui di database
     public function saveLemburEdit($id, $tanggal, $mulai, $selesai, $keterangan): void
     {
         $this->edit_id = $id;
@@ -53,7 +56,7 @@ class TabelPengajuanLembur extends Component
         ]);
 
         $lembur = (new LemburService)->getLemburOrFail($id);
-        
+
         if ($lembur->status_validasi !== 'pending') {
             session()->flash('error', 'Hanya pengajuan dengan status Menunggu yang dapat diubah.');
             return;
@@ -69,6 +72,9 @@ class TabelPengajuanLembur extends Component
         session()->flash('success_riwayat', 'Data pengajuan lembur berhasil diperbarui!');
     }
 
+    // melakukan penghapusan data pengajuan lembur
+    // input berupa id pengajuan lembur
+    // output berupa validasi berhasil atau gagal, jika berhasil maka data akan dihapus dari database
     public function deleteLembur($id): void
     {
         $lembur = (new LemburService)->getLemburOrFail($id);

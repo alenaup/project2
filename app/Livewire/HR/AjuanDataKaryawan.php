@@ -82,6 +82,9 @@ class AjuanDataKaryawan extends Component
      *
      * @param int $userId
      */
+
+    // melakukan pembukaan modal detail karyawan berdasarkan ID user, mengambil data karyawan dari service, dan menampilkan informasi karyawan di modal
+    // input ID user, memberikan output modal detail karyawan terbuka dengan data karyawan yang sesuai
     public function openDetail(int $userId, UserService $userService): void
     {
         $user = $userService->getUserWithOutsourcing($userId);
@@ -228,6 +231,9 @@ class AjuanDataKaryawan extends Component
      *
      * @param int|null $userId
      */
+
+    // melakukan persetujuan ajuan karyawan outsourcing, mengubah status user menjadi active, dan menampilkan pesan sukses
+    // input ID user (opsional), memberikan output status user berubah menjadi active dan pesan sukses
     public function approve(?int $userId = null, UserService $userService): void
     {
         $id   = $userId ?? $this->selectedUserId;
@@ -248,6 +254,9 @@ class AjuanDataKaryawan extends Component
      * Mengubah status user dari pending menjadi inactive.
      * tanggal_keluar tetap null.
      */
+    // melakukan penolakan ajuan karyawan outsourcing, mengubah status user menjadi inactive, dan menampilkan pesan sukses
+    // input ID user (opsional) dan alasan penolakan, memberikan output status user berubah menjadi inactive dan pesan sukses
+    public function reject(?int $userId = null, User
     public function reject(UserService $userService): void
     {
         $this->validate([

@@ -43,6 +43,9 @@ class FormPengajuanLembur extends Component
         $this->validateOnly($propertyName);
     }
 
+    // melakukan validasi sebelum menyimpan pengajuan lembur
+    // input berupa tanggal lembur, jam mulai, jam selesai, dan keterangan
+    // output berupa validasi berhasil atau gagal, jika berhasil maka data akan disimpan ke database
     public function simpanPengajuan(): void
     {
         \Log::info('simpanPengajuan triggered', [
@@ -66,9 +69,9 @@ class FormPengajuanLembur extends Component
     {
         $user = Auth::user();
         if (!$user) {
-            $user = \App\Models\User::first(); 
+            $user = \App\Models\User::first();
         }
-        
+
         return view('livewire.Karyawan.form-pengajuan-lembur', [
             'user' => $user,
         ]);

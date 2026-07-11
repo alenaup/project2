@@ -63,6 +63,8 @@ class Dashboard extends Component
     }
 
     // ── Hitung durasi lembur dalam menit (Helper View) ───────────
+    // melakukan perhitungan durasi dari lembur karyawan
+    // input nilai mulai dan selesai, memberikan output durasi dalam menit 
     public function hitungDurasi(?string $mulai, ?string $selesai): int
     {
         if (!$mulai || !$selesai) {
@@ -72,6 +74,8 @@ class Dashboard extends Component
     }
 
     // ── Label & warna status validasi (Helper View) ──────────────
+    // melakukan pengecekan status validasi lembur, memberikan label dan warna sesuai status
+    // input status validasi, memberikan output label dan warna
     public function statusBadge(string $status): array
     {
         return match ($status) {
@@ -97,6 +101,8 @@ class Dashboard extends Component
     /**
      * Hitung rekapitulasi lembur menggunakan LemburService.
      */
+    // melakukan perhitungan total lembur karyawan berdasarkan bulan, tahun, dan departemen
+    // input bulan, tahun, dan departemen, memberikan output total menit lembur, periode mulai, dan periode selesai
     public function hitungLemburKalkulator(LemburService $lemburService): void
     {
         $this->kalkulatorError = '';
@@ -126,7 +132,7 @@ class Dashboard extends Component
     {
         $jam = floor($totalMenit / 60);
         $menit = $totalMenit % 60;
-        
+
         if ($jam > 0) {
             return "{$jam} Jam {$menit} Menit";
         }

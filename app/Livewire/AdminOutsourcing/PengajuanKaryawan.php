@@ -64,6 +64,7 @@ class PengajuanKaryawan extends Component
     /**
      * Buka modal detail pengajuan.
      */
+    // mengambil data detail karyawan yang dipilih untuk dimasukkan kedalam modal
     public function openDetail(int $id, PerizinanSakitService $perizinanSakitService): void
     {
         $perizinan = $perizinanSakitService->getPerizinanById($id);
@@ -124,6 +125,7 @@ class PengajuanKaryawan extends Component
     /**
      * Terima pengajuan perizinan.
      */
+    // pengajuan dilakukan validasi status dan validasi input
     public function approve(PerizinanSakitService $perizinanSakitService): void
     {
         $perizinan = $perizinanSakitService->updateStatus($this->selectedId, 'disetujui');
@@ -190,6 +192,7 @@ class PengajuanKaryawan extends Component
     /**
      * Tolak pengajuan perizinan.
      */
+    // melakukan penolakan pengajuan kareba 
     public function reject(PerizinanSakitService $perizinanSakitService): void
     {
         $perizinan = $perizinanSakitService->updateStatus($this->selectedId, 'ditolak');
@@ -200,7 +203,7 @@ class PengajuanKaryawan extends Component
             return;
         }
 
-        session()->flash('success', "❌ Pengajuan dari {$perizinan->karyawan->nama_lengkap} telah ditolak.");
+        session()->flash('success', "Pengajuan dari {$perizinan->karyawan->nama_lengkap} telah ditolak.");
 
         $this->closeReject();
         $this->showDetailModal = false;

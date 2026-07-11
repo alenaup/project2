@@ -184,4 +184,15 @@ class PerizinanSakitService
             ->orderBy('updated_at', 'desc')
             ->get();
     }
+
+    public function getApprovedPerizinanByRange($userId, $startDate, $endDate)
+    {
+        return PerizinanSakit::where('karyawan_id', $userId)
+            ->where('status', 'disetujui')
+            ->where(function ($q) use ($startDate, $endDate) {
+                $q->where('tanggal_mulai', '<=', $endDate)
+                  ->where('tanggal_selesai', '>=', $startDate);
+            })
+            ->get();
+    }
 }

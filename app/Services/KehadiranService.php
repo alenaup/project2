@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\Status;
 use App\Models\Kehadiran;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -132,13 +130,13 @@ class KehadiranService
     // method untuk mengecek kehadiran banyak karyawan berdasarkan tipe kehadiran dan bulan dan tahun
     /* mengembalikan data
     - jumlah int data yang cocok */
-    public function cekKehadiranBanyakKaryawan($tipeKehadiran, $arrayKaryawanIds, $bulan, $tahun)
+    public function cekKehadiranBanyakKaryawan($tipe, $arrayId, $bulan, $tahun)
     {
         // melakukan pengecekan berdasarkan tipe kehadiran
-        $query = Kehadiran::whereHas('tipeKehadiran', function ($q) use ($tipeKehadiran) {
-            $q->where('status_kehadiran', $tipeKehadiran);
+        $query = Kehadiran::whereHas('tipeKehadiran', function ($q) use ($tipe) {
+            $q->where('status_kehadiran', $tipe);
         })
-            ->whereIn('karyawan_id', $arrayKaryawanIds)
+            ->whereIn('karyawan_id', $arrayId)
             ->whereMonth('tanggal', $bulan)
             ->whereYear('tanggal', $tahun)
             ->count();
@@ -306,9 +304,9 @@ class KehadiranService
         return $query;
     }
 
-    public function ambilBanyakKehadiranByDateRange($karyawanIds, $startDate, $endDate)
+    public function ambilBanyakKehadiranByDateRange($Ids, $startDate, $endDate)
     {
-        $query = Kehadiran::whereIn('karyawan_id', $karyawanIds)
+        $query = Kehadiran::whereIn('karyawan_id', $Ids)
             ->whereBetween('tanggal', [$startDate, $endDate])
             ->get();
         return $query;
@@ -342,13 +340,13 @@ class KehadiranService
         return $query;
     }
 
-    public function cekKehadiranBanyakKaryawanByDateRange($tipeKehadiran, $arrayKaryawanIds, $startDate, $endDate)
+    public function cekKehadiranBanyakKaryawanByDateRange($tipe, $Ids, $start, $end)
     {
-        $query = Kehadiran::whereHas('tipeKehadiran', function ($q) use ($tipeKehadiran) {
-            $q->where('status_kehadiran', $tipeKehadiran);
+        $query = Kehadiran::whereHas('tipeKehadiran', function ($q) use ($tipe) {
+            $q->where('status_kehadiran', $tipe);
         })
-            ->whereIn('karyawan_id', $arrayKaryawanIds)
-            ->whereBetween('tanggal', [$startDate, $endDate])
+            ->whereIn('karyawan_id', $Ids)
+            ->whereBetween('tanggal', [$start, $end])
             ->count();
         return $query;
     }
@@ -388,6 +386,47 @@ class KehadiranService
     {
         return Kehadiran::whereIn('karyawan_id', $karyawanIds)
             ->whereYear('tanggal', $year)
+            ->get();
+    }
+
+    public function getKehadiranSummaryToday($userIds)
+    {
+        $today = Carbon::today();
+
+        $hadir = Kehadiran::whereDate('tanggal', $today)
+            ->whereIn('karyawan_id', $userIds)
+            ->whereHas('tipeKehadiran', function ($q) {
+                $q->whereIn('status_kehadiran', ['hadir', 'terlambat']);
+            })->count();
+
+        $terlambat = Kehadiran::whereDate('tanggal', $today)
+            ->whereIn('karyawan_id', $userIds)
+            ->whereHas('tipeKehadiran', function ($q) {
+                $q->where('status_kehadiran', 'terlambat');
+            })->count();
+
+        $izinCuti = Kehadiran::whereDate('tanggal', $today)
+            ->whereIn('karyawan_id', $userIds)
+            ->whereHas('tipeKehadiran', function ($q) {
+                $q->whereIn('status_kehadiran', ['izin', 'cuti', 'sakit', 'mankir']);
+            })->count();
+
+        return [
+            'hadir' => $hadir,
+            'terlambat' => $terlambat,
+            'izinCuti' => $izinCuti,
+        ];
+    }
+
+    public function getKehadiranStatusForKaryawan(int $userId, string $startDate, string $endDate)
+    {
+        return DB::table('kehadiran')
+            ->join('jadwal', 'kehadiran.jadwal_id', '=', 'jadwal.id_jadwal')
+            ->join('karyawan_jadwal', 'jadwal.id_jadwal', '=', 'karyawan_jadwal.jadwal_id')
+            ->join('tipe_kehadiran', 'kehadiran.tipe_kehadiran_id', '=', 'tipe_kehadiran.id_tipe_kehadiran')
+            ->where('karyawan_jadwal.user_id', $userId)
+            ->whereBetween('kehadiran.tanggal', [$startDate, $endDate])
+            ->select('kehadiran.tanggal', 'tipe_kehadiran.status_kehadiran')
             ->get();
     }
 }

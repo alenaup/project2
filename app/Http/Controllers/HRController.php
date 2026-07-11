@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Enums\Status;
 use App\Enums\Validasi;
-use App\Models\Departemen;
-use App\Models\Lembur;
+use App\Services\LemburService;
+use App\Services\RekapService;
+use App\Services\UserService;
+use App\Services\OutsourcingService;
+use App\Services\DepartemenService;
+use App\Services\KehadiranService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -16,9 +20,34 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class HRController extends Controller
 {
+    protected $lemburService;
+    protected $rekapService;
+    protected $userService;
+    protected $outsourcingService;
+    protected $departemenService;
+    protected $kehadiranService;
+
+    public function __construct(
+        LemburService $lemburService,
+        RekapService $rekapService,
+        UserService $userService,
+        OutsourcingService $outsourcingService,
+        DepartemenService $departemenService,
+        KehadiranService $kehadiranService
+    ) {
+        $this->lemburService = $lemburService;
+        $this->rekapService = $rekapService;
+        $this->userService = $userService;
+        $this->outsourcingService = $outsourcingService;
+        $this->departemenService = $departemenService;
+        $this->kehadiranService = $kehadiranService;
+    }
+
     /**
      * Export rekap lembur karyawan ke Excel.
      */
+    // memuat data yang dimasukkan dan membuat struktur tamplate excel 
+    // 
     public function exportLembur(Request $request)
     {
         $request->validate([
@@ -44,25 +73,13 @@ class HRController extends Controller
 
         $deptNama = 'Semua Departemen';
         if (!empty($departemenId)) {
-            $dept = Departemen::find($departemenId);
+            $dept = $this->departemenService->findDepartemen($departemenId);
             if ($dept) {
                 $deptNama = $dept->nama_departemen;
             }
         }
 
-        $query = Lembur::with(['karyawan.departemen', 'karyawan.outsourcing'])
-            ->where('status', Status::Active->value)
-            ->where('status_validasi', Validasi::Valid->value)
-            ->whereDate('mulai_lembur', '>=', $startDate)
-            ->whereDate('selesai_lembur', '<=', $endDate);
-
-        if (!empty($departemenId)) {
-            $query->whereHas('karyawan', function ($q) use ($departemenId) {
-                $q->where('departemen_id', $departemenId);
-            });
-        }
-
-        $lemburs = $query->orderBy('mulai_lembur', 'asc')->get();
+        $lemburs = $this->lemburService->getValidLemburForExport($startDate, $endDate, $departemenId);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -179,6 +196,8 @@ class HRController extends Controller
         header('Content-Disposition: attachment; filename="' . $fileName . '"');
         header('Cache-Control: max-age=0');
 
+        $writer->save('php://output');
+        exit;
     }
 
     /**
@@ -202,16 +221,7 @@ class HRController extends Controller
         $jumlahHariDalamBulan = (int) $awal->diffInDays($akhir) + 1;
 
         // Cari rekap yang diajukan oleh Admin Outsourcing dari vendorId ini
-        // dan memiliki tanggal_rekap yang valid, serta terhubung dengan kehadiran pada periode rekap
-        $rekapRecord = \App\Models\RekapKehadiran::whereHas('pengajuUser', function ($q) use ($vendorId) {
-                $q->where('outsourcing_id', $vendorId);
-            })
-            ->whereNotNull('tanggal_rekap')
-            ->where('tanggal_rekap', '>=', $periodeAwal)
-            ->whereHas('kehadiran', function ($q) use ($periodeAwal, $periodeAkhir) {
-                $q->whereBetween('tanggal', [$periodeAwal, $periodeAkhir]);
-            })
-            ->first();
+        $rekapRecord = $this->rekapService->getRekapRecord($vendorId, $periodeAwal, $periodeAkhir);
 
         // JIKA tidak ada atau belum dikirim, tidak boleh di-export
         if (!$rekapRecord || !$rekapRecord->tanggal_rekap) {
@@ -230,15 +240,10 @@ class HRController extends Controller
             }
         }
 
-        $vendor = \App\Models\Outsourcing::find($vendorId);
+        $vendor = $this->outsourcingService->getOutsourcingById($vendorId);
         $vendorNama = $vendor ? $vendor->nama_outsourcing : 'Vendor';
 
-        $karyawans = \App\Models\User::with(['departemen'])
-            ->where('role', \App\Enums\UserRole::Karyawan->value)
-            ->where('status', \App\Enums\Status::Active->value)
-            ->where('outsourcing_id', $vendorId)
-            ->orderBy('nama_lengkap', 'asc')
-            ->get();
+        $karyawans = $this->userService->getKaryawanByOutsourcingWithDepartemen($vendorId);
 
         if ($karyawans->isEmpty()) {
             return redirect()->back()->with('error', 'Ekspor gagal: Tidak ada data karyawan ditemukan.');
@@ -331,14 +336,7 @@ class HRController extends Controller
             $sheet->setCellValueByColumnAndRow(3, $row, $user->nama_lengkap);
             $sheet->setCellValueByColumnAndRow(4, $row, $user->departemen->nama_departemen ?? '-');
 
-            $kehadiranData = \Illuminate\Support\Facades\DB::table('kehadiran')
-                ->join('jadwal', 'kehadiran.jadwal_id', '=', 'jadwal.id_jadwal')
-                ->join('karyawan_jadwal', 'jadwal.id_jadwal', '=', 'karyawan_jadwal.jadwal_id')
-                ->join('tipe_kehadiran', 'kehadiran.tipe_kehadiran_id', '=', 'tipe_kehadiran.id_tipe_kehadiran')
-                ->where('karyawan_jadwal.user_id', $user->id_user)
-                ->whereBetween('kehadiran.tanggal', [$periodeAwal, $periodeAkhir])
-                ->select('kehadiran.tanggal', 'tipe_kehadiran.status_kehadiran')
-                ->get();
+            $kehadiranData = $this->kehadiranService->getKehadiranStatusForKaryawan($user->id_user, $periodeAwal, $periodeAkhir);
 
             $mappingKode = [
                 'hadir'     => 'H',

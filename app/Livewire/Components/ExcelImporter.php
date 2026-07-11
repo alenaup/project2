@@ -17,6 +17,8 @@ class ExcelImporter extends Component
 
     public $fileExcel;
 
+    // melakukan validasi file excel yang diupload, memastikan format dan ukuran file sesuai
+    // input file excel, memberikan output validasi berhasil atau gagal
     public function import()
     {
         $this->validate([

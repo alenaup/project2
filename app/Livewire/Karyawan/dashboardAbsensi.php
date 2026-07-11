@@ -98,6 +98,8 @@ class DashboardAbsensi extends Component
 
     // ──────────────────────────────────────────────────────────────────────
 
+    // melakukan validasi input, memanggil service untuk menyimpan absensi, dan menampilkan pesan sukses atau error
+    // input berupa object KehadiranService, output berupa void yang mengirimkan event ke frontend
     public function simpanAbsensi(KehadiranService $service)
     {
         // Validasi backend: pastikan lokasi dan waktu absensi sudah berhasil diambil dari GPS

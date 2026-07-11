@@ -3,16 +3,34 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Jadwal;
-use App\Models\Shift;
 use App\Enums\UserRole;
 use App\Enums\Status;
+use App\Services\UserService;
+use App\Services\JadwalService;
+use App\Services\KehadiranService;
+use App\Services\PerizinanSakitService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
 class KepalaDepartemenController extends Controller
 {
+    protected $userService;
+    protected $jadwalService;
+    protected $kehadiranService;
+    protected $perizinanSakitService;
+
+    public function __construct(
+        UserService $userService,
+        JadwalService $jadwalService,
+        KehadiranService $kehadiranService,
+        PerizinanSakitService $perizinanSakitService
+    ) {
+        $this->userService = $userService;
+        $this->jadwalService = $jadwalService;
+        $this->kehadiranService = $kehadiranService;
+        $this->perizinanSakitService = $perizinanSakitService;
+    }
+
     public function dashboard()
     {
         return view('kepala-departement.dashboard');
@@ -22,39 +40,17 @@ class KepalaDepartemenController extends Controller
     {
         $deptId = Auth::check() ? Auth::user()->departemen_id : null;
 
-        $queryKaryawan = User::where('role', UserRole::Karyawan->value)->where('status', Status::Active->value);
-        if ($deptId) {
-            $queryKaryawan->where('departemen_id', $deptId);
-        }
+        $karyawans = $this->userService->getActiveKaryawanList($deptId);
+        $totalKaryawan = $karyawans->count();
+        $userIds = $karyawans->pluck('id_user')->toArray();
 
-        $totalKaryawan = $queryKaryawan->count();
-        $userIds = $queryKaryawan->pluck('id_user');
-
-        $today = Carbon::today();
-
-        $hadir = \App\Models\Kehadiran::whereDate('tanggal', $today)
-            ->whereIn('karyawan_id', $userIds)
-            ->whereHas('tipeKehadiran', function ($q) {
-                $q->whereIn('status_kehadiran', ['hadir', 'terlambat']);
-            })->count();
-
-        $terlambat = \App\Models\Kehadiran::whereDate('tanggal', $today)
-            ->whereIn('karyawan_id', $userIds)
-            ->whereHas('tipeKehadiran', function ($q) {
-                $q->where('status_kehadiran', 'terlambat');
-            })->count();
-
-        $izinCuti = \App\Models\Kehadiran::whereDate('tanggal', $today)
-            ->whereIn('karyawan_id', $userIds)
-            ->whereHas('tipeKehadiran', function ($q) {
-                $q->whereIn('status_kehadiran', ['izin', 'cuti', 'sakit', 'mankir']);
-            })->count();
+        $summary = $this->kehadiranService->getKehadiranSummaryToday($userIds);
 
         return response()->json([
             'totalKaryawan' => $totalKaryawan,
-            'hadir' => $hadir,
-            'terlambat' => $terlambat,
-            'izinCuti' => $izinCuti,
+            'hadir' => $summary['hadir'],
+            'terlambat' => $summary['terlambat'],
+            'izinCuti' => $summary['izinCuti'],
         ]);
     }
 
@@ -64,21 +60,8 @@ class KepalaDepartemenController extends Controller
         $startDate = $request->query('start_date', Carbon::now()->startOfWeek()->format('Y-m-d'));
         $endDate = $request->query('end_date', Carbon::now()->endOfWeek()->format('Y-m-d'));
 
-        // Query users. Filter berdasarkan department
-        $query = User::where('role', UserRole::Karyawan->value)
-            ->with(['jadwal' => function($query) use ($startDate, $endDate) {
-                $query->where(function ($q) use ($startDate, $endDate) {
-                    $q->where('tanggal_mulai', '<=', $endDate)
-                      ->where('tanggal_akhir', '>=', $startDate);
-                })->with('shift');
-            }]);
-
-        // If logged in user has department, filter by it.
-        if (Auth::check() && Auth::user()->departemen_id) {
-            $query->where('departemen_id', Auth::user()->departemen_id);
-        }
-
-        $karyawans = $query->paginate(10);
+        $deptId = (Auth::check() && Auth::user()->departemen_id) ? Auth::user()->departemen_id : null;
+        $karyawans = $this->jadwalService->getJadwalKaryawanPaginated($deptId, $startDate, $endDate, 10);
 
         $formattedData = [];
         foreach ($karyawans->items() as $karyawan) {
@@ -116,13 +99,13 @@ class KepalaDepartemenController extends Controller
             $formattedData[] = [
                 'id' => $karyawan->id_user,
                 'name' => $karyawan->nama_lengkap,
-                'role' => 'Karyawan', // Or specific role string if you have it in user model
+                'role' => 'Karyawan',
                 'initials' => $initials,
                 'shifts' => $shiftsArr,
             ];
         }
 
-        $shifts = Shift::all();
+        $shifts = $this->jadwalService->getAllShifts();
 
         return response()->json([
             'employees' => $formattedData,
@@ -140,13 +123,7 @@ class KepalaDepartemenController extends Controller
     public function getAllKaryawan()
     {
         $deptId = Auth::check() ? Auth::user()->departemen_id : null;
-
-        $query = User::where('role', UserRole::Karyawan->value)->where('status', Status::Active->value);
-        if ($deptId) {
-            $query->where('departemen_id', $deptId);
-        }
-
-        $karyawans = $query->orderBy('nama_lengkap', 'asc')->get(['id_user', 'nama_lengkap']);
+        $karyawans = $this->userService->getActiveKaryawanListSimple($deptId);
 
         return response()->json($karyawans);
     }
@@ -183,21 +160,12 @@ class KepalaDepartemenController extends Controller
         $createdCount = 0;
 
         foreach ($request->user_ids as $userId) {
-            // Selesaikan jadwal yang tumpang tindih untuk karyawan ini sebelum membuat yang baru
-            (new \App\Services\JadwalService)->resolveOverlappingJadwal($userId, $request->start_date, $request->end_date);
-
-            $jadwal = Jadwal::create([
-                'status' => Status::Active->value,
-                'tanggal_mulai' => $request->start_date,
-                'tanggal_akhir' => $request->end_date,
-                'shift_id' => $request->shift_id,
-                'dibuat_oleh' => Auth::id() ?? 1,
-                'nama_periode' => 'Periode ' . Carbon::parse($request->start_date)->format('M Y'),
-            ]);
-
-            $user = User::find($userId);
-            if ($user) {
-                $user->jadwal()->attach($jadwal->id_jadwal);
+            $jadwal = $this->jadwalService->createJadwalForUser(
+                $userId,
+                $request->only(['start_date', 'end_date', 'shift_id']),
+                Auth::id() ?? 1
+            );
+            if ($jadwal) {
                 $createdJadwals[] = $jadwal;
                 $createdCount++;
             }
@@ -213,7 +181,7 @@ class KepalaDepartemenController extends Controller
      * Mengunduh berkas template jadwal Excel yang otomatis terisi
      * dengan nama dan email karyawan aktif di departemen terkait.
      */
-    public function downloadTemplateJadwal()
+    public function downloadTemplateJadwal(Request $request)
     {
         $templateFile = public_path('templates/tamplate_jadwal_ecogreen.xlsx');
 
@@ -228,13 +196,7 @@ class KepalaDepartemenController extends Controller
 
             // Ambil daftar karyawan aktif yang berada di departemen yang sama
             $deptId = Auth::check() ? Auth::user()->departemen_id : null;
-            $query = User::where('role', UserRole::Karyawan->value)->where('status', Status::Active->value);
-            
-            if ($deptId) {
-                $query->where('departemen_id', $deptId);
-            }
-            
-            $karyawans = $query->orderBy('nama_lengkap', 'asc')->get();
+            $karyawans = $this->userService->getActiveKaryawanList($deptId);
 
             // Isi nomor urut di kolom A dan nama_lengkap di kolom B mulai baris 15
             $startRow = 15;
@@ -248,6 +210,11 @@ class KepalaDepartemenController extends Controller
             $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
 
             $fileName = 'template_jadwal_karyawan_' . strtolower(str_replace(' ', '_', Auth::user()->nama_lengkap ?? 'departemen')) . '.xlsx';
+
+            $downloadToken = $request->input('download_token');
+            if ($downloadToken) {
+                setcookie('download_token', $downloadToken, time() + 60, '/');
+            }
 
             return response()->streamDownload(function () use ($writer) {
                 $writer->save('php://output');
@@ -276,11 +243,7 @@ class KepalaDepartemenController extends Controller
         $deptId = Auth::check() ? Auth::user()->departemen_id : null;
         $deptNama = Auth::user()->departemen->nama_departemen ?? 'Semua Departemen';
 
-        $query = User::where('role', UserRole::Karyawan->value)->where('status', Status::Active->value);
-        if ($deptId) {
-            $query->where('departemen_id', $deptId);
-        }
-        $karyawans = $query->orderBy('nama_lengkap', 'asc')->get();
+        $karyawans = $this->userService->getActiveKaryawanList($deptId);
 
         try {
             $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
@@ -329,22 +292,18 @@ class KepalaDepartemenController extends Controller
                 $sheet->setCellValue('B' . $currentRow, $karyawan->nama_lengkap);
 
                 // Ambil jadwal karyawan bulan ini
-                $jadwals = $karyawan->jadwal()
-                    ->where(function ($q) use ($startDate, $endDate) {
-                        $q->where('tanggal_mulai', '<=', $endDate->format('Y-m-d'))
-                          ->where('tanggal_akhir', '>=', $startDate->format('Y-m-d'));
-                    })
-                    ->with('shift')
-                    ->get();
+                $jadwals = $this->jadwalService->getJadwalUserByRange(
+                    $karyawan->id_user,
+                    $startDate->format('Y-m-d'),
+                    $endDate->format('Y-m-d')
+                );
 
                 // Ambil perizinan cuti & sakit bulan ini
-                $perizinans = \App\Models\PerizinanSakit::where('karyawan_id', $karyawan->id_user)
-                    ->where('status', 'disetujui')
-                    ->where(function ($q) use ($startDate, $endDate) {
-                        $q->where('tanggal_mulai', '<=', $endDate->format('Y-m-d'))
-                          ->where('tanggal_selesai', '>=', $startDate->format('Y-m-d'));
-                    })
-                    ->get();
+                $perizinans = $this->perizinanSakitService->getApprovedPerizinanByRange(
+                    $karyawan->id_user,
+                    $startDate->format('Y-m-d'),
+                    $endDate->format('Y-m-d')
+                );
 
                 for ($day = 1; $day <= $daysInMonth; $day++) {
                     $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2);
@@ -397,6 +356,11 @@ class KepalaDepartemenController extends Controller
             $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
             $fileName = 'Jadwal_Kerja_' . str_replace(' ', '_', $deptNama) . '_' . $bulanIndo . '_' . $year . '.xlsx';
 
+            $downloadToken = $request->input('download_token');
+            if ($downloadToken) {
+                setcookie('download_token', $downloadToken, time() + 60, '/');
+            }
+
             return response()->streamDownload(function () use ($writer) {
                 $writer->save('php://output');
             }, $fileName, [
@@ -409,4 +373,3 @@ class KepalaDepartemenController extends Controller
         }
     }
 }
-

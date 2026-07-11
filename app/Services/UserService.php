@@ -14,20 +14,20 @@ class UserService
     // CREATE user baru untuk user Super Admin, Kepala Departemen, Admin Vendor, dan HR
     // dipakai di:
     // UserManagement super Admin
-    public function generateUser($nama_lengkap, $email, $nomor_tlp, $role, $password, $departemen_id = null)
+    public function generateUser($nama, $email, $no_tlp, $role, $pass, $dept_id = null)
     {
         if(Auth::check() && Auth::user()->role !== UserRole::SuperAdmin->value) {
             throw new \Exception('Hanya Super Admin yang dapat membuat user baru.');
         }
         $query = User::create([
-            'nama_lengkap'  => $nama_lengkap,
+            'nama_lengkap'  => $nama,
             'email'         => $email,
-            'nomor_tlp'     => $nomor_tlp,
+            'nomor_tlp'     => $no_tlp,
             'role'          => $role,
-            'password'      => Hash::make($password),
+            'password'      => Hash::make($pass),
             'status'        => Status::Active->value,
             'user_id'       => Auth::id(),
-            'departemen_id' => $departemen_id,
+            'departemen_id' => $dept_id,
         ]);
 
         return $query;
@@ -79,7 +79,7 @@ class UserService
             ->get();
     }
 
-    
+
     public function getUserAdmin()
     {
         return User::where('role', UserRole::AdminVendor->value)
@@ -199,7 +199,7 @@ class UserService
      */
     public function getDepartemenById($deptId)
     {
-        return \App\Models\Departemen::find($deptId);
+        return Departemen::find($deptId);
     }
 
     /**
@@ -490,6 +490,65 @@ class UserService
             })
             ->orderBy('nama_lengkap')
             ->paginate($perPage);
+    }
+
+    public function getKaryawanPaginated(string $search = '', string $status = '', ?int $vendorId = null, int $perPage = 10)
+    {
+        $query = User::with('outsourcing')
+            ->where('role', UserRole::Karyawan->value);
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                  ->orWhere('nip', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if (!empty($status)) {
+            $query->where('status', $status);
+        }
+
+        if (!empty($vendorId)) {
+            $query->where('outsourcing_id', $vendorId);
+        }
+
+        return $query->paginate($perPage);
+    }
+
+    public function getKaryawanByOutsourcingWithDepartemen(int $outsourcingId)
+    {
+        return User::with('departemen')
+            ->where('role', UserRole::Karyawan->value)
+            ->where('outsourcing_id', $outsourcingId)
+            ->where('status', Status::Active->value)
+            ->whereNull('tanggal_keluar')
+            ->orderBy('nama_lengkap', 'asc')
+            ->get();
+    }
+
+    public function getActiveKaryawanList($deptId = null)
+    {
+        $query = User::where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Active->value);
+
+        if ($deptId) {
+            $query->where('departemen_id', $deptId);
+        }
+
+        return $query->orderBy('nama_lengkap', 'asc')->get();
+    }
+
+    public function getActiveKaryawanListSimple($deptId = null)
+    {
+        $query = User::where('role', UserRole::Karyawan->value)
+            ->where('status', Status::Active->value);
+
+        if ($deptId) {
+            $query->where('departemen_id', $deptId);
+        }
+
+        return $query->orderBy('nama_lengkap', 'asc')->get(['id_user', 'nama_lengkap']);
     }
 }
 

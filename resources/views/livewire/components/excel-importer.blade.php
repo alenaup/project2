@@ -4,9 +4,42 @@
         <p class="text-xs text-gray-500">Unduh berkas template terlebih dahulu untuk menginput data secara masal.</p>
 
         @if($templatePath)
-            <a href="{{ url($templatePath) }}" download class="text-xs text-green-700 hover:text-green-800 font-semibold flex items-center gap-1.5 mt-1.5 transition">
-                <i class="fas fa-download text-green-600"></i> Unduh Template Excel (.xlsx)
-            </a>
+            <div x-data="{
+                isDownloading: false,
+                startDownload(e) {
+                    if (this.isDownloading) {
+                        e.preventDefault();
+                        return;
+                    }
+                    this.isDownloading = true;
+                    let token = new Date().getTime().toString();
+                    let url = new URL(e.currentTarget.href, window.location.origin);
+                    url.searchParams.set('download_token', token);
+                    
+                    window.dispatchEvent(new CustomEvent('show-loading', { detail: { message: 'Mengunduh template...' } }));
+                    
+                    window.location.href = url.toString();
+                    
+                    let checkCookie = setInterval(() => {
+                        const match = document.cookie.match(new RegExp('(^| )download_token=([^;]+)'));
+                        if (match && match[2] == token) {
+                            clearInterval(checkCookie);
+                            this.isDownloading = false;
+                            document.cookie = 'download_token=; Max-Age=-99999999; path=/;';
+                            window.dispatchEvent(new CustomEvent('hide-loading'));
+                        }
+                    }, 500);
+                    e.preventDefault();
+                }
+            }">
+                <a href="{{ url($templatePath) }}" 
+                   @click="startDownload($event)"
+                   class="text-xs font-semibold flex items-center gap-1.5 mt-1.5 transition"
+                   :class="isDownloading ? 'text-gray-400 cursor-not-allowed pointer-events-none' : 'text-green-700 hover:text-green-800'">
+                    <i class="fas" :class="isDownloading ? 'fa-spinner fa-spin' : 'fa-download text-green-600'"></i> 
+                    <span x-text="isDownloading ? 'Mengunduh...' : 'Unduh Template Excel (.xlsx)'"></span>
+                </a>
+            </div>
         @endif
     </div>
 

@@ -2,7 +2,6 @@
 
 namespace App\Livewire\AdminOutsourcing;
 
-use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Services\KehadiranService;
 use App\Services\UserService;
@@ -13,8 +12,8 @@ class Grafik extends Component
     public $mode = 'tahunan';
     public $tahun;
     public $bulan;
-    public $listTahun = [];
-    public $listBulan = [];
+    public array $listTahun = [];
+    public array $listBulan = [];
     public $kehadiran;
 
     // fungsi ini untuk mengambil data yang ada di database
@@ -26,7 +25,7 @@ class Grafik extends Component
 
         // Mendapatkan daftar tahun dari data absensi karyawan outsourcing
         $karyawanIds = $userService->getOutsourcing();
-        
+
         $years = $kehadiranService->getYearsListByKaryawanIds($karyawanIds);
 
         if (empty($years)) {
@@ -42,6 +41,8 @@ class Grafik extends Component
         ];
     }
 
+    // melakukan auto update data jika memiliki data baru pada kolom
+    // output adalah pemanggilan method getChartData
     public function updated($propertyName)
     {
         // Emit event to update chart
@@ -50,6 +51,8 @@ class Grafik extends Component
         }
     }
 
+    // mengirim data kehadiran kkaryawan yang memiliki outsourcing yang sama 
+    // output adalah data array kehadiran karaywan 
     public function getChartData()
     {
         $userService = app(UserService::class);
@@ -77,8 +80,8 @@ class Grafik extends Component
             $dataTerlambat = array_fill(0, 12, 0);
 
             $kehadiran = $kehadiranService->getKehadiranByKaryawanIdsAndYear($karyawanIds, $tahun);
-                
-            foreach ($kehadiran as $absen) { 
+
+            foreach ($kehadiran as $absen) {
 
                 $bulanIndex = (int) date('m', strtotime($absen->tanggal)) - 1;
 
@@ -135,7 +138,7 @@ class Grafik extends Component
         $dataTerlambat = array_fill(0, $jumlahHari, 0);
 
         $kehadiran = $kehadiranService->ambilBanyaklKehadiranRange($karyawanIds, $this->bulan, $tahun);
-        
+
 
         foreach ($kehadiran as $absen) {
 
