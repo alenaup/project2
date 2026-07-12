@@ -43,7 +43,7 @@
                 startExport() {
                     const token = 'export_' + Date.now();
                     const url = new URL('{{ route('admin.export_absensi') }}', window.location.origin);
-                    url.searchParams.set('rekap_bulan', @js($rekapBulan));
+                    url.searchParams.set('rekap_bulan', $wire.rekapBulan);
                     url.searchParams.set('download_token', token);
                     
                     this.$dispatch('show-loading', { message: 'Menyiapkan file Excel...' });
