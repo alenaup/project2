@@ -34,11 +34,16 @@
                     iframe.src = url.toString();
                     document.body.appendChild(iframe);
                     
+                    let attempts = 0;
+                    const maxAttempts = 40; // Maksimal 10 detik (40 * 250ms)
                     const checkCookie = setInterval(() => {
+                        attempts++;
                         const match = document.cookie.match(new RegExp('(^| )download_token=([^;]+)'));
-                        if (match && match[2] === token) {
+                        if ((match && match[2] === token) || attempts >= maxAttempts) {
                             clearInterval(checkCookie);
-                            document.cookie = 'download_token=; Max-Age=-99999999; path=/;';
+                            if (match && match[2] === token) {
+                                document.cookie = 'download_token=; Max-Age=-99999999; path=/;';
+                            }
                             this.$dispatch('hide-loading');
                             document.body.removeChild(iframe);
                         }
