@@ -1,1 +1,1 @@
-web: php artisan serve --host=0.0.0.0 --port=$PORT
+web: mkdir -p storage/app/livewire-tmp storage/framework/cache storage/framework/sessions storage/framework/views storage/logs && php -d upload_max_filesize=50M -d post_max_size=50M -d memory_limit=256M artisan serve --host=0.0.0.0 --port=$PORT
