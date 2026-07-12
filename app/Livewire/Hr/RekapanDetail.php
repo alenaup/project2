@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\HR;
+namespace App\Livewire\Hr;
 
 use Livewire\Component;
 use App\Models\User;

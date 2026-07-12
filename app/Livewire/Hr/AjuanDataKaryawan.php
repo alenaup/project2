@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\HR;
+namespace App\Livewire\Hr;
 use App\Services\UserService;
 use Livewire\Component;
 use Livewire\WithPagination;
