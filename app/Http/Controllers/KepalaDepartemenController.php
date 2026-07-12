@@ -350,7 +350,7 @@ class KepalaDepartemenController extends Controller
             // Penarikan data kolektif (Eager loading) untuk menghindari query berulang (N+1 Query)
             $allJadwals = \App\Models\Jadwal::whereIn('id_jadwal', function($q) use ($userIds) {
                 $q->select('jadwal_id')
-                    ->from('user_jadwal')
+                    ->from('karyawan_jadwal')
                     ->whereIn('user_id', $userIds);
             })
             ->where('tanggal_mulai', '<=', $endDate->format('Y-m-d'))
@@ -365,7 +365,7 @@ class KepalaDepartemenController extends Controller
             }
             // Karena relasi user-jadwal adalah many-to-many, kita bisa ambil relasi pivot atau query bridge.
             // Untuk mempermudah dan tetap cepat, mari ambil data pivot:
-            $pivotData = \Illuminate\Support\Facades\DB::table('user_jadwal')
+            $pivotData = \Illuminate\Support\Facades\DB::table('karyawan_jadwal')
                 ->whereIn('user_id', $userIds)
                 ->get()
                 ->groupBy('user_id');
