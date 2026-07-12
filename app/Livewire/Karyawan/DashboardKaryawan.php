@@ -54,7 +54,7 @@ class DashboardKaryawan extends Component
         }
 
         // mengembalikan data ke view
-        return view('livewire.Karyawan.dashboard-karyawan', [
+        return view('livewire.karyawan.dashboard-karyawan', [
             'tipe_kehadiran' => $this->tipe_kehadiran,
             'jadwal' => $this->jadwal,
             'shift' => $this->shift,

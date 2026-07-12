@@ -130,6 +130,6 @@ class FormPerizinanSakit extends Component
 
     public function render()
     {
-        return view('livewire.Karyawan.form-perizinan-sakit');
+        return view('livewire.karyawan.form-perizinan-sakit');
     }
 }

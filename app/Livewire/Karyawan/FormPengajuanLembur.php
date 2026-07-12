@@ -78,7 +78,7 @@ class FormPengajuanLembur extends Component
             $user = \App\Models\User::first();
         }
 
-        return view('livewire.Karyawan.form-pengajuan-lembur', [
+        return view('livewire.karyawan.form-pengajuan-lembur', [
             'user' => $user,
         ]);
     }

@@ -131,7 +131,7 @@ class JadwalKaryawan extends Component
 
         $calendarData = $this->getJadwalData();
 
-        return view('livewire.Karyawan.jadwal-karyawan', [
+        return view('livewire.karyawan.jadwal-karyawan', [
             'monthName' => $monthName,
             'daysInMonth' => $daysInMonth,
             'firstDayOfWeek' => $firstDayOfWeek,

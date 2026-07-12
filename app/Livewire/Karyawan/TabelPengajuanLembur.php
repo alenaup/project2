@@ -98,7 +98,7 @@ class TabelPengajuanLembur extends Component
 
         $pengajuan = $query->latest('created_at')->paginate(10);
 
-        return view('livewire.Karyawan.tabel-pengajuan-lembur', [
+        return view('livewire.karyawan.tabel-pengajuan-lembur', [
             'pengajuan' => $pengajuan,
         ]);
     }

@@ -173,7 +173,7 @@ class DashboardAbsensi extends Component
 
     public function render()
     {
-        return view('livewire.Karyawan.dashboard-absensi', [
+        return view('livewire.karyawan.dashboard-absensi', [
             'jamMasuk'              => $this->jamMasuk,
             'jamKeluar'             => $this->jamKeluar,
             'kehadiranSudahTerisi'  => $this->kehadiranSudahTerisi,

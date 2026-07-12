@@ -96,7 +96,7 @@ class RiwayatPerizinanSakit extends Component
 
         $riwayat = $query->orderBy('created_at', 'desc')->get();
 
-        return view('livewire.Karyawan.riwayat-perizinan-sakit', [
+        return view('livewire.karyawan.riwayat-perizinan-sakit', [
             'riwayat' => $riwayat,
         ]);
     }

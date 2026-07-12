@@ -182,7 +182,7 @@ class GrafikRekapKehadiran extends Component
 
     public function render()
     {
-        return view('livewire.Karyawan.grafik-rekap-kehadiran', [
+        return view('livewire.karyawan.grafik-rekap-kehadiran', [
             'chartData' => $this->getChartData(),
         ]);
     }
