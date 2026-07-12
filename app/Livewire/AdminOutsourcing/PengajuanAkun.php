@@ -77,6 +77,7 @@ class PengajuanAkun extends Component
         ], auth()->id(), auth()->user()->outsourcing_id);
 
         session()->flash('success', '✅ Pengajuan data karyawan berhasil dikirim.');
+        $this->dispatch('flash-success', message: 'Pengajuan data karyawan berhasil dikirim.');
 
         $this->resetForm();
         $this->dispatch('close-add-modal');
@@ -103,8 +104,10 @@ class PengajuanAkun extends Component
 
         if ($success) {
             session()->flash('success', '🗑️ Pengajuan data karyawan berhasil dibatalkan.');
+            $this->dispatch('flash-success', message: 'Pengajuan data karyawan berhasil dibatalkan.');
         } else {
             session()->flash('error', 'Gagal membatalkan pengajuan.');
+            $this->dispatch('flash-error', message: 'Gagal membatalkan pengajuan.');
         }
 
         $this->selectedId = null;
@@ -169,8 +172,10 @@ class PengajuanAkun extends Component
 
         if ($success) {
             session()->flash('success', '✅ Pengajuan data karyawan berhasil diperbarui dan dikirim kembali.');
+            $this->dispatch('flash-success', message: 'Pengajuan data karyawan berhasil diperbarui dan dikirim kembali.');
         } else {
             session()->flash('error', 'Gagal mengirim kembali pengajuan.');
+            $this->dispatch('flash-error', message: 'Gagal mengirim kembali pengajuan.');
         }
 
         $this->closeEdit();
@@ -289,6 +294,7 @@ class PengajuanAkun extends Component
 
             $this->reset('fileExcel');
             session()->flash('success', ' Pengajuan data karyawan dari Excel berhasil diimpor.');
+            $this->dispatch('flash-success', message: 'Pengajuan data karyawan dari Excel berhasil diimpor.');
             $this->dispatch('close-import-modal');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
@@ -299,9 +305,14 @@ class PengajuanAkun extends Component
                 $errs = implode(', ', $failure->errors());
                 $errors[] = "Baris {$row} (Kolom {$attribute}): {$errs}";
             }
-            session()->flash('error', 'Gagal Impor: ' . ($errors[0] ?? 'Data tidak valid'));
+            $errorMsg = 'Gagal Impor: ' . ($errors[0] ?? 'Data tidak valid');
+            session()->flash('error', $errorMsg);
+            $this->dispatch('flash-error', message: $errorMsg);
+            $this->dispatch('close-import-modal');
         } catch (\Exception $e) {
-            session()->flash('error', 'Gagal mengimpor file. Pastikan format kolom sesuai dengan template.');
+            $errorMsg = 'Gagal mengimpor file. Pastikan format kolom sesuai dengan template.';
+            session()->flash('error', $errorMsg);
+            $this->dispatch('flash-error', message: $errorMsg);
         }
     }
 
