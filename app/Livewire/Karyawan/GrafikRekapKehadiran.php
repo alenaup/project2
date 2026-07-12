@@ -120,11 +120,7 @@ class GrafikRekapKehadiran extends Component
         // MODE BULANAN
         // ==========================
 
-        $jumlahHari = cal_days_in_month(
-            CAL_GREGORIAN,
-            $this->bulan,
-            $tahun
-        );
+        $jumlahHari = \Carbon\Carbon::createFromDate($tahun, $this->bulan, 1)->daysInMonth;
 
         $labels = range(1, $jumlahHari);
 
