@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminOutsourcingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\KaryawanController;
+use App\Http\Controllers\JadwalKaryawanController;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
