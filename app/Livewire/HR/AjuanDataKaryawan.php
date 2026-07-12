@@ -1,9 +1,6 @@
 <?php
 
 namespace App\Livewire\HR;
-
-use App\Enums\Status;
-use App\Enums\UserRole;
 use App\Services\UserService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -194,9 +191,9 @@ class AjuanDataKaryawan extends Component
     /**
      * Lanjutkan proses setujui berdasarkan user terpilih.
      */
-    public function proceedApproveConfirm(): void
+    public function proceedApproveConfirm(UserService $userService): void
     {
-        $this->approve($this->selectedUserId);
+        $this->approve($this->selectedUserId, $userService);
         $this->showApproveModal = false;
     }
 
@@ -256,7 +253,7 @@ class AjuanDataKaryawan extends Component
      */
     // melakukan penolakan ajuan karyawan outsourcing, mengubah status user menjadi inactive, dan menampilkan pesan sukses
     // input ID user (opsional) dan alasan penolakan, memberikan output status user berubah menjadi inactive dan pesan sukses
-    public function reject(?int $userId = null, User
+   
     public function reject(UserService $userService): void
     {
         $this->validate([

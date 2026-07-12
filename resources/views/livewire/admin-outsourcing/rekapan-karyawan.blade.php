@@ -1,16 +1,4 @@
 <div x-data="{ showKirimUlangModal: false }">
-    @if (session()->has('success'))
-        <div class="mb-4 p-4 text-sm text-green-700 bg-green-100 rounded-lg flex items-center gap-2" role="alert">
-            <i class="fa-solid fa-circle-check text-base"></i>
-            <div><span class="font-medium">Sukses!</span> {{ session('success') }}</div>
-        </div>
-    @endif
-    @if (session()->has('error'))
-        <div class="mb-4 p-4 text-sm text-red-700 bg-red-100 rounded-lg flex items-center gap-2" role="alert">
-            <i class="fa-solid fa-circle-xmark text-base"></i>
-            <div><span class="font-medium">Gagal!</span> {{ session('error') }}</div>
-        </div>
-    @endif
     <div wire:id="{{ $this->getId() }}">
 
         {{-- ─── Stat Cards Grid ───────────────────────────────── --}}

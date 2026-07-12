@@ -230,6 +230,31 @@ class KehadiranService
             ];
         }
 
+        // Validasi tidak bisa absen keluar sebelum waktu shift selesai
+        if (!empty($data['jamKeluar'])) {
+            $jamMasuk = $data['jamMasuk'] ?? '00:00:00';
+            $jamKeluar = $data['jamKeluar'];
+            
+            $isShiftMalam = $jamMasuk > $jamKeluar;
+            $tanggalShift = Carbon::parse($kehadiran->tanggal);
+            
+            if ($isShiftMalam) {
+                $tanggalShiftKeluar = $tanggalShift->copy()->addDay()->toDateString();
+            } else {
+                $tanggalShiftKeluar = $tanggalShift->toDateString();
+            }
+            
+            $batasMinimalKeluar = Carbon::parse($tanggalShiftKeluar . ' ' . $jamKeluar);
+            $waktuSekarang = Carbon::parse($data['waktu']);
+            
+            if ($waktuSekarang->lessThan($batasMinimalKeluar)) {
+                return [
+                    'success' => false,
+                    'message' => 'Anda belum bisa melakukan absen keluar. Waktu shift Anda baru berakhir pada pukul ' . $batasMinimalKeluar->format('H:i') . '.',
+                ];
+            }
+        }
+
         $kehadiran->update([
             'waktu_keluar' => $data['waktu'],
             'latitude_keluar' => $data['latitude'],

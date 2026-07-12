@@ -236,7 +236,7 @@
     <!-- MODAL PREVIEW -->
     <div x-show="openPreview" x-cloak x-transition
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-        <div @click.away="openPreview = false" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative">
+        <div @click.outside="openPreview = false" class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden relative">
             <div class="flex items-center justify-between px-5 py-4 border-b bg-gray-50">
                 <h3 class="font-semibold text-gray-800 truncate pr-4">Preview Surat Sakit</h3>
                 <button type="button" @click="openPreview = false" class="text-gray-400 hover:text-gray-600 transition text-xl">
@@ -244,18 +244,18 @@
                 </button>
             </div>
 
-            <div class="p-5 flex justify-center bg-gray-100 max-h-[70vh] overflow-auto w-full">
+            <div class="p-5 flex justify-center bg-gray-100 max-h-[80vh] overflow-auto w-full">
                 <div x-show="previewType === 'image'" class="w-full flex justify-center">
                     <img :src="previewUrl" alt="Preview Surat" class="rounded-lg shadow max-w-full object-contain">
                 </div>
-                <div x-show="previewType === 'pdf'" class="text-center py-10 text-gray-500 w-full">
-                    <i class="fa-solid fa-file-pdf text-red-400 text-6xl mb-4 block"></i>
-                    <p class="font-medium text-lg">File PDF</p>
-                    <p class="text-sm mt-1 mb-6">Silakan unduh untuk melihat isinya secara penuh.</p>
-                    <a :href="previewUrl" download target="_blank"
-                        class="inline-block bg-emerald-600 text-white px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-emerald-700 transition shadow-sm">
-                        <i class="fa-solid fa-download mr-1"></i> Unduh File PDF
-                    </a>
+                <div x-show="previewType === 'pdf'" class="w-full">
+                    <iframe :src="previewUrl" class="w-full h-[55vh] border border-gray-200 rounded-lg bg-white mb-4"></iframe>
+                    <div class="text-center">
+                        <a :href="previewUrl" download target="_blank"
+                            class="inline-block bg-emerald-600 text-white px-5 py-2 rounded-lg text-xs font-semibold hover:bg-emerald-700 transition shadow-sm">
+                            <i class="fa-solid fa-download mr-1"></i> Unduh File PDF
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>

@@ -131,12 +131,12 @@ class PengajuanKaryawan extends Component
         $perizinan = $perizinanSakitService->updateStatus($this->selectedId, 'disetujui');
 
         if (!$perizinan) {
-            session()->flash('error', 'Data pengajuan tidak ditemukan.');
+            $this->dispatch('flash-error', message: 'Data pengajuan tidak ditemukan.');
             $this->closeApprove();
             return;
         }
 
-        session()->flash('success', "✅ Pengajuan dari {$perizinan->karyawan->nama_lengkap} telah diterima.");
+        $this->dispatch('flash-success', message: "✅ Pengajuan dari {$perizinan->karyawan->nama_lengkap} telah diterima.");
 
         $this->closeApprove();
         $this->showDetailModal = false;
@@ -198,12 +198,12 @@ class PengajuanKaryawan extends Component
         $perizinan = $perizinanSakitService->updateStatus($this->selectedId, 'ditolak');
 
         if (!$perizinan) {
-            session()->flash('error', 'Data pengajuan tidak ditemukan.');
+            $this->dispatch('flash-error', message: 'Data pengajuan tidak ditemukan.');
             $this->closeReject();
             return;
         }
 
-        session()->flash('success', "Pengajuan dari {$perizinan->karyawan->nama_lengkap} telah ditolak.");
+        $this->dispatch('flash-success', message: "Pengajuan dari {$perizinan->karyawan->nama_lengkap} telah ditolak.");
 
         $this->closeReject();
         $this->showDetailModal = false;

@@ -29,17 +29,17 @@ class DashboardStats extends Component
     // query count untuk masing-masing role pengguna
     public function getTotalAdminVendorProperty(): int
     {
-        return $this->userService->getUserAdmin()->count();
+        return $this->userService->getUserAdmin('count');
     }
 
     public function getTotalHrProperty(): int
     {
-        return $this->userService->getUserHr()->count();
+        return $this->userService->getUserHr('count');
     }
 
     public function getTotalKepalaDepartemenProperty(): int
     {
-        return $this->userService->getUserKepalaDepartemen()->count();
+        return $this->userService->getUserKepalaDepartemen('count');
     }
 
     // menghitung total pengguna dengan menjumlahkan semua role

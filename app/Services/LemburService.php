@@ -143,14 +143,19 @@ class LemburService
 
     public function createLembur($tanggal_lembur, $jam_mulai, $jam_selesai, $keterangan)
     {
+        $karyawanId = Auth::id();
+        if (!$karyawanId) {
+            throw new \Exception('Aksi tidak sah: Anda harus masuk ke sistem untuk melakukan pengajuan lembur.');
+        }
+
         return Lembur::create([
             'mulai_lembur'    => $tanggal_lembur . ' ' . $jam_mulai . ':00',
             'selesai_lembur'  => $tanggal_lembur . ' ' . $jam_selesai . ':00',
-            'created_at'  => now(),
+            'created_at'      => now(),
             'status'          => 'active',
             'status_validasi' => 'pending',
             'keterangan'      => $keterangan,
-            'karyawan_id'     => Auth::id() ?? User::first()->id_user,
+            'karyawan_id'     => $karyawanId,
         ]);
     }
 

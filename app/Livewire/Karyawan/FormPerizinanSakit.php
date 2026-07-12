@@ -17,10 +17,25 @@ class FormPerizinanSakit extends Component
     public $keterangan;
 
     public $file_surat;
+    
+    public $latitude;
+    public $longitude;
+    public $perluAbsenKeluar = false;
+
+    public function mount()
+    {
+        // Cek apakah karyawan saat ini sudah absen masuk tapi belum keluar
+        $kehadiranService = new \App\Services\KehadiranService;
+        $kehadiran = $kehadiranService->cekKehadiran();
+
+        if ($kehadiran && $kehadiran->waktu_masuk && !$kehadiran->waktu_keluar) {
+            $this->perluAbsenKeluar = true;
+        }
+    }
 
     public function rules()
     {
-        return [
+        $rules = [
             'tanggal_mulai' => [
                 'required',
                 'date',
@@ -41,12 +56,19 @@ class FormPerizinanSakit extends Component
             ],
 
             'file_surat' => [
-                'required',
+                'nullable',
                 'file',
                 'mimes:jpg,jpeg,png,pdf',
                 'max:5120',
             ],
         ];
+        
+        if ($this->perluAbsenKeluar) {
+            $rules['latitude'] = 'required';
+            $rules['longitude'] = 'required';
+        }
+
+        return $rules;
     }
 
     public function messages()
@@ -56,9 +78,10 @@ class FormPerizinanSakit extends Component
             'tanggal_selesai.required' => 'Tanggal selesai wajib diisi.',
             'tanggal_selesai.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
             'keterangan.required' => 'Keterangan wajib diisi.',
-            'file_surat.required' => 'Surat keterangan sakit wajib diunggah.',
             'file_surat.mimes' => 'Format file harus berupa JPG, PNG, atau PDF.',
             'file_surat.max' => 'Ukuran file maksimal 5MB.',
+            'latitude.required' => 'Lokasi harus diambil karena Anda perlu melakukan absen keluar otomatis.',
+            'longitude.required' => 'Lokasi harus diambil karena Anda perlu melakukan absen keluar otomatis.',
         ];
     }
 
@@ -66,7 +89,7 @@ class FormPerizinanSakit extends Component
     {
         $this->validate();
 
-        $path = $this->file_surat->store('surat_sakit', 'public');
+        $path = $this->file_surat ? $this->file_surat->store('surat_sakit', 'public') : null;
 
         (new PerizinanSakitService)->membuatFormulir(
             $this->tanggal_mulai,
@@ -75,9 +98,34 @@ class FormPerizinanSakit extends Component
             $path
         );
 
-        $this->reset(['tanggal_mulai', 'tanggal_selesai', 'keterangan', 'file_surat']);
+        $wasCheckedOut = false;
+        if ($this->perluAbsenKeluar) {
+            $kehadiranService = new \App\Services\KehadiranService;
+            $kehadiran = $kehadiranService->cekKehadiran();
+            if ($kehadiran) {
+                $kehadiran->update([
+                    'waktu_keluar' => now(),
+                    'latitude_keluar' => $this->latitude,
+                    'longitude_keluar' => $this->longitude,
+                ]);
+            }
+            $this->perluAbsenKeluar = false;
+            $wasCheckedOut = true;
+        }
+
+        $this->resetForm(true);
         $this->dispatch('perizinan-dikirim');
-        session()->flash('success', 'Pengajuan izin sakit berhasil dikirim!');
+        session()->flash('success', 'Pengajuan izin sakit berhasil dikirim' . ($wasCheckedOut ? ' dan Anda telah otomatis diabsen keluar!' : '!'));
+    }
+
+    public function resetForm($isSubmit = false)
+    {
+        $this->reset(['tanggal_mulai', 'tanggal_selesai', 'keterangan', 'file_surat', 'latitude', 'longitude']);
+        $this->resetValidation();
+        
+        if (!$isSubmit) {
+            $this->dispatch('form-reset');
+        }
     }
 
     public function render()

@@ -57,11 +57,17 @@ class FormPengajuanLembur extends Component
 
         $this->validate();
 
-        (new LemburService)->createLembur();
+        (new LemburService)->createLembur(
+            $this->tanggal_lembur,
+            $this->jam_mulai,
+            $this->jam_selesai,
+            $this->keterangan
+        );
 
         $this->reset(['tanggal_lembur', 'jam_mulai', 'jam_selesai', 'keterangan']);
         $this->resetValidation();
         $this->dispatch('lembur-diajukan');
+        $this->dispatch('flash-success', message: 'Pengajuan lembur berhasil dikirim!');
         session()->flash('success', 'Pengajuan lembur berhasil dikirim!');
     }
 

@@ -18,7 +18,7 @@
 
         <form wire:submit.prevent="submitForm">
             <div class="p-6 space-y-4">
-                
+
                 @if(session('success'))
                     <div class="bg-emerald-50 text-emerald-600 px-4 py-3 rounded-lg text-sm font-semibold flex items-center gap-2 mb-2">
                         <i class="fa-solid fa-circle-check"></i>
@@ -56,7 +56,7 @@
 
                 <div>
                     <label class="text-sm font-semibold text-gray-700 block mb-2">
-                        Upload Surat Sakit <span class="text-red-500">*</span>
+                        Upload Surat Sakit <span class="text-red-500">( oppsional )</span>
                     </label>
 
                     @if($file_surat)
@@ -82,9 +82,37 @@
                             <input type="file" wire:model.live="file_surat" accept=".jpg,.jpeg,.png,.pdf" class="hidden">
                         </label>
                     @endif
-                    
+
                     @error('file_surat') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                 </div>
+                
+                @if($perluAbsenKeluar)
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mt-4">
+                    <div class="flex items-start gap-3 mb-3">
+                        <i class="fa-solid fa-info-circle text-blue-500 mt-0.5"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-blue-800">Absen Keluar Otomatis</p>
+                            <p class="text-xs text-blue-600">Anda saat ini sedang berstatus masuk kerja. Pengajuan izin akan otomatis melakukan absen keluar. Silakan ambil lokasi Anda saat ini.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative z-10 space-y-2">
+                        <div class="flex items-center gap-2 mb-2">
+                            <button onclick="ambilLokasiForm()" type="button"
+                                class="bg-blue-100 text-blue-600 px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-200 transition flex items-center justify-center gap-2">
+                                <i class="fas fa-location-arrow"></i>
+                                Ambil Lokasi
+                            </button>
+                            <span id="infoLokasiForm" class="text-xs text-gray-500">Lokasi belum diambil</span>
+                        </div>
+                        
+                        <!-- Input hidden untuk bind model -->
+                        <input type="hidden" wire:model="latitude">
+                        <input type="hidden" wire:model="longitude">
+                        @error('latitude') <span class="text-xs text-red-500 block">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+                @endif
 
             </div>
 
@@ -97,7 +125,7 @@
                     <i class="fa-solid fa-paper-plane"></i>
                     Kirim Pengajuan
                 </button>
-                <button type="button" wire:click="reset(['tanggal_mulai', 'tanggal_selesai', 'keterangan', 'file_surat'])"
+                <button type="button" wire:click="resetForm"
                     class="flex-1 md:flex-none bg-gray-100 hover:bg-gray-200 active:scale-95 text-gray-600 py-3 px-8 rounded-lg font-semibold transition-all duration-200">
                     Reset
                 </button>
@@ -115,6 +143,43 @@
                 }
             }, 50);
         });
+
+        $wire.on('form-reset', () => {
+            const infoText = document.getElementById('infoLokasiForm');
+            if (infoText) {
+                infoText.innerHTML = 'Lokasi belum diambil';
+                infoText.className = 'text-xs text-gray-500';
+            }
+        });
+        
+        window.ambilLokasiForm = function() {
+            const infoText = document.getElementById('infoLokasiForm');
+            
+            if (!navigator.geolocation) {
+                infoText.innerHTML = '<span class="text-red-500">Geolocation tidak didukung oleh browser Anda.</span>';
+                return;
+            }
+
+            infoText.innerHTML = '<span class="text-blue-500"><i class="fas fa-spinner fa-spin mr-1"></i> Mengambil lokasi...</span>';
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = document.coords ? position.coords.longitude : position.coords.longitude; // typo fix
+                    
+                    @this.set('latitude', lat);
+                    @this.set('longitude', lng);
+                    
+                    infoText.innerHTML = `<span class="text-emerald-600 font-medium"><i class="fas fa-check-circle mr-1"></i> Lokasi berhasil didapatkan.</span>`;
+                },
+                (error) => {
+                    let errMsg = 'Gagal mendapatkan lokasi.';
+                    if (error.code === error.PERMISSION_DENIED) errMsg = 'Izin akses lokasi ditolak.';
+                    infoText.innerHTML = `<span class="text-red-500"><i class="fas fa-times-circle mr-1"></i> ${errMsg}</span>`;
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
     </script>
     @endscript
 </div>

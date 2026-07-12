@@ -16,7 +16,7 @@ class UserService
     // UserManagement super Admin
     public function generateUser($nama, $email, $no_tlp, $role, $pass, $dept_id = null)
     {
-        if(Auth::check() && Auth::user()->role !== UserRole::SuperAdmin->value) {
+        if(Auth::check() && Auth::user()->role !== UserRole::SuperAdmin) {
             throw new \Exception('Hanya Super Admin yang dapat membuat user baru.');
         }
         $query = User::create([
@@ -72,26 +72,44 @@ class UserService
             ->get();
     }
 
-    public function getUserKepalaDepartemen()
+    public function getUserKepalaDepartemen($fungsi)
     {
-        return User::where('role', UserRole::KepalaDepartemen->value)
+        if ($fungsi == 'array') {
+            return User::where('role', UserRole::KepalaDepartemen->value)
             ->where('status', Status::Active->value)
             ->get();
+        } else if( $fungsi == 'count'){
+            return User::where('role', UserRole::KepalaDepartemen->value)
+            ->where('status', Status::Active->value)
+            ->count();
+        }
     }
 
 
-    public function getUserAdmin()
+    public function getUserAdmin($fungsi)
     {
-        return User::where('role', UserRole::AdminVendor->value)
+        if ($fungsi == 'array') {
+            return User::where('role', UserRole::AdminVendor->value)
             ->where('status', Status::Active->value)
             ->get();
+        } else if( $fungsi == 'count'){
+            return User::where('role', UserRole::AdminVendor->value)
+            ->where('status', Status::Active->value)
+            ->count();
+        }
     }
 
-    public function getUserHr()
+    public function getUserHr($fungsi)
     {
-        return User::where('role', UserRole::Hr->value)
-            ->where('status', Status::Active->value)
-            ->get();
+        if ($fungsi == 'array') {
+            return User::where('role', UserRole::Hr->value)
+                ->where('status', Status::Active->value)
+                ->get();
+        } else if ($fungsi == 'count') {
+            return User::where('role', UserRole::Hr->value)
+                ->where('status', Status::Active->value)
+                ->count();
+        }
     }
 
     public function getUserKaryawanByDepartemen($departemen)
@@ -129,7 +147,7 @@ class UserService
 
     public function getOutsourcing()
     {
-        if (!Auth::check()) {
+        if (!Auth::check() || !Auth::user()->outsourcing_id) {
             return [];
         }
         $query = User::where('outsourcing_id', Auth::user()->outsourcing_id)
@@ -355,7 +373,7 @@ class UserService
         return User::create([
             'nama_lengkap' => $data['nama_lengkap'],
             'email' => $data['email'],
-            'password' => bcrypt('admin123'),
+            'password' => bcrypt($data['email']),
             'nomor_tlp' => $data['nomor_tlp'],
             'alamat' => $data['alamat'],
             'nip' => 'NIP-' . ltrim(str_replace('NIP-', '', $data['nip'])),
@@ -465,6 +483,21 @@ class UserService
         $user = User::find($userId);
         if ($user) {
             $user->delete();
+        }
+        return $user;
+    }
+
+    /**
+     * Menonaktifkan karyawan (soft delete via status).
+     */
+    public function deactivateKaryawan(int $userId): ?User
+    {
+        $user = User::find($userId);
+        if ($user) {
+            $user->update([
+                'status' => Status::Inactive->value,
+                'tanggal_keluar' => now()->toDateString(), // Mencatat tanggal keluar
+            ]);
         }
         return $user;
     }

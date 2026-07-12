@@ -10,9 +10,19 @@ use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 
-class UsersImport implements ToModel, WithHeadingRow, WithValidation
+class UsersImport implements ToModel, WithHeadingRow, WithValidation, SkipsEmptyRows
 {
+    protected $role;
+    protected $departemenId;
+
+    public function __construct(UserRole $role, ?int $departemenId = null)
+    {
+        $this->role = $role;
+        $this->departemenId = $departemenId;
+    }
+
     /**
      * Map each row of Excel into the User model.
      *
@@ -21,23 +31,15 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation
      */
     public function model(array $row)
     {
-        $roleString = strtolower(trim($row['role']));
-
-        $role = match($roleString) {
-            'admin_outsourcing' => UserRole::AdminVendor,
-            'hr'                => UserRole::Hr,
-            'kepala_departemen' => UserRole::KepalaDepartemen,
-            default             => UserRole::AdminVendor, // fallback
-        };
-
         return new User([
-            'nama_lengkap' => $row['nama_lengkap'],
-            'email'        => $row['email'],
-            'nomor_tlp'    => $row['nomor_tlp'] ?? null,
-            'role'         => $role,
-            'password'     => Hash::make($row['password']),
-            'status'       => Status::Active->value,
-            'user_id'      => Auth::id(),
+            'nama_lengkap'  => $row['nama_lengkap'],
+            'email'         => $row['email'],
+            'nomor_tlp'     => $row['nomor_tlp'] ?? null,
+            'role'          => $this->role->value,
+            'departemen_id' => $this->departemenId,
+            'password'      => Hash::make($row['password']),
+            'status'        => Status::Active->value,
+            'user_id'       => Auth::id(),
         ]);
     }
 
@@ -52,20 +54,19 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation
             'nama_lengkap' => 'required|string|max:255',
             'email'        => 'required|email|unique:user,email',
             'nomor_tlp'    => 'nullable|string|max:20',
-            'role'         => 'required|in:admin_outsourcing,hr,kepala_departemen',
             'password'     => 'required|string|min:8',
         ];
     }
 
     /**
-     * Tentukan bahwa heading kolom berada pada baris ke-9.
-     * Data sesungguhnya akan diimpor mulai dari baris ke-10.
+     * Tentukan bahwa heading kolom berada pada baris ke-8.
+     * Data sesungguhnya akan diimpor mulai dari baris ke-9.
      *
      * @return int
      */
     public function headingRow(): int
     {
-        return 9;
+        return 8;
     }
 
     /**
@@ -89,17 +90,12 @@ class UsersImport implements ToModel, WithHeadingRow, WithValidation
             $data['email'] = (string) $data['email'];
         }
 
-        // 3. Cast role ke string
-        if (isset($data['role']) && $data['role'] !== null) {
-            $data['role'] = (string) $data['role'];
-        }
-
-        // 4. Cast password ke string (mengatasi password angka murni)
+        // 3. Cast password ke string (mengatasi password angka murni)
         if (isset($data['password']) && $data['password'] !== null) {
             $data['password'] = (string) $data['password'];
         }
 
-        // 5. Cast nomor_tlp ke string dan kembalikan angka 0 jika terpotong
+        // 4. Cast nomor_tlp ke string dan kembalikan angka 0 jika terpotong
         if (isset($data['nomor_tlp']) && $data['nomor_tlp'] !== null) {
             $data['nomor_tlp'] = (string) $data['nomor_tlp'];
 

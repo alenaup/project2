@@ -458,7 +458,7 @@ class="space-y-6">
                         <p class="text-xs text-emerald-800">Unduh template Excel dengan judul Ecogreen Outsourcing dan aturan pengisian data.</p>
                     </div>
                     <button type="button" 
-                            @click="$dispatch('show-loading', { message: 'Mengunduh template...' }); $wire.downloadTemplate()"
+                            @click="$dispatch('show-loading', { message: 'Mengunduh template...' }); $wire.downloadTemplate().then(() => $dispatch('hide-loading'))"
                             class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-xs whitespace-nowrap cursor-pointer">
                         <i class="fa-solid fa-download"></i> Unduh
                     </button>

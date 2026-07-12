@@ -126,7 +126,7 @@ Route::middleware('auth')->group(function () {
     Route::get(
     '/karyawan-outsourcing/jadwal-karyawan/pdf/{year}/{month}',
     [JadwalKaryawanController::class, 'exportPdf']
-);
+    );
 
     Route::get('/karyawan-outsourcing/perizinan-karyawan', function () {
         return view('karyawanOutsourcing.perizinan');

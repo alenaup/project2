@@ -224,7 +224,7 @@
             {{-- Modal Body --}}
             <div class="p-6 space-y-4 overflow-y-auto flex-1">
                 <p class="text-xs text-gray-500 leading-relaxed">
-                    Hitung total durasi lembur (yang telah disetujui) untuk periode dari **tanggal 26 bulan lalu** hingga **tanggal 25 bulan terpilih**.
+                    Hitung total durasi lembur (yang telah disetujui) untuk periode dari tanggal 26 bulan lalu hingga tanggal 25 bulan terpilih**.
                 </p>
                 
                 <div class="grid grid-cols-2 gap-4">
@@ -431,7 +431,7 @@
                   class="flex flex-col flex-1 overflow-hidden">
                 <div class="p-6 space-y-4 overflow-y-auto flex-1">
                     <p class="text-xs text-gray-500 leading-relaxed">
-                        Unduh data rekap lembur karyawan yang disetujui untuk periode dari **tanggal 26 bulan lalu** hingga **tanggal 25 bulan terpilih** dalam bentuk spreadsheet Excel.
+                        Unduh data rekap lembur karyawan yang disetujui untuk periode dari tanggal 26 bulan lalu hingga tanggal 25 bulan terpilih dalam bentuk spreadsheet Excel.
                     </p>
                     
                     <div class="grid grid-cols-2 gap-4">

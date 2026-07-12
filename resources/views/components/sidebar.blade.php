@@ -59,7 +59,7 @@ md:translate-x-0 z-50 shadow-2xl shrink-0">
             </div>
             <div class="min-w-0">
                 <p class="text-sm font-semibold truncate">{{ $slot }}</p>
-                <p class="text-xs text-white/60 truncate">Karyawan Outsourcing</p>
+                <p class="text-xs text-white/60 truncate">e-outsourcing</p>
             </div>
         </div>
     </div>

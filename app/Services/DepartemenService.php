@@ -52,6 +52,9 @@ class DepartemenService
     public function updateDepartemen(int $id, array $data): bool
     {
         $departemen = $this->getDepartemenById($id);
+        
+        $this->syncUserStatus($id, $data['status']);
+
         return $departemen->update([
             'nama_departemen' => $data['nama_departemen'],
             'status' => $data['status'],
@@ -67,6 +70,8 @@ class DepartemenService
         $departemen = $this->getDepartemenById($id);
         $newStatus = $departemen->status === Status::Active->value ? Status::Inactive->value : Status::Active->value;
         $departemen->update(['status' => $newStatus]);
+        
+        $this->syncUserStatus($id, $newStatus);
 
         $label = $newStatus === Status::Active->value ? 'diaktifkan' : 'dinonaktifkan';
         return [
@@ -81,7 +86,20 @@ class DepartemenService
     public function updateStatus(int $id, string $status): bool
     {
         $departemen = $this->getDepartemenById($id);
+        
+        $this->syncUserStatus($id, $status);
+
         return $departemen->update(['status' => $status]);
+    }
+
+    /**
+     * Mensinkronkan status user Kepala Departemen dengan departemennya
+     */
+    private function syncUserStatus(int $departemenId, string $status): void
+    {
+        \App\Models\User::where('departemen_id', $departemenId)
+            ->where('role', \App\Enums\UserRole::KepalaDepartemen->value)
+            ->update(['status' => $status]);
     }
 
     /**

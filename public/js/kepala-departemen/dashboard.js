@@ -307,13 +307,14 @@ function dashboard() {
 
         shiftClass(type) {
             if (!type) return 'bg-slate-100 text-slate-450';
+            const name = typeof type === 'object' ? type.nama : type;
             return {
                 pagi: 'bg-emerald-50 text-emerald-700 border border-emerald-200/60',
                 siang: 'bg-amber-50/80 text-amber-700 border border-amber-250',
                 sore: 'bg-orange-50/80 text-orange-700 border border-orange-250',
                 malam: 'bg-indigo-50 text-indigo-700 border border-indigo-250',
                 libur: 'bg-rose-50/80 text-rose-600 border border-rose-250'
-            }[type.toLowerCase()] || 'bg-slate-55/80 text-slate-700 border border-slate-200';
+            }[name.toLowerCase()] || 'bg-slate-55/80 text-slate-700 border border-slate-200';
         }
     }
 }

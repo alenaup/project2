@@ -29,6 +29,9 @@ class KelolaKaryawan extends Component
     /** @var string Kata kunci pencarian */
     public string $search = '';
 
+    /** @var string Filter status */
+    public string $filterStatus = 'semua';
+
     /** @var int Jumlah data per halaman */
     public int $perPage = 10;
 
@@ -79,6 +82,11 @@ class KelolaKaryawan extends Component
         $this->resetPage();
     }
 
+    public function updatedFilterStatus(): void
+    {
+        $this->resetPage();
+    }
+
     /* ──────────────────────────────────────────────────────────────
      |  Modal Detail
      * ──────────────────────────────────────────────────────────── */
@@ -87,10 +95,10 @@ class KelolaKaryawan extends Component
      * Buka modal detail karyawan.
      */
 
-    // megambil data karyawan untuk diisi pada modal 
+    // megambil data karyawan untuk diisi pada modal
     public function openDetail(int $userId, UserService $userService): void
     {
-        $user = $userService->getUserWithOutsourcingAndDepartemen($userId);
+        $user = $userService->getUserWithOutsourcing($userId);
 
         if (!$user) return;
 
@@ -124,7 +132,7 @@ class KelolaKaryawan extends Component
     // melakukan validasi input secara realtime
     public function openEdit(int $userId, UserService $userService): void
     {
-        $user = $userService->getUserWithOutsourcingAndDepartemen($userId);
+        $user = $userService->getUserWithOutsourcing($userId);
 
         if (!$user) return;
 
@@ -179,7 +187,7 @@ class KelolaKaryawan extends Component
     }
 
     /* ──────────────────────────────────────────────────────────────
-     |  Aksi Hapus
+     |  Aksi Hapus & Ubah Status
      * ──────────────────────────────────────────────────────────── */
 
     /**
@@ -199,9 +207,9 @@ class KelolaKaryawan extends Component
     }
 
     /**
-     * Hapus data karyawan.
+     * Hapus data karyawan (tambah tanggal keluar).
      */
-    // mengahpus data karyawan yang dipilih berdasarkan id user nya
+    // menonaktifkan data karyawan yang dipilih berdasarkan id user nya (dengan tanggal keluar)
     public function delete(UserService $userService): void
     {
         $user = $userService->deleteKaryawan($this->selectedId);
@@ -212,9 +220,21 @@ class KelolaKaryawan extends Component
             return;
         }
 
-        session()->flash('success', "🗑️ Karyawan {$user->nama_lengkap} berhasil dihapus.");
+        session()->flash('success', "🚫 Karyawan {$user->nama_lengkap} berhasil dihapus permanen.");
 
         $this->dispatch('close-delete');
+    }
+
+    /**
+     * Ubah status karyawan tanpa menambah tanggal keluar.
+     */
+    public function toggleStatus(int $userId, UserService $userService): void
+    {
+        $result = $userService->toggleUserStatus($userId);
+        $user = $result['user'];
+        $label = $result['label'];
+
+        session()->flash('success', "Status karyawan {$user->nama_lengkap} berhasil {$label}.");
     }
 
     /* ──────────────────────────────────────────────────────────────
@@ -239,8 +259,10 @@ class KelolaKaryawan extends Component
 
     public function render(UserService $userService)
     {
+        $status = $this->filterStatus === 'semua' ? '' : $this->filterStatus;
+
         return view('livewire.admin-outsourcing.kelola-karyawan', [
-            'karyawanList' => $userService->getKaryawanAktifPaginated($this->search, auth()->user()->outsourcing_id, $this->perPage),
+            'karyawanList' => $userService->getKaryawanPaginated($this->search, $status, auth()->user()->outsourcing_id, $this->perPage),
         ]);
     }
 }

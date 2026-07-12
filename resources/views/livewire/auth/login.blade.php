@@ -50,17 +50,12 @@
         <button type="submit" wire:loading.attr="disabled" name="login"
             class="w-full mb-3 bg-emerald-600 text-white hover:text-white transition py-1 md:py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-70 disabled:cursor-not-allowed">
             <span wire:loading.remove>Masuk</span>
-            <span wire:loading.flex class="items-center justify-center w-full">Memproses 
+            <span wire:loading.flex class="items-center justify-center w-full">Memproses
                 <svg class="animate-spin w-5 h-5 ml-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
             </span>
         </button>
-        <button type="button" name="forgot-password"
-            class="w-full bg-transparent border border-white/50 text-white hover:text-white transition py-1 md:py-2 rounded-lg hover:bg-white/10">
-            Lupa Password
-        </button>
-
     </form>
 </div>

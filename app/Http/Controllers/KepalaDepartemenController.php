@@ -89,7 +89,10 @@ class KepalaDepartemenController extends Controller
                         for ($date = $overlapStart->copy(); $date->lte($overlapEnd); $date->addDay()) {
                             $diffInDays = $weekStart->diffInDays($date);
                             if ($diffInDays >= 0 && $diffInDays < 7) {
-                                $shiftsArr[$diffInDays] = $shiftType;
+                                $shiftsArr[$diffInDays] = [
+                                    'nama' => $shiftType,
+                                    'jam_masuk' => $j->shift->jam_masuk ? Carbon::parse($j->shift->jam_masuk)->format('H.i') : 'Libur',
+                                ];
                             }
                         }
                     }
@@ -156,6 +159,22 @@ class KepalaDepartemenController extends Controller
             'end_date.after_or_equal' => 'Tanggal selesai harus setelah atau sama dengan tanggal mulai.',
         ]);
 
+        $deptId = Auth::user()->departemen_id;
+        if ($deptId) {
+            $invalidCount = \App\Models\User::whereIn('id_user', $request->user_ids)
+                ->where(function($q) use ($deptId) {
+                    $q->where('departemen_id', '!=', $deptId)
+                      ->orWhere('role', '!=', \App\Enums\UserRole::Karyawan->value);
+                })
+                ->count();
+
+            if ($invalidCount > 0) {
+                return response()->json([
+                    'message' => 'Anda tidak memiliki hak untuk mengatur jadwal karyawan di luar departemen Anda.'
+                ], 403);
+            }
+        }
+
         $createdJadwals = [];
         $createdCount = 0;
 
@@ -192,18 +211,66 @@ class KepalaDepartemenController extends Controller
         try {
             // Load berkas template menggunakan PhpSpreadsheet
             $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templateFile);
+            // Set ke sheet kedua "atur jadwal"
+            $spreadsheet->setActiveSheetIndex(1);
             $sheet = $spreadsheet->getActiveSheet();
 
-            // Ambil daftar karyawan aktif yang berada di departemen yang sama
             $deptId = Auth::check() ? Auth::user()->departemen_id : null;
             $karyawans = $this->userService->getActiveKaryawanList($deptId);
 
-            // Isi nomor urut di kolom A dan nama_lengkap di kolom B mulai baris 15
-            $startRow = 15;
+            // Bulan dan Tahun dari parameter URL
+            $month = (int) $request->query('month', Carbon::now()->month);
+            $year = (int) $request->query('year', Carbon::now()->year);
+
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $daysInMonth = $startDate->daysInMonth;
+
+            // Header hari dan tanggal
+            $hariIndo = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+            $bulanIndoArr = [1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'];
+
+            // Tulis Periode di B7
+            $sheet->setCellValue('B7', $bulanIndoArr[$month] . ' ' . $year);
+
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2); // Kolom C = 3
+                $currentDate = Carbon::create($year, $month, $day);
+                
+                // Baris 8: Nama Hari
+                $sheet->setCellValue($colStr . '8', $hariIndo[$currentDate->format('l')]);
+                $sheet->getStyle($colStr . '8')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                
+                // Baris 9: Tanggal
+                $excelDate = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($currentDate);
+                $sheet->setCellValue($colStr . '9', $excelDate);
+                $sheet->getStyle($colStr . '9')->getNumberFormat()->setFormatCode('d/m');
+                $sheet->getStyle($colStr . '9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            }
+
+            // Isi nomor urut di kolom A dan nama_lengkap di kolom B mulai baris 10
+            $startRow = 10;
             foreach ($karyawans as $index => $karyawan) {
                 $currentRow = $startRow + $index;
                 $sheet->setCellValue('A' . $currentRow, $index + 1);
                 $sheet->setCellValue('B' . $currentRow, $karyawan->nama_lengkap);
+            }
+
+            // Styling Borders and Backgrounds
+            if ($karyawans->count() > 0) {
+                $lastColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($daysInMonth + 2);
+                $lastRow = $startRow + $karyawans->count() - 1;
+
+                // Border seluruh area tabel (A8 hingga kolom terakhir dan baris terakhir)
+                $tableRange = 'A8:' . $lastColLetter . $lastRow;
+                $sheet->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                // Background D9D9D9 untuk Header Tanggal (C8 sampai ujung kanan baris 9)
+                $dateRange = 'C8:' . $lastColLetter . '9';
+                $sheet->getStyle($dateRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+
+                // Background D9D9D9 untuk Nomor dan Nama (A10 sampai B baris terakhir)
+                $nameRange = 'A10:B' . $lastRow;
+                $sheet->getStyle($nameRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
             }
 
             // Unduh file secara dinamis
@@ -246,64 +313,89 @@ class KepalaDepartemenController extends Controller
         $karyawans = $this->userService->getActiveKaryawanList($deptId);
 
         try {
-            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-
-            // Set judul
-            $sheet->setCellValue('A1', 'JADWAL KERJA KARYAWAN ECOGREEN');
-            $lastColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($daysInMonth + 2);
-            $sheet->mergeCells('A1:' . $lastColLetter . '1');
-            $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-            $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-            $bulanIndo = match($month) {
-                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember',
-                default => 'Periode'
-            };
-
-            $sheet->setCellValue('A2', 'Departemen: ' . $deptNama . ' | Periode: ' . $bulanIndo . ' ' . $year);
-            $sheet->mergeCells('A2:' . $lastColLetter . '2');
-            $sheet->getStyle('A2')->getFont()->setItalic(true)->setSize(11);
-            $sheet->getStyle('A2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-            // Row 4: Header Tabel
-            $sheet->setCellValue('A4', 'No');
-            $sheet->setCellValue('B4', 'Nama Karyawan');
-
-            for ($day = 1; $day <= $daysInMonth; $day++) {
-                $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2);
-                $sheet->setCellValue($colStr . '4', $day);
-                $sheet->getStyle($colStr . '4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            $templateFile = public_path('templates/tamplate_jadwal_ecogreen.xlsx');
+            if (!file_exists($templateFile)) {
+                return redirect()->back()->with('error', 'Berkas template excel tidak ditemukan.');
             }
 
-            // Styling Header Row
-            $headerRange = 'A4:' . $lastColLetter . '4';
-            $sheet->getStyle($headerRange)->getFont()->setBold(true);
-            $sheet->getStyle($headerRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
-                ->getStartColor()->setARGB('FFE2EFDA'); // Hijau muda
+            $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($templateFile);
+            $spreadsheet->setActiveSheetIndex(1); // Gunakan sheet kedua
+            $sheet = $spreadsheet->getActiveSheet();
 
-            // Isi Data Baris Karyawan
-            $rowStart = 5;
+            $hariIndo = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+            $bulanIndoArr = [1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April', 5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus', 9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'];
+
+            // Tulis Periode di B7
+            $sheet->setCellValue('B7', $bulanIndoArr[$month] . ' ' . $year);
+
+            for ($day = 1; $day <= $daysInMonth; $day++) {
+                $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2); // Kolom C = 3
+                $currentDate = Carbon::create($year, $month, $day);
+                
+                // Baris 8: Nama Hari
+                $sheet->setCellValue($colStr . '8', $hariIndo[$currentDate->format('l')]);
+                $sheet->getStyle($colStr . '8')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                
+                // Baris 9: Tanggal
+                $excelDate = \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($currentDate);
+                $sheet->setCellValue($colStr . '9', $excelDate);
+                $sheet->getStyle($colStr . '9')->getNumberFormat()->setFormatCode('d/m');
+                $sheet->getStyle($colStr . '9')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            }
+
+            // Isi Data Baris Karyawan mulai dari baris 10
+            $rowStart = 10;
+            $userIds = $karyawans->pluck('id_user')->toArray();
+
+            // Penarikan data kolektif (Eager loading) untuk menghindari query berulang (N+1 Query)
+            $allJadwals = \App\Models\Jadwal::whereIn('id_jadwal', function($q) use ($userIds) {
+                $q->select('jadwal_id')
+                    ->from('user_jadwal')
+                    ->whereIn('user_id', $userIds);
+            })
+            ->where('tanggal_mulai', '<=', $endDate->format('Y-m-d'))
+            ->where('tanggal_akhir', '>=', $startDate->format('Y-m-d'))
+            ->with('shift')
+            ->get();
+
+            // Petakan jadwal ke user_id
+            $userJadwals = [];
+            foreach ($karyawans as $karyawan) {
+                $userJadwals[$karyawan->id_user] = collect();
+            }
+            // Karena relasi user-jadwal adalah many-to-many, kita bisa ambil relasi pivot atau query bridge.
+            // Untuk mempermudah dan tetap cepat, mari ambil data pivot:
+            $pivotData = \Illuminate\Support\Facades\DB::table('user_jadwal')
+                ->whereIn('user_id', $userIds)
+                ->get()
+                ->groupBy('user_id');
+
+            $jadwalsById = $allJadwals->keyBy('id_jadwal');
+
+            foreach ($userIds as $uId) {
+                $jIds = isset($pivotData[$uId]) ? $pivotData[$uId]->pluck('jadwal_id')->toArray() : [];
+                $userJadwals[$uId] = $allJadwals->filter(function($j) use ($jIds) {
+                    return in_array($j->id_jadwal, $jIds);
+                });
+            }
+
+            $allPerizinans = \App\Models\PerizinanSakit::whereIn('karyawan_id', $userIds)
+                ->where('status', 'disetujui')
+                ->where('tanggal_mulai', '<=', $endDate->format('Y-m-d'))
+                ->where('tanggal_selesai', '>=', $startDate->format('Y-m-d'))
+                ->get()
+                ->groupBy('karyawan_id');
+
             foreach ($karyawans as $index => $karyawan) {
                 $currentRow = $rowStart + $index;
                 $sheet->setCellValue('A' . $currentRow, $index + 1);
                 $sheet->setCellValue('B' . $currentRow, $karyawan->nama_lengkap);
 
-                // Ambil jadwal karyawan bulan ini
-                $jadwals = $this->jadwalService->getJadwalUserByRange(
-                    $karyawan->id_user,
-                    $startDate->format('Y-m-d'),
-                    $endDate->format('Y-m-d')
-                );
+                // Ambil jadwal karyawan dari memori
+                $jadwals = $userJadwals[$karyawan->id_user] ?? collect();
 
-                // Ambil perizinan cuti & sakit bulan ini
-                $perizinans = $this->perizinanSakitService->getApprovedPerizinanByRange(
-                    $karyawan->id_user,
-                    $startDate->format('Y-m-d'),
-                    $endDate->format('Y-m-d')
-                );
+                // Ambil perizinan cuti & sakit dari memori
+                $perizinans = $allPerizinans->get($karyawan->id_user) ?? collect();
 
                 for ($day = 1; $day <= $daysInMonth; $day++) {
                     $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2);
@@ -339,22 +431,26 @@ class KepalaDepartemenController extends Controller
                 }
             }
 
-            // Set Lebar Kolom
-            $sheet->getColumnDimension('A')->setWidth(5);
-            $sheet->getColumnDimension('B')->setWidth(25);
-            for ($day = 1; $day <= $daysInMonth; $day++) {
-                $colStr = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($day + 2);
-                $sheet->getColumnDimension($colStr)->setWidth(4);
+            // Styling Borders and Backgrounds
+            if ($karyawans->count() > 0) {
+                $lastColLetter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($daysInMonth + 2);
+                $lastRow = $rowStart + $karyawans->count() - 1;
+
+                // Border seluruh area tabel (A8 hingga kolom terakhir dan baris terakhir)
+                $tableRange = 'A8:' . $lastColLetter . $lastRow;
+                $sheet->getStyle($tableRange)->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                // Background D9D9D9 untuk Header Tanggal (C8 sampai ujung kanan baris 9)
+                $dateRange = 'C8:' . $lastColLetter . '9';
+                $sheet->getStyle($dateRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
+
+                // Background D9D9D9 untuk Nomor dan Nama (A10 sampai B baris terakhir)
+                $nameRange = 'A10:B' . $lastRow;
+                $sheet->getStyle($nameRange)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('FFD9D9D9');
             }
 
-            // Border seluruh tabel
-            $lastRow = $rowStart + $karyawans->count() - 1;
-            $tableRange = 'A4:' . $lastColLetter . $lastRow;
-            $sheet->getStyle($tableRange)->getBorders()->getAllBorders()
-                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-
             $writer = \PhpOffice\PhpSpreadsheet\IOFactory::createWriter($spreadsheet, 'Xlsx');
-            $fileName = 'Jadwal_Kerja_' . str_replace(' ', '_', $deptNama) . '_' . $bulanIndo . '_' . $year . '.xlsx';
+            $fileName = 'Jadwal_Kerja_' . str_replace(' ', '_', $deptNama) . '_' . $bulanIndoArr[$month] . '_' . $year . '.xlsx';
 
             $downloadToken = $request->input('download_token');
             if ($downloadToken) {

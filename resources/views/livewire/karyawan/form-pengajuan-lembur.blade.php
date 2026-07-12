@@ -40,17 +40,6 @@
                       }
                   }
               }">
-              
-            {{-- Success Message --}}
-            @if (session()->has('success'))
-                <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)"
-                     x-transition.duration.500ms
-                     class="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-semibold mb-5 shadow-sm">
-                    <i class="fa-solid fa-circle-check text-lg"></i>
-                    {{ session('success') }}
-                </div>
-            @endif
-
             {{-- Section title --}}
             <div class="flex items-center gap-2 mb-5">
                 <div class="section-bar bg-[#3C8B5E]"></div>
@@ -60,39 +49,34 @@
             <div class="grid md:grid-cols-2 gap-x-6 gap-y-4">
                 <div>
                     <label class="inp-label">NIP</label>
-                    <input type="text" value="{{ $user->nip }}" readonly class="inp bg-gray-50">
+                    <input type="text" value="{{ $user->nip }}" readonly class="inp" style="background-color: #f3f4f6 !important;">
                 </div>
                 <div>
                     <label class="inp-label">Nama Lengkap</label>
-                    <input type="text" value="{{ $user->nama_lengkap }}" readonly class="inp bg-gray-50">
+                    <input type="text" value="{{ $user->nama_lengkap }}" readonly class="inp" style="background-color: #f3f4f6 !important;">
                 </div>
                 <div>
                     <label class="inp-label">No. HP</label>
-                    <input type="tel" value="{{ $user->nomor_tlp ?? '-' }}" readonly class="inp bg-gray-50">
+                    <input type="tel" value="{{ $user->nomor_tlp ?? '-' }}" readonly class="inp" style="background-color: #f3f4f6 !important;">
                 </div>
                 <div>
                     <label class="inp-label">Email</label>
-                    <input type="email" value="{{ $user->email }}" readonly class="inp bg-gray-50">
+                    <input type="email" value="{{ $user->email }}" readonly class="inp" style="background-color: #f3f4f6 !important;">
                 </div>
                 <div>
-                    <label class="inp-label">Tanggal Lembur <span class="req">*</span></label>
-                    <input wire:model="tanggal_lembur" type="date"
-                        class="inp @error('tanggal_lembur') border-red-500 @enderror">
-                    @error('tanggal_lembur')
-                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
-                    @enderror
+                    <label class="inp-label">Alamat</label>
+                    <input type="text" value="{{ $user->alamat ?? '-' }}" readonly class="inp" style="background-color: #f3f4f6 !important;">
                 </div>
                 <div>
                     <label class="inp-label">Asal Departemen</label>
-                    <input type="text" value="{{ $user->departemen->nama_departemen ?? '-' }}" readonly
-                        class="inp bg-gray-50">
+                    <input type="text" value="{{ $user->departemen->nama_departemen ?? '-' }}" readonly class="inp" style="background-color: #f3f4f6 !important;">
                 </div>
                 <div>
                     <label class="inp-label">Jam Mulai <span class="req">*</span></label>
                     <input wire:model="jam_mulai" type="time"
                         class="inp @error('jam_mulai') border-red-500 @enderror">
                     @error('jam_mulai')
-                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                        <span class="text-red-550 text-xs mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
                 <div>
@@ -100,12 +84,16 @@
                     <input wire:model="jam_selesai" type="time"
                         class="inp @error('jam_selesai') border-red-500 @enderror">
                     @error('jam_selesai')
-                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                        <span class="text-red-550 text-xs mt-1 block">{{ $message }}</span>
                     @enderror
                 </div>
                 <div class="md:col-span-2">
-                    <label class="inp-label">Alamat</label>
-                    <input type="text" value="{{ $user->alamat ?? '-' }}" readonly class="inp bg-gray-50">
+                    <label class="inp-label">Tanggal Lembur <span class="req">*</span></label>
+                    <input wire:model="tanggal_lembur" type="date"
+                        class="inp @error('tanggal_lembur') border-red-500 @enderror">
+                    @error('tanggal_lembur')
+                        <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 {{-- Keterangan --}}

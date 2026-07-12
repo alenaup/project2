@@ -42,16 +42,26 @@ x-on:close-delete.window="showDeleteModal = false">
         </div>
     @endif
 
-    {{-- ─── Search Bar ───────────────────────────────────────── --}}
-    <div class="relative mb-4">
-        <span class="absolute left-3 top-2.5 text-gray-400 text-sm">
-            <i class="fa-solid fa-magnifying-glass"></i>
-        </span>
-        <input
-            type="text"
-            wire:model.live.debounce.300ms="search"
-            placeholder="Cari karyawan..."
-            class="pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-400 focus:outline-none text-sm">
+    {{-- ─── Search Bar & Filter ───────────────────────────────────────── --}}
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div class="relative w-full md:w-1/3">
+            <span class="absolute left-3 top-2.5 text-gray-400 text-sm">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input
+                type="text"
+                wire:model.live.debounce.300ms="search"
+                placeholder="Cari karyawan..."
+                class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-green-400 focus:outline-none text-sm">
+        </div>
+        
+        <div class="w-full md:w-auto">
+            <select wire:model.live="filterStatus" class="w-full md:w-auto bg-white border border-gray-200 text-gray-700 py-2 px-4 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-400">
+                <option value="semua">Semua Status</option>
+                <option value="active">Aktif</option>
+                <option value="inactive">Nonaktif</option>
+            </select>
+        </div>
     </div>
 
     {{-- ─── Tabel Karyawan ───────────────────────────────────── --}}
@@ -71,7 +81,14 @@ x-on:close-delete.window="showDeleteModal = false">
                     </td>
 
                     <td class="px-4 py-2">
-                        <div class="font-medium text-gray-800">{{ $karyawan->nama_lengkap }}</div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-gray-800">{{ $karyawan->nama_lengkap }}</span>
+                            @if($karyawan->status === 'active')
+                                <span class="px-2 py-0.5 text-[10px] font-semibold bg-green-100 text-green-700 rounded-full">Aktif</span>
+                            @else
+                                <span class="px-2 py-0.5 text-[10px] font-semibold bg-red-100 text-red-700 rounded-full">Nonaktif</span>
+                            @endif
+                        </div>
                         <div class="text-xs text-gray-400">
                             {{ $karyawan->nip && (int) $karyawan->nip !== 0 ? 'NIP-' . $karyawan->nip : '-' }}
                         </div>
@@ -93,6 +110,14 @@ x-on:close-delete.window="showDeleteModal = false">
                                 <i class="fa-solid fa-eye text-gray-600"></i>
                             </button>
 
+                            {{-- Tombol Ubah Status --}}
+                            <button
+                                wire:click="toggleStatus({{ $karyawan->id_user }})"
+                                class="w-9 h-9 flex items-center justify-center rounded-lg transition {{ $karyawan->status === 'active' ? 'bg-orange-100 hover:bg-orange-200 text-orange-600' : 'bg-green-100 hover:bg-green-200 text-green-600' }}"
+                                title="{{ $karyawan->status === 'active' ? 'Nonaktifkan User' : 'Aktifkan User' }}">
+                                <i class="fa-solid {{ $karyawan->status === 'active' ? 'fa-ban' : 'fa-check' }}"></i>
+                            </button>
+
                             {{-- Tombol Edit --}}
                             <button
                                 @click="showEditModal = true"
@@ -103,13 +128,15 @@ x-on:close-delete.window="showDeleteModal = false">
                             </button>
 
                             {{-- Tombol Hapus --}}
+                            @if($karyawan->status === 'inactive')
                             <button
                                 @click="showDeleteModal = true"
                                 wire:click="openDelete({{ $karyawan->id_user }})"
                                 class="w-9 h-9 flex items-center justify-center rounded-lg bg-red-100 hover:bg-red-200 text-red-600 transition"
-                                title="Hapus Data">
+                                title="Hapus Permanen">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
+                            @endif
 
                         </div>
                     </td>

@@ -25,11 +25,11 @@
                             
                         </div>
                         
-                        <!-- Popup di atas kotak -->
+                        <!-- Popup di bawah lonceng -->
                         <div x-show="popupOpen" @click.outside="popupOpen = false" style="display: none;"
-                            class="fixed bottom-8 right-0 translate-x-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 bg-white border border-slate-200 shadow-xl rounded-2xl p-4 w-72 max-w-[85vw] z-40 text-left text-xs text-slate-700  ">
-                            <!-- Arrow pointer pointing down -->
-                            <div class="absolute -bottom-1.5 right-2 translate-x-0 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 w-3 h-3 bg-white border-r border-b border-slate-200 rotate-45"></div>
+                            class="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white border border-slate-200 shadow-xl rounded-2xl p-4 w-72 max-w-[85vw] z-40 text-left text-xs text-slate-700">
+                            <!-- Arrow pointer pointing up -->
+                            <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-l border-t border-slate-200 rotate-45"></div>
                             
                             <div class="relative z-10">
                                 <div class="font-extrabold text-slate-800 border-b border-slate-100 pb-2 mb-2 flex items-center justify-between">

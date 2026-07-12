@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('karyawan_id');
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
-            $table->text('keterangan');
+            $table->text('keterangan')->nullable();
             $table->string('file_surat');
             $table->enum('status', ['menunggu', 'disetujui', 'ditolak'])->default('menunggu');
             $table->timestamp('tanggal_pengajuan')->useCurrent();

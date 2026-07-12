@@ -79,6 +79,9 @@
     {{-- ✅ Loading Modal diletakkan di root body agar fixed inset-0 bisa menutupi seluruh halaman --}}
     <x-loading-modal target="logout" message="Sedang keluar dari sistem..." keepAlive="true" />
     
+    {{-- Komponen pesan sukses/error di pojok kanan atas --}}
+    <x-flash-message type="success" sessionKey="success" on="flash-success" />
+    <x-flash-message type="error" sessionKey="error" on="flash-error" />
 
     {{-- js bawaan untuk livewire --}}
     @livewireScripts
