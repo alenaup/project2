@@ -13,5 +13,5 @@
         </div>
     </div>
 
-    @livewire(\App\Livewire\HR\AjuanDataKaryawan::class)
+    @livewire(\App\Livewire\Hr\AjuanDataKaryawan::class)
 @endsection
