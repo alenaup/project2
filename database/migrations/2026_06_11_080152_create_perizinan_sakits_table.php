@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->text('keterangan')->nullable();
-            $table->string('file_surat');
+            $table->string('file_surat')->nullable();
             $table->enum('status', ['menunggu', 'disetujui', 'ditolak'])->default('menunggu');
             $table->timestamp('tanggal_pengajuan')->useCurrent();
             $table->timestamps();
