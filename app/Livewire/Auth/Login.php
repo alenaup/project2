@@ -19,16 +19,17 @@ class Login extends Component
     {
         // * untuk membatasi percobaan login, dengan menggunakan fitur RateLimiter bawaan laravel
         // * key ini akan menyimpan data percobaan login berdasarkan IP address pengguna
-        $key = 'login-attempts:'.request()->ip();
+        $key = 'login-attempts:'.strtolower(trim($this->email)).'|'.request()->ip();
 
         // 1. Validasi dengan memanggil fungsi rules dan massege yang sidah dibuat
         $this->validate($this->rules(), $this->messages());
 
         // * jika percobaan login melebihi batas yang ditentukan, maka akan mengirimkan pesan error dan menghentikan proses login
         if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
             session()->flash(
                 'error',
-                'Terlalu banyak percobaan login. Coba lagi nanti.'
+                "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik."
             );
 
             return;
@@ -42,10 +43,11 @@ class Login extends Component
         // 3. mengambil return dari service, jika gagal → tampilkan error, jika berhasil → kirim event ke frontend
         if (! $result['success']) {
             /* membersihkan rate limiter setelah login supaya tidak terblokir saat  */
-            RateLimiter::clear($key);
             $this->addError('login', $result['message']);
             return;
         }
+
+        RateLimiter::clear($key);
 
         // 4. Kalau berhasil → kirim event ke frontend (animasi)
         // pakai event karena kita tidak ingin melakukan redirect secara langsung, tapi ingin menampilkan animasi terlebih dahulu
