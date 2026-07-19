@@ -27,10 +27,7 @@ class Login extends Component
         // * jika percobaan login melebihi batas yang ditentukan, maka akan mengirimkan pesan error dan menghentikan proses login
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $seconds = RateLimiter::availableIn($key);
-            session()->flash(
-                'error',
-                "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik."
-            );
+            $this->addError('login', "Terlalu banyak percobaan login. Coba lagi dalam {$seconds} detik.");
 
             return;
         }
