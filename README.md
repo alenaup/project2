@@ -43,6 +43,12 @@
 </div>
 
 <br>
+# Project2
+
+Repository ini dikembangkan sebagai pengembangan sistem outsourcing.
+
+## Perubahan
+- Update README
 
 ### 🚀 Link Deploys Aplikasi
 Aplikasi ini telah berhasil dideploy dan dapat diakses secara publik melalui link berikut:
@@ -167,7 +173,7 @@ Proyek ini dibangun menggunakan teknologi mutakhir untuk memastikan performa yan
       <h3>⚙️ Cara Menjalankan Proyek Secara Lokal</h3>
       <p>Ingin mencoba menjalankan di komputer Anda? Ikuti langkah-langkah mudah berikut:</p>
       <ol>
-        <li><b>Clone Repositori:</b><br/><code>git clone https://github.com/username/E-outsourcing-trpl210.git</code></li>
+        <li><b>Clone Repositori:</b><br/><code>git clone https://github.com/username/project2.git</code></li>
         <li><b>Instal Dependensi PHP & Node:</b><br/><code>composer install</code> dan <code>npm install</code></li>
         <li><b>Konfigurasi Environment:</b><br/>Salin berkas <code>.env.example</code> ke <code>.env</code> dan generate key dengan <code>php artisan key:generate</code></li>
         <li><b>Migrasi Database &amp; Seeder:</b><br/><code>php artisan migrate:fresh --seed</code></li>
@@ -192,5 +198,6 @@ Proyek ini dibangun menggunakan teknologi mutakhir untuk memastikan performa yan
 <div align="center">
   <p>Dibuat dengan penuh dedikasi dan cinta 💚 oleh Tim EcoStaff.</p>
   <p><i>~ Arigatou Gozaimasu! ~</i></p>
+  <p><i>~ TRPL210 ~</i></p>
   <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Hand%20gestures/Writing%20Hand.png" alt="Writing" width="45" />
 </div>
